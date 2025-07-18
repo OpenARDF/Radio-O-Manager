@@ -92,7 +92,7 @@ class ReadoutDetailFragment : Fragment() {
             indexView.text = getText(R.string.unknown)
         }
         raceStatusView.text =
-            dataProcessor.raceStatusToString(resultData.result.raceStatus)
+            dataProcessor.raceStatusToString(resultData.result.resultStatus)
 
         if (resultData.competitorCategory?.category != null) {
             categoryView.text = resultData.competitorCategory!!.category!!.name
@@ -108,7 +108,7 @@ class ReadoutDetailFragment : Fragment() {
         runTimeView.text =
             TimeProcessor.durationToMinuteString(resultData.result.runTime)
 
-        placeView.text = resultData.result.place?.toString()
+        placeView.text = resultData.result.place.toString()
             ?: getText(R.string.unknown) //TODO: Place
 
         setMenuActions()

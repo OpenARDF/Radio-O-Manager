@@ -33,7 +33,7 @@ class RaceCreateDialogFragment : DialogFragment() {
     private val dataProcessor = DataProcessor.get()
 
     private lateinit var nameEditText: TextInputEditText
-    private lateinit var externalIdEditText: TextInputEditText
+    private lateinit var apiKey: TextInputEditText
     private lateinit var dateView: TextInputEditText
     private lateinit var startTimeView: TextInputEditText
     private lateinit var limitEditText: TextInputEditText
@@ -59,7 +59,7 @@ class RaceCreateDialogFragment : DialogFragment() {
         setStyle(STYLE_NORMAL, R.style.add_dialog)
 
         nameEditText = view.findViewById(R.id.race_dialog_name)
-        externalIdEditText = view.findViewById(R.id.race_dialog_external_id)
+        apiKey = view.findViewById(R.id.race_dialog_external_id)
         dateView = view.findViewById(R.id.race_dialog_date)
         startTimeView = view.findViewById(R.id.race_dialog_start_time)
         limitEditText = view.findViewById(R.id.race_dialog_limit)
@@ -118,7 +118,7 @@ class RaceCreateDialogFragment : DialogFragment() {
             dialog?.setTitle(R.string.race_create)
             race = Race(
                 UUID.randomUUID(),
-                "", null,
+                "", "",
                 LocalDateTime.now(),
                 RaceType.CLASSICS,
                 RaceLevel.TRAINING,
@@ -132,8 +132,8 @@ class RaceCreateDialogFragment : DialogFragment() {
         }
 
         dateView.setText(race.startDateTime.toLocalDate().toString())
-        if (race.externalId != null) {
-            externalIdEditText.setText(race.externalId.toString())
+        if (race.apiKey != null) {
+            apiKey.setText(race.apiKey.toString())
         }
         startTimeView.setText(TimeProcessor.hoursMinutesFormatter(race.startDateTime))
         limitEditText.setText("120") //TODO: Fix with default values from settings
@@ -151,10 +151,10 @@ class RaceCreateDialogFragment : DialogFragment() {
             if (checkValidity()) {
 
                 race.name = nameEditText.text.toString().trim()
-                if (externalIdEditText.text.toString().trim().isNotBlank()) {
-                    race.externalId = externalIdEditText.text.toString().trim().toLong()
+                if (apiKey.text.toString().trim().isNotBlank()) {
+                    race.apiKey = apiKey.text.toString().trim()
                 } else {
-                    race.externalId = null
+                    race.apiKey = ""
                 }
                 race.raceType =
                     dataProcessor.raceTypeStringToEnum(raceTypePicker.text.toString())

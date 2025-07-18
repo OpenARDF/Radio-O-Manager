@@ -3,16 +3,18 @@ package kolskypavel.ardfmanager.backend.files.processors
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
 import kolskypavel.ardfmanager.backend.DataProcessor
-import kolskypavel.ardfmanager.backend.files.adapters.RaceDataJsonAdapter
-import kolskypavel.ardfmanager.backend.files.adapters.ResultDataJsonAdapter
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
+import kolskypavel.ardfmanager.backend.files.json.adapters.RaceDataJsonAdapter
+import kolskypavel.ardfmanager.backend.files.json.adapters.ResultDataJsonAdapter
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
@@ -41,7 +43,7 @@ object JsonProcessor : FormatProcessor {
         dataProcessor: DataProcessor,
         raceId: UUID
     ): Boolean {
-       when (dataType) {
+        when (dataType) {
             DataType.CATEGORIES -> TODO()
             DataType.C0MPETITORS -> TODO()
             DataType.RESULTS_SIMPLE -> exportResults(
@@ -63,12 +65,16 @@ object JsonProcessor : FormatProcessor {
     }
 
     suspend fun exportResults(outStream: OutputStream, results: List<ResultData>) {
-        val moshi: Moshi = Moshi.Builder().add(ResultDataJsonAdapter()).build()
-        val adapter = moshi.adapter<List<ResultData>>()
+        withContext(Dispatchers.IO) {
+            val moshi: Moshi = Moshi.Builder().add(ResultDataJsonAdapter()).build()
+            val adapter = moshi.adapter<List<ResultData>>()
 
-        val json = adapter.toJson(results);
-        outStream.write(json.toByteArray())
-        outStream.flush()
+            val json = adapter.toJson(results);
+
+            outStream.write(json.toByteArray())
+
+            outStream.flush()
+        }
     }
 
     suspend fun exportRaceData(

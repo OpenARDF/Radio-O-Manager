@@ -27,7 +27,8 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
 import kolskypavel.ardfmanager.backend.room.enums.RaceBand
 import kolskypavel.ardfmanager.backend.room.enums.RaceLevel
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultServiceType
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.StandardCategoryType
 import kolskypavel.ardfmanager.backend.sportident.SIPort.CardData
 import kolskypavel.ardfmanager.backend.sportident.SIReaderService
@@ -385,7 +386,7 @@ class DataProcessor private constructor(context: Context) {
     suspend fun processManualPunches(
         result: Result,
         punches: ArrayList<Punch>,
-        manualStatus: RaceStatus?
+        manualStatus: ResultStatus?
     ) = resultsProcessor?.processManualPunchData(
         result,
         punches,
@@ -490,22 +491,22 @@ class DataProcessor private constructor(context: Context) {
         return RaceBand.getByValue(raceBandStrings.indexOf(string))
     }
 
-    fun raceStatusToString(raceStatus: RaceStatus): String {
+    fun raceStatusToString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return raceStatusStrings[raceStatus.value]
+        return raceStatusStrings[resultStatus.value]
     }
 
-    fun raceStatusStringToEnum(string: String): RaceStatus {
+    fun raceStatusStringToEnum(string: String): ResultStatus {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return RaceStatus.getByValue(raceStatusStrings.indexOf(string))
+        return ResultStatus.getByValue(raceStatusStrings.indexOf(string))
     }
 
-    fun raceStatusToShortString(raceStatus: RaceStatus): String {
+    fun raceStatusToShortString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array_short)!!
-        return raceStatusStrings[raceStatus.value]
+        return raceStatusStrings[resultStatus.value]
     }
 
     fun genderToString(isMan: Boolean?): String {
@@ -513,6 +514,12 @@ class DataProcessor private constructor(context: Context) {
             false -> appContext.get()!!.resources.getString(R.string.general_gender_woman)
             else -> appContext.get()!!.resources.getString(R.string.general_gender_man)
         }
+    }
+
+    fun resultServiceTypeFromString(string: String): ResultServiceType{
+        val raceStatusStrings =
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
+        return ResultServiceType.getByValue(raceStatusStrings.indexOf(string))
     }
 
     /**

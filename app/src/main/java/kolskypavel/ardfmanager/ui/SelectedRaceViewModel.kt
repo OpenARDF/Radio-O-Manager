@@ -18,7 +18,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.StandardCategoryType
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kolskypavel.ardfmanager.backend.wrappers.StatisticsWrapper
@@ -229,7 +229,7 @@ class SelectedRaceViewModel : ViewModel() {
     suspend fun processManualPunches(
         result: Result,
         punches: ArrayList<Punch>,
-        manualStatus: RaceStatus?
+        manualStatus: ResultStatus?
     ) {
         dataProcessor.processManualPunches(result, punches, manualStatus)
     }

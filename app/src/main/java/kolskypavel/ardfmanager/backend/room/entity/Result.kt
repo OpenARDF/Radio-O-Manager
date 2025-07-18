@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.sportident.SITime
 import java.io.Serializable
 import java.time.Duration
@@ -35,18 +35,18 @@ data class Result(
     @ColumnInfo(name = "orig_finish_time") var origFinishTime: SITime?, // Immutable copy of original SI Time, used mainly for SI 5 cards
     @ColumnInfo(name = "readout_time") var readoutTime: LocalDateTime = LocalDateTime.now(),
     @ColumnInfo(name = "automatic_status") var automaticStatus: Boolean,
-    @ColumnInfo(name = "race_status") var raceStatus: RaceStatus,
+    @ColumnInfo(name = "result_status") var resultStatus: ResultStatus,
     @ColumnInfo(name = "points") var points: Int = 0,
     @ColumnInfo(name = "run_time") var runTime: Duration,
     @ColumnInfo(name = "modified") var modified: Boolean
 ) : Serializable, Comparable<Result> {
     @Ignore
-    var place: Int? = null
+    var place: Int = 0
     override operator fun compareTo(other: Result): Int {
 
         //Compare race status
-        return if (raceStatus != other.raceStatus) {
-            raceStatus.compareTo(other.raceStatus)
+        return if (resultStatus != other.resultStatus) {
+            resultStatus.compareTo(other.resultStatus)
         }
         //Compare points - more points are before less points
         else if (points != other.points) {

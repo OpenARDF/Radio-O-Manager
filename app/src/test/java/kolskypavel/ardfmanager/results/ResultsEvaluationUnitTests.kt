@@ -6,7 +6,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.sportident.SIConstants
 import kolskypavel.ardfmanager.backend.sportident.SITime
@@ -40,7 +40,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -74,7 +74,7 @@ class ResultsEvaluationUnitTests {
         }
         controlPoints.last().type = ControlPointType.BEACON
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         //Check the punches
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)
@@ -100,7 +100,7 @@ class ResultsEvaluationUnitTests {
                 SITime(),
                 LocalDateTime.now(),
                 true,
-                RaceStatus.NO_RANKING,
+                ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
                 false
@@ -141,7 +141,7 @@ class ResultsEvaluationUnitTests {
 
             controlPoints.last().type = ControlPointType.BEACON
             ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-            assertEquals(RaceStatus.VALID, result.raceStatus)
+            assertEquals(ResultStatus.VALID, result.resultStatus)
             assertEquals(randLength + 1, result.points)
         }
     }
@@ -163,7 +163,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -211,7 +211,7 @@ class ResultsEvaluationUnitTests {
         )
 
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
 
         //Check the punches
         assertEquals(6, result.points)
@@ -235,7 +235,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -289,7 +289,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
 
         //Check the punches
         assertEquals(5, result.points)
@@ -312,7 +312,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -320,7 +320,7 @@ class ResultsEvaluationUnitTests {
         val punches = ArrayList<Punch>()
         val controlPoints = ArrayList<ControlPoint>()
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.NO_RANKING, result.raceStatus)
+        assertEquals(ResultStatus.NO_RANKING, result.resultStatus)
 
         punches.add(
             Punch(
@@ -345,7 +345,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.NO_RANKING, result.raceStatus)
+        assertEquals(ResultStatus.NO_RANKING, result.resultStatus)
         punches.add(
             Punch(
                 UUID.randomUUID(),
@@ -369,7 +369,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
     }
 
     @Test
@@ -389,7 +389,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -422,7 +422,7 @@ class ResultsEvaluationUnitTests {
             )
         }
         ResultsProcessor.evaluateOrienteering(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(6, result.points)
     }
 
@@ -443,7 +443,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -501,7 +501,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateOrienteering(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(6, result.points)
         assertEquals(PunchStatus.INVALID, punches[2].punchStatus)
         assertEquals(PunchStatus.INVALID, punches[4].punchStatus)
@@ -524,7 +524,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -558,7 +558,7 @@ class ResultsEvaluationUnitTests {
         }
         punches[2].siCode = 44
         ResultsProcessor.evaluateOrienteering(punches, controlPoints, result)
-        assertEquals(RaceStatus.DISQUALIFIED, result.raceStatus)
+        assertEquals(ResultStatus.DISQUALIFIED, result.resultStatus)
     }
 
     @Test
@@ -578,7 +578,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -586,7 +586,7 @@ class ResultsEvaluationUnitTests {
         val punches = ArrayList<Punch>()
         val controlPoints = ArrayList<ControlPoint>()
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.NO_RANKING, result.raceStatus)
+        assertEquals(ResultStatus.NO_RANKING, result.resultStatus)
 
         for (i in 1..12) {
             punches.add(
@@ -617,7 +617,7 @@ class ResultsEvaluationUnitTests {
         controlPoints.last().type = ControlPointType.BEACON
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(12, result.points)
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)
@@ -650,7 +650,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(12, result.points)
         assertEquals(PunchStatus.UNKNOWN, punches[5].punchStatus)
         assertEquals(PunchStatus.UNKNOWN, punches[9].punchStatus)
@@ -674,7 +674,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -682,7 +682,7 @@ class ResultsEvaluationUnitTests {
         val punches = ArrayList<Punch>()
         val controlPoints = ArrayList<ControlPoint>()
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.NO_RANKING, result.raceStatus)
+        assertEquals(ResultStatus.NO_RANKING, result.resultStatus)
 
         for (i in 1..12) {
             punches.add(
@@ -743,7 +743,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(12, result.points)
         assertEquals(PunchStatus.DUPLICATE, punches[4].punchStatus)
         assertEquals(PunchStatus.DUPLICATE, punches[8].punchStatus)
@@ -766,7 +766,7 @@ class ResultsEvaluationUnitTests {
             SITime(),
             LocalDateTime.now(),
             true,
-            RaceStatus.NO_RANKING,
+            ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
             false
@@ -800,7 +800,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(RaceStatus.VALID, result.raceStatus)
+        assertEquals(ResultStatus.VALID, result.resultStatus)
         assertEquals(12, result.points)
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)
@@ -825,7 +825,7 @@ class ResultsEvaluationUnitTests {
                 SITime(),
                 LocalDateTime.now(),
                 true,
-                RaceStatus.NO_RANKING,
+                ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
                 false

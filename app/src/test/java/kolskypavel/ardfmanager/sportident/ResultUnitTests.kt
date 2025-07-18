@@ -3,7 +3,7 @@ package kolskypavel.ardfmanager.sportident
 import junit.framework.TestCase.assertEquals
 import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Result
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.sportident.SIConstants
 import kolskypavel.ardfmanager.backend.sportident.SIPort
 import kolskypavel.ardfmanager.backend.sportident.SIPort.CardData
@@ -61,7 +61,7 @@ class ResultUnitTests {
                 cardData.finishTime,
                 LocalDateTime.now(),
                 false,
-                RaceStatus.NO_RANKING,
+                ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
                 false
@@ -125,7 +125,7 @@ class ResultUnitTests {
                 cardData.finishTime,
                 LocalDateTime.now(),
                 false,
-                RaceStatus.NO_RANKING,
+                ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
                 false

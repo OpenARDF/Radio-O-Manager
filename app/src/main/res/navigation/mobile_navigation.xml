@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mobile_navigation"
+    android:id="@+id/openResultService"
     app:startDestination="@id/raceSelectionFragment">
     <fragment
         android:id="@+id/raceSelectionFragment"
@@ -24,6 +24,10 @@
         android:id="@+id/bottomNav"
         app:startDestination="@id/navigation_categories">
 
+        <dialog
+            android:id="@+id/resultServiceDialogFragment"
+            android:name="kolskypavel.ardfmanager.ui.services.ResultServiceDialogFragment"
+            android:label="ResultServiceDialogFragment" />
         <dialog
             android:id="@+id/standardCategoriesDialogFragment"
             android:name="kolskypavel.ardfmanager.ui.categories.StandardCategoriesDialogFragment"
@@ -142,6 +146,9 @@
             <action
                 android:id="@+id/openReadoutDetail"
                 app:destination="@id/readoutDetailFragment" />
+            <action
+                android:id="@+id/openResultService"
+                app:destination="@id/resultServiceDialogFragment" />
         </fragment>
 
         <dialog

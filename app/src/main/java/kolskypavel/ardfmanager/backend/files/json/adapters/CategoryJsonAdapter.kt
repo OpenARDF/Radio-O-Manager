@@ -1,10 +1,10 @@
-package kolskypavel.ardfmanager.backend.files.adapters
+package kolskypavel.ardfmanager.backend.files.json.adapters
 
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 import kolskypavel.ardfmanager.backend.room.entity.Category
 
-class CategoryAdapter {
+class CategoryJsonAdapter {
     @ToJson
     fun toJson(category: Category): String {
         var res = ""

@@ -13,4 +13,10 @@ data class AliasPunch(
         entityColumn = "si_code",
     )
     var alias: Alias?,
-) : Serializable
+) : Serializable {
+    // No args constructor()
+    constructor() : this(
+        Punch(),
+        null
+    )
+}

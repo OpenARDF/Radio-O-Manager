@@ -11,7 +11,7 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -98,10 +98,10 @@ class ResultsFragmentRecyclerViewAdapter(
                 if (singleResult.resultData != null) {
                     val res = singleResult.resultData!!.result
                     competitorPlace.text =
-                        if (res.raceStatus == RaceStatus.VALID && res.place != null) {
+                        if (res.resultStatus == ResultStatus.VALID && res.place != null) {
                             res.place.toString()
                         } else {
-                            dataProcessor.raceStatusToShortString(res.raceStatus)
+                            dataProcessor.raceStatusToShortString(res.resultStatus)
                         }
                 } else {
                     competitorPlace.text = "-"

@@ -85,6 +85,10 @@ class ResultsFragment : Fragment() {
                 findNavController().navigate(ResultsFragmentDirections.exportResults())
             }
 
+            R.id.result_menu_results_service->{
+                findNavController().navigate(ResultsFragmentDirections.openResultService())
+            }
+
             R.id.result_menu_edit_race -> {
                 findNavController().navigate(
                     BottomNavDirections.modifyRaceProperties(

@@ -4,7 +4,6 @@
 
     <!--General strings -->
     <string name="general_race">Race</string>
-
     <string name="general_competitors">Competitors</string>
     <string name="general_categories">Categories</string>
     <string name="general_readouts">Readouts</string>
@@ -28,6 +27,8 @@
     <string name="general_automatic">Automatic</string>
     <string name="general_print">Print</string>
     <string name="general_preset">Preset</string>
+    <string name="general_type">Type</string>
+    <string name="general_url" translatable="false">URL</string>
 
     <!--    Sportident-->
     <string name="no_si_card">No SI card!</string>
@@ -50,10 +51,10 @@
     <string name="race_toolbar_title">Races overview</string>
     <string name="race_level">Level</string>
     <string name="race_type">Race type</string>
+    <string name="race_api_key">ROBis API key</string>
     <string name="race_limit_hint">Limit (min)</string>
     <string name="start_time_hint">Start time (hh:mm)</string>
     <string name="relative_start_time_hint">Relative start time (mm:ss)</string>
-    <string name="external_id">External ID</string>
 
     <string name="race_create">Create race</string>
     <string name="race_edit">Edit race</string>
@@ -219,6 +220,10 @@
     <string name="data_format_xml" translatable="false">XML</string>
     <string name="data_format_pdf" translatable="false">PDF</string>
     <string name="data_format_html" translatable="false">HTML</string>
+
+    <!-- Result service -->
+    <string name="result_service_type_robis" translatable="false">ROBis</string>
+    <string name="result_service_enable">Enable results service</string>
 
     <!--    Preferences    -->
     <string name="global_settings">Global settings</string>
@@ -451,5 +456,9 @@
         <item>@string/data_type_categories</item>
         <item>@string/data_type_competitors</item>
         <item>@string/data_type_competitor_starts_time</item>
+    </string-array>
+
+    <string-array name="result_service_types">
+        <item>@string/result_service_type_robis</item>
     </string-array>
 </resources>

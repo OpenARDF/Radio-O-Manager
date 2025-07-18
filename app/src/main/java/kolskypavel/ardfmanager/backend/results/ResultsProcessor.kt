@@ -14,7 +14,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.sportident.SIConstants
@@ -172,7 +172,7 @@ class ResultsProcessor(
                     cardData.finishTime,
                     LocalDateTime.now(),
                     false,
-                    RaceStatus.NO_RANKING,
+                    ResultStatus.NO_RANKING,
                     0,
                     Duration.ZERO,
                     false
@@ -228,7 +228,7 @@ class ResultsProcessor(
         result: Result,
         punches: ArrayList<Punch>,
         race: Race,
-        manualStatus: RaceStatus?
+        manualStatus: ResultStatus?
     ) {
         val competitor = if (result.competitorID != null) {
             dataProcessor.getCompetitor(result.competitorID!!)
@@ -270,7 +270,7 @@ class ResultsProcessor(
         result: Result,
         category: Category?,
         punches: ArrayList<Punch>,
-        manualStatus: RaceStatus?
+        manualStatus: ResultStatus?
     ) {
 
         if (category != null) {
@@ -335,7 +335,7 @@ class ResultsProcessor(
         // Set the result status based on user preference
         if (manualStatus != null) {
             result.automaticStatus = false
-            result.raceStatus = manualStatus
+            result.resultStatus = manualStatus
         } else {
             result.automaticStatus = true
         }
@@ -482,7 +482,7 @@ class ResultsProcessor(
             punches.forEach { punch ->
                 punch.punchStatus = PunchStatus.UNKNOWN
             }
-            result.raceStatus = RaceStatus.NO_RANKING
+            result.resultStatus = ResultStatus.NO_RANKING
         }
 
         /**
@@ -545,9 +545,9 @@ class ResultsProcessor(
 
             //Set the status accordingly
             if (result.points > 1) {
-                result.raceStatus = RaceStatus.VALID
+                result.resultStatus = ResultStatus.VALID
             } else {
-                result.raceStatus = RaceStatus.NO_RANKING
+                result.resultStatus = ResultStatus.NO_RANKING
             }
         }
 
@@ -613,9 +613,9 @@ class ResultsProcessor(
             //Set the status accordingly
             result.points = points
             if (result.points > 1) {
-                result.raceStatus = RaceStatus.VALID
+                result.resultStatus = ResultStatus.VALID
             } else {
-                result.raceStatus = RaceStatus.NO_RANKING
+                result.resultStatus = ResultStatus.NO_RANKING
             }
         }
 
@@ -648,9 +648,9 @@ class ResultsProcessor(
             }
 
             if (result.points == controlPoints.size) {
-                result.raceStatus = RaceStatus.VALID
+                result.resultStatus = ResultStatus.VALID
             } else {
-                result.raceStatus = RaceStatus.DISQUALIFIED
+                result.resultStatus = ResultStatus.DISQUALIFIED
             }
         }
     }

@@ -52,7 +52,7 @@ class ReadoutDataRecyclerViewAdapter(
         }
         holder.runTimeView.text = "${
             TimeProcessor.durationToMinuteString(item.result.runTime)
-        } (${dataProcessor.raceStatusToShortString(item.result.raceStatus)})"
+        } (${dataProcessor.raceStatusToShortString(item.result.resultStatus)})"
 
         //Set the start + finish + readout time
         holder.startTimeView.text = if (item.result.startTime != null) {

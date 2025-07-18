@@ -1,6 +1,6 @@
 package kolskypavel.ardfmanager.backend.room.enums
 
-enum class RaceStatus(val value: Int) : Comparable<RaceStatus> {
+enum class ResultStatus(val value: Int) : Comparable<ResultStatus> {
     VALID(0),
     MISPUNCHED(1),
     NO_RANKING(2),          //Did not fulfill the min CP requirement
@@ -13,6 +13,6 @@ enum class RaceStatus(val value: Int) : Comparable<RaceStatus> {
 
     companion object {
         fun getByValue(value: Int) =
-            RaceStatus.entries.firstOrNull { it.value == value } ?: NO_RANKING
+            ResultStatus.entries.firstOrNull { it.value == value } ?: NO_RANKING
     }
 }

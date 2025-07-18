@@ -25,7 +25,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
-import kolskypavel.ardfmanager.backend.room.enums.RaceStatus
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.sportident.SIConstants
 import kolskypavel.ardfmanager.backend.sportident.SITime
@@ -116,7 +116,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
                     null,
                     LocalDateTime.now(),
                     true,
-                    RaceStatus.NO_RANKING,
+                    ResultStatus.NO_RANKING,
                     0,
                     Duration.ZERO,
                     true
@@ -136,7 +136,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
             if (!args.resultData!!.result.automaticStatus) {
                 raceStatusPicker.setText(
-                    dataProcessor.raceStatusToString(args.resultData!!.result.raceStatus),
+                    dataProcessor.raceStatusToString(args.resultData!!.result.resultStatus),
                     false
                 )
             } else {
@@ -234,7 +234,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
             PunchEditRecyclerViewAdapter(punchWrappers)
 
         //Populate the status options
-        for (status in RaceStatus.entries) {
+        for (status in ResultStatus.entries) {
             statusArr.add(dataProcessor.raceStatusToString(status))
         }
 
@@ -345,7 +345,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
         return null
     }
 
-    private fun getRaceStatusFromPicker(): RaceStatus? {
+    private fun getRaceStatusFromPicker(): ResultStatus? {
         val raceStatusString = raceStatusPicker.text.toString()
         return if (raceStatusString.isNotEmpty()
             && raceStatusString == requireContext().getString(R.string.general_automatic)
