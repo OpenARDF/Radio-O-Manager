@@ -103,7 +103,7 @@ class SelectedRaceViewModel : ViewModel() {
         }
     }
 
-    fun removeReaderRace() = dataProcessor.removeReaderRace()
+    fun removeReaderRace() = dataProcessor.removeCurrentRace()
 
     //Category
     suspend fun getCategory(id: UUID) = dataProcessor.getCategory(id)

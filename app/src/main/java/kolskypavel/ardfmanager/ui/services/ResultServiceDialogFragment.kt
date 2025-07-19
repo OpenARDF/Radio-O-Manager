@@ -16,8 +16,12 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
+import kolskypavel.ardfmanager.backend.results.ResultServiceWorker
+import kolskypavel.ardfmanager.backend.room.entity.ResultService
+import kolskypavel.ardfmanager.backend.room.enums.ResultServiceType
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kolskypavel.ardfmanager.ui.readouts.ReadoutEditDialogFragmentArgs
+import kotlinx.coroutines.runBlocking
 
 class ResultServiceDialogFragment : DialogFragment() {
 
@@ -25,13 +29,16 @@ class ResultServiceDialogFragment : DialogFragment() {
     private lateinit var selectedRaceViewModel: SelectedRaceViewModel
     private val dataProcessor = DataProcessor.get()
 
+    private lateinit var resultService: ResultService
+
     private lateinit var enableSwitch: SwitchMaterial
     private lateinit var typePicker: MaterialAutoCompleteTextView
-    private lateinit var urlPickerLayout: TextInputLayout
-    private lateinit var urlPicker: TextInputEditText
+    private lateinit var urlInputLayout: TextInputLayout
+    private lateinit var urlInput: TextInputEditText
+    private lateinit var apiKeyLayout: TextInputLayout
+    private lateinit var apiKeyInput: TextInputEditText
 
-    private lateinit var okButton: Button
-    private lateinit var cancelButton: Button
+    private lateinit var closeButton: Button
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,10 +66,11 @@ class ResultServiceDialogFragment : DialogFragment() {
 
         enableSwitch = view.findViewById(R.id.result_service_dialog_enable)
         typePicker = view.findViewById(R.id.result_service_dialog_type)
-        urlPickerLayout = view.findViewById(R.id.results_service_dialog_url_layout)
-        urlPicker = view.findViewById(R.id.results_service_dialog_url)
-        okButton = view.findViewById(R.id.result_service_dialog_ok)
-        cancelButton = view.findViewById(R.id.readout_dialog_cancel)
+        urlInputLayout = view.findViewById(R.id.results_service_dialog_url_layout)
+        urlInput = view.findViewById(R.id.results_service_dialog_url)
+        apiKeyLayout = view.findViewById(R.id.results_service_dialog_api_key_layout)
+        apiKeyInput = view.findViewById(R.id.results_service_dialog_api_key)
+        closeButton = view.findViewById(R.id.results_service_dialog_close)
 
         populateFields()
         setButtons()
@@ -70,26 +78,40 @@ class ResultServiceDialogFragment : DialogFragment() {
 
     private fun populateFields() {
         dialog?.setTitle(R.string.results_service)
+        val currRace = selectedRaceViewModel.getCurrentRace()
 
+        runBlocking {
+            resultService =
+                dataProcessor.getResultServiceByRaceId(currRace.id)
+                    ?: ResultService()
+        }
+        enableSwitch.isChecked = resultService.enabled
+        typePicker.setText(
+            dataProcessor.resultServiceTypeToString(resultService.serviceType),
+            false
+        )
+        urlInput.setText(resultService.url)
+        apiKeyInput.setText(currRace.apiKey)
     }
 
     private fun setButtons() {
-        okButton.setOnClickListener {
-            if (validateFields()) {
-                val serviceType =
-                    dataProcessor.resultServiceTypeFromString(typePicker.text.toString())
-                val url = urlPicker.text.toString()
-                val enabled = enableSwitch.isChecked
+        typePicker.onItemSelectedListener
 
-//                val service = dataProcessor.createResultService(
-//                    args.readoutId,
-//                    serviceType,
-//                    selectedRaceViewModel
-//                )
+        enableSwitch.setOnClickListener {
+            if (validateFields()) {
+                if (!resultService.enabled) {
+                    enableResultService()
+                } else {
+                    disableResultService()
+                }
+
+            } else {
+                enableSwitch.isEnabled = false
+                enableSwitch.isChecked = false
             }
         }
 
-        cancelButton.setOnClickListener {
+        closeButton.setOnClickListener {
             dialog?.cancel()
         }
     }
@@ -97,7 +119,42 @@ class ResultServiceDialogFragment : DialogFragment() {
     private fun validateFields(): Boolean {
         var valid = true
 
+        val serviceType =
+            dataProcessor.resultServiceTypeFromString(typePicker.text.toString())
+        val url = urlInput.text.toString()
+
+        when (serviceType) {
+            ResultServiceType.ROBIS -> {
+
+                if (apiKeyInput.text.toString().isEmpty()) {
+                    valid = false
+                    apiKeyLayout.error = getString(R.string.result_service_api_key_missing)
+                }
+            }
+            //TODO: Add more services
+        }
 
         return valid
+    }
+
+    private fun enableResultService() {
+        runBlocking {
+            dataProcessor.setResultServiceJob(
+                ResultServiceWorker.resultServiceJob(
+                    resultService,
+                    dataProcessor
+                )
+            )
+            resultService.enabled = true
+            dataProcessor.createOrUpdateResultService(resultService)
+        }
+    }
+
+    private fun disableResultService() {
+        runBlocking {
+            dataProcessor.removeResultServiceJob()
+            resultService.enabled = false
+            dataProcessor.createOrUpdateResultService(resultService)
+        }
     }
 }

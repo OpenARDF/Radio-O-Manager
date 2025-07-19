@@ -205,7 +205,7 @@ class CategoryCreateDialogFragment : DialogFragment() {
         var valid = true
 
         if (nameEditText.text?.isBlank() == true) {
-            nameEditText.error = getString(R.string.required)
+            nameEditText.error = getString(R.string.general_required)
             valid = false
         }
         //Check if the name is unique
@@ -223,11 +223,11 @@ class CategoryCreateDialogFragment : DialogFragment() {
                 try {
                     Duration.ofMinutes(limitEditText.text.toString().toLong())
                 } catch (e: Exception) {
-                    limitEditText.error = getString(R.string.invalid)
+                    limitEditText.error = getString(R.string.general_invalid)
                     valid = false
                 }
             } else {
-                limitEditText.error = getString(R.string.required)
+                limitEditText.error = getString(R.string.general_required)
                 valid = false
             }
         }

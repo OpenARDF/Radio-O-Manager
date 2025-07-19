@@ -22,6 +22,7 @@ import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
+import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
 import kolskypavel.ardfmanager.backend.room.enums.RaceBand
@@ -35,6 +36,7 @@ import kolskypavel.ardfmanager.backend.sportident.SIReaderService
 import kolskypavel.ardfmanager.backend.sportident.SIReaderState
 import kolskypavel.ardfmanager.backend.sportident.SIReaderStatus
 import kolskypavel.ardfmanager.backend.wrappers.StatisticsWrapper
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -97,8 +99,18 @@ class DataProcessor private constructor(context: Context) {
 
     fun getCurrentRace() = currentState.value?.currentRace!!
 
-    fun removeReaderRace() {
-        currentState.postValue(currentState.value?.let { AppState(null, it.siReaderState) })
+    fun removeCurrentRace() {
+        currentState.postValue(currentState.value?.let { AppState(null, it.siReaderState, null) })
+    }
+
+    fun setResultServiceJob(job: Job) {
+        currentState.postValue(currentState.value?.let { AppState(it.currentRace, it.siReaderState, job) })
+        currentState.value?.resultServiceJob?.start()
+    }
+
+    fun removeResultServiceJob() {
+        currentState.value?.resultServiceJob?.cancel()
+        currentState.postValue(currentState.value?.let { AppState(it.currentRace, it.siReaderState, null) })
     }
 
     //METHODS TO HANDLE RACES
@@ -118,15 +130,15 @@ class DataProcessor private constructor(context: Context) {
     }
 
     //RACE DATA
-    suspend fun getRaceData(raceId: UUID):RaceData{
+    suspend fun getRaceData(raceId: UUID): RaceData {
         TODO();
     }
 
-    suspend fun importRaceData(){
+    suspend fun importRaceData() {
 
     }
 
-    suspend fun exportRaceData(){}
+    suspend fun exportRaceData() {}
 
     //CATEGORIES
     fun getCategoryDataFlowForRace(raceId: UUID) =
@@ -358,6 +370,9 @@ class DataProcessor private constructor(context: Context) {
     suspend fun saveResultPunches(result: Result, punches: List<Punch>) =
         ardfRepository.saveResultPunches(result, punches)
 
+    suspend fun createOrUpdateResult(result: Result) =
+        ardfRepository.createOrUpdateResult(result)
+
     private suspend fun updateResults(raceId: UUID) {
         getCategoriesForRace(raceId).forEach { category ->
             updateResultsForCategory(category.id, false)
@@ -402,6 +417,13 @@ class DataProcessor private constructor(context: Context) {
         resultsProcessor?.updateResultsForCompetitor(
             competitorId
         )
+
+    //RESULT SERVICE
+    suspend fun getResultServiceByRaceId(raceId: UUID) =
+        ardfRepository.getResultServiceByRaceId(raceId)
+
+    suspend fun createOrUpdateResultService(resultService: ResultService) =
+        ardfRepository.createOrUpdateResultService(resultService)
 
     //DATA IMPORT/EXPORT
     suspend fun importData(
@@ -516,10 +538,16 @@ class DataProcessor private constructor(context: Context) {
         }
     }
 
-    fun resultServiceTypeFromString(string: String): ResultServiceType{
+    fun resultServiceTypeFromString(string: String): ResultServiceType {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
         return ResultServiceType.getByValue(raceStatusStrings.indexOf(string))
+    }
+
+    fun resultServiceTypeToString(resultServiceType: ResultServiceType): String {
+        val raceStatusStrings =
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
+        return raceStatusStrings[resultServiceType.value]
     }
 
     /**

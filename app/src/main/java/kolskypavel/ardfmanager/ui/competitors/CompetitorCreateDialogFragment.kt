@@ -266,11 +266,11 @@ class CompetitorCreateDialogFragment : DialogFragment() {
 
         if (firstNameTextView.text.toString().trim().isBlank()) {
             valid = false
-            firstNameTextView.error = getString(R.string.required)
+            firstNameTextView.error = getString(R.string.general_required)
         }
         if (lastNameTextView.text.toString().trim().isBlank()) {
             valid = false
-            lastNameTextView.error = getString(R.string.required)
+            lastNameTextView.error = getString(R.string.general_required)
         }
 
         //Check the birth year
@@ -310,7 +310,7 @@ class CompetitorCreateDialogFragment : DialogFragment() {
                 }
             } catch (e: Exception) {
                 valid = false
-                siNumberTextView.error = getString(R.string.invalid)
+                siNumberTextView.error = getString(R.string.general_invalid)
             }
         }
 
@@ -329,11 +329,11 @@ class CompetitorCreateDialogFragment : DialogFragment() {
 
             } catch (e: Exception) {
                 valid = false
-                startNumberTextView.error = getString(R.string.invalid)
+                startNumberTextView.error = getString(R.string.general_invalid)
             }
         } else {
             valid = false
-            startNumberTextView.error = getString(R.string.required)
+            startNumberTextView.error = getString(R.string.general_required)
         }
 
         //Check the start time
@@ -341,7 +341,7 @@ class CompetitorCreateDialogFragment : DialogFragment() {
             try {
                 TimeProcessor.minuteStringToDuration(startTimeTextView.text.toString().trim())
             } catch (e: Exception) {
-                startTimeTextView.error = getString(R.string.invalid)
+                startTimeTextView.error = getString(R.string.general_invalid)
                 valid = false
             }
         }

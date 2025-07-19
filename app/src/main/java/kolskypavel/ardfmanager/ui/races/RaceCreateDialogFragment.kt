@@ -132,9 +132,7 @@ class RaceCreateDialogFragment : DialogFragment() {
         }
 
         dateView.setText(race.startDateTime.toLocalDate().toString())
-        if (race.apiKey != null) {
-            apiKey.setText(race.apiKey.toString())
-        }
+        apiKey.setText(race.apiKey)
         startTimeView.setText(TimeProcessor.hoursMinutesFormatter(race.startDateTime))
         limitEditText.setText("120") //TODO: Fix with default values from settings
 
@@ -186,19 +184,19 @@ class RaceCreateDialogFragment : DialogFragment() {
         var valid = true
 
         if (nameEditText.text?.isBlank() == true) {
-            nameEditText.error = getString(R.string.required)
+            nameEditText.error = getString(R.string.general_required)
             valid = false
         }
 
         //Validate start time
         if (startTimeView.text?.isBlank() == true) {
-            startTimeView.error = getString(R.string.required)
+            startTimeView.error = getString(R.string.general_required)
             valid = false
         } else {
             try {
                 LocalTime.parse(startTimeView.text.toString().trim())
             } catch (e: Exception) {
-                startTimeView.error = getString(R.string.invalid)
+                startTimeView.error = getString(R.string.general_invalid)
                 valid = false
             }
         }
@@ -207,11 +205,11 @@ class RaceCreateDialogFragment : DialogFragment() {
             try {
                 Duration.ofMinutes(limitEditText.text.toString().trim().toLong())
             } catch (e: Exception) {
-                limitEditText.error = getString(R.string.invalid)
+                limitEditText.error = getString(R.string.general_invalid)
                 valid = false
             }
         } else {
-            limitEditText.error = getString(R.string.required)
+            limitEditText.error = getString(R.string.general_required)
             valid = false
         }
 

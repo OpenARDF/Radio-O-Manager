@@ -131,12 +131,12 @@ class ResultsFragment : Fragment() {
             val message = getString(R.string.race_end_confirmation)
             builder.setMessage(message)
 
-            builder.setPositiveButton(R.string.ok) { dialog, _ ->
-                dataProcessor.removeReaderRace()
+            builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
+                dataProcessor.removeCurrentRace()
                 findNavController().navigate(ResultsFragmentDirections.closeRace())
             }
 
-            builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+            builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
                 dialog.cancel()
             }
             builder.show()

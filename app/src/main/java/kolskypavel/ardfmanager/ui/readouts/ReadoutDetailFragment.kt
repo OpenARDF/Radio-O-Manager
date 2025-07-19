@@ -166,13 +166,13 @@ class ReadoutDetailFragment : Fragment() {
             )
         builder.setMessage(message)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteResult(resultData.result.id)
             dialog.dismiss()
             parentFragmentManager.popBackStackImmediate();
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()

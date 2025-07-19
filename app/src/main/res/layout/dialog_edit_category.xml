@@ -120,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checked="true"
-            android:text="@string/same_category_type" />
+            android:text="@string/category_same_type" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/category_dialog_type_layout"
@@ -223,7 +223,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
                 android:layout_weight="1"
-                android:text="@string/cancel" />
+                android:text="@string/general_cancel" />
 
             <Button
                 android:id="@+id/category_dialog_ok"
@@ -231,7 +231,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/ok" />
+                android:text="@string/general_ok" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

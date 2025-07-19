@@ -175,6 +175,7 @@ class ResultsProcessor(
                     ResultStatus.NO_RANKING,
                     0,
                     Duration.ZERO,
+                    false,
                     false
                 )
 

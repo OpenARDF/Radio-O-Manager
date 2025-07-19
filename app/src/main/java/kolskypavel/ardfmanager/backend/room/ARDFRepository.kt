@@ -11,6 +11,7 @@ import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.Result
+import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -158,7 +159,7 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun getResultByCompetitor(competitorId: UUID) =
         eventDatabase.resultDao().getResultByCompetitor(competitorId)
 
-    suspend fun createResult(result: Result) =
+    suspend fun createOrUpdateResult(result: Result) =
         eventDatabase.resultDao().createOrUpdateResult(result)
 
     suspend fun saveResultPunches(
@@ -179,12 +180,21 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun deleteAllResultsByRace(raceId: UUID) =
         eventDatabase.resultDao().deleteAllResultsByRace(raceId)
 
-
     //PUNCHES
     suspend fun createPunch(punch: Punch) = eventDatabase.punchDao().createOrUpdatePunch(punch)
 
     suspend fun getPunchesByResult(resultId: UUID) =
         eventDatabase.punchDao().getPunchesByResult(resultId)
+
+
+    //Result service
+    suspend fun getResultService(id: UUID) =
+        eventDatabase.resultServiceDao().getResultService(id)
+
+    suspend fun getResultServiceByRaceId(raceId: UUID) =
+        eventDatabase.resultServiceDao().getResultServiceByRaceId(raceId)
+
+    suspend fun createOrUpdateResultService(resultService: ResultService)=eventDatabase.resultServiceDao().createOrUpdateResultService(resultService)
 
     //Singleton instantiation
     companion object {

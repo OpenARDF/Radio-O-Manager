@@ -152,12 +152,12 @@ class ReadoutFragment : Fragment() {
         builder.setTitle(getString(R.string.readout_delete_all))
         builder.setMessage(R.string.readout_delete_all_confirmation)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteAllResultsByRace()
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -242,12 +242,12 @@ class ReadoutFragment : Fragment() {
             )
         builder.setMessage(message)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteResult(resultData.result.id)
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -285,14 +285,14 @@ class ReadoutFragment : Fragment() {
             val message = getString(R.string.race_end_confirmation)
             builder.setMessage(message)
 
-            builder.setPositiveButton(R.string.ok) { dialog, _ ->
+            builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
                 selectedRaceViewModel.removeReaderRace()
                 statsJob?.cancel()
 
                 findNavController().navigate(ReadoutFragmentDirections.closeRace())
             }
 
-            builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+            builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
                 dialog.cancel()
             }
             builder.show()

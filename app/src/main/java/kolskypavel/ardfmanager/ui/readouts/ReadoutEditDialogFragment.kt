@@ -119,7 +119,8 @@ class ReadoutEditDialogFragment : DialogFragment() {
                     ResultStatus.NO_RANKING,
                     0,
                     Duration.ZERO,
-                    true
+                    true,
+                    false
                 )
 
             raceStatusPicker.setText(getString(R.string.general_automatic), false)
@@ -310,7 +311,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
             }
 
         } else if (result.competitorID == null) {
-            siNumberInputLayout.error = getString(R.string.required)
+            siNumberInputLayout.error = getString(R.string.general_required)
             valid = false
         }
 

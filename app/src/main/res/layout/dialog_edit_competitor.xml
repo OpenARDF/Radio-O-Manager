@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.6"
-                android:hint="@string/club">
+                android:hint="@string/general_club">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/competitor_dialog_club"
@@ -218,7 +218,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.6"
-                android:hint="@string/relative_start_time_hint">
+                android:hint="@string/race_relative_start_time_hint">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/competitor_dialog_start_time"
@@ -246,7 +246,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="15dp"
                 android:layout_weight="1"
-                android:text="@string/cancel" />
+                android:text="@string/general_cancel" />
 
             <Button
                 android:id="@+id/competitor_dialog_ok"
@@ -254,7 +254,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/ok" />
+                android:text="@string/general_ok" />
         </LinearLayout>
 
     </LinearLayout>

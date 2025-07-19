@@ -135,12 +135,12 @@ class RaceSelectionFragment : Fragment() {
         val message = getString(R.string.race_delete_confirmation) + " " + race.name
         builder.setMessage(message)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             raceViewModel.deleteRace(race.id)
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()

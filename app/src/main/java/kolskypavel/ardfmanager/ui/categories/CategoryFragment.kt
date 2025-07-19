@@ -180,12 +180,12 @@ class CategoryFragment : Fragment() {
         val message = getString(R.string.category_delete_confirmation) + " " + category.name
         builder.setMessage(message)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteCategory(category.id)
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -218,12 +218,12 @@ class CategoryFragment : Fragment() {
             val message = getString(R.string.race_end_confirmation)
             builder.setMessage(message)
 
-            builder.setPositiveButton(R.string.ok) { _, _ ->
-                dataProcessor.removeReaderRace()
+            builder.setPositiveButton(R.string.general_ok) { _, _ ->
+                dataProcessor.removeCurrentRace()
                 findNavController().navigate(CategoryFragmentDirections.closeRace())
             }
 
-            builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+            builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
                 dialog.cancel()
             }
             builder.show()

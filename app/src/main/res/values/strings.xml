@@ -8,6 +8,7 @@
     <string name="general_categories">Categories</string>
     <string name="general_readouts">Readouts</string>
     <string name="general_results">Results</string>
+    <string name="general_club">Club</string>
     <string name="general_name">Name</string>
     <string name="general_date">Date</string>
     <string name="general_gender">Gender</string>
@@ -17,13 +18,24 @@
     <string name="general_year_of_birth">Year of birth</string>
     <string name="general_band">Band</string>
     <string name="general_display">Display</string>
+
+    <string name="general_ok" translatable="false">OK</string>
+    <string name="general_cancel">Cancel</string>
+    <string name="general_close">Close</string>
+    <string name="general_required">Required</string>
+    <string name="general_invalid">Invalid</string>
     <string name="general_preview">Preview</string>
     <string name="general_share">Share</string>
     <string name="general_duplicate">Duplicate</string>
     <string name="general_copy">Copy</string>
+    <string name="general_status">Status</string>
+
     <string name="general_start_time">Start time</string>
+    <string name="general_finish_time">Finish time</string>
+    <string name="general_run_time">Run time</string>
     <string name="general_minutes">minutes</string>
     <string name="general_limit">Limit</string>
+
     <string name="general_automatic">Automatic</string>
     <string name="general_print">Print</string>
     <string name="general_preset">Preset</string>
@@ -53,24 +65,16 @@
     <string name="race_type">Race type</string>
     <string name="race_api_key">ROBis API key</string>
     <string name="race_limit_hint">Limit (min)</string>
-    <string name="start_time_hint">Start time (hh:mm)</string>
-    <string name="relative_start_time_hint">Relative start time (mm:ss)</string>
+    <string name="race_start_time_hint">Start time (hh:mm)</string>
+    <string name="race_relative_start_time_hint">Relative start time (mm:ss)</string>
+    <string name="race_end_confirmation">Do you really want to close the current race?</string>
 
     <string name="race_create">Create race</string>
     <string name="race_edit">Edit race</string>
     <string name="race_delete">Delete race</string>
+    <string name="race_delete_confirmation">Do you really want to delete this race?</string>
     <string name="race_export">Export race</string>
     <string name="race_end">Close race</string>
-    <string name="race_end_confirmation">Do you really want to close the current race?</string>
-
-    <string name="ok" translatable="false">OK</string>
-    <string name="cancel">Cancel</string>
-    <string name="finish_time">Finish time</string>
-    <string name="run_time">Run time</string>
-    <string name="required">Required</string>
-    <string name="invalid">Invalid</string>
-    <string name="race_delete_confirmation">Do you really want to delete this race?</string>
-    <string name="same_category_type">Same type as race</string>
 
     <!--Categories-->
     <string name="category">Category</string>
@@ -92,6 +96,7 @@
     <string name="nonexistent_year">Invalid year</string>
     <string name="invalid_codes">Invalid SI codes</string>
     <string name="invalid_max_age">Max age is already taken for category %1$s!</string>
+    <string name="category_same_type">Same type as race</string>
 
     <string name="separator">Separator</string>
     <string name="beacon">Beacon</string>
@@ -121,7 +126,6 @@
     <string name="competitor_start_time">Start time</string>
     <string name="competitor_start_number_header" translatable="false">Start #</string>
     <string name="competitor_to_limit">To limit</string>
-    <string name="club">Club</string>
     <string name="competitor_create">Create competitor</string>
     <string name="competitor_edit">Edit competitor</string>
     <string name="competitor_duplicate">Duplicate competitor</string>
@@ -224,6 +228,7 @@
     <!-- Result service -->
     <string name="result_service_type_robis" translatable="false">ROBis</string>
     <string name="result_service_enable">Enable results service</string>
+    <string name="result_service_api_key_missing">API key must be present for ROBis</string>
 
     <!--    Preferences    -->
     <string name="global_settings">Global settings</string>

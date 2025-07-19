@@ -43,6 +43,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -103,6 +104,7 @@ class ResultsEvaluationUnitTests {
                 ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
+                false,
                 false
             )
             val punches = ArrayList<Punch>()
@@ -166,6 +168,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -238,6 +241,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -315,6 +319,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -392,6 +397,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -446,6 +452,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -527,6 +534,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -581,6 +589,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -677,6 +686,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -769,6 +779,7 @@ class ResultsEvaluationUnitTests {
             ResultStatus.NO_RANKING,
             0,
             Duration.ZERO,
+            false,
             false
         )
         val punches = ArrayList<Punch>()
@@ -828,6 +839,7 @@ class ResultsEvaluationUnitTests {
                 ResultStatus.NO_RANKING,
                 0,
                 Duration.ZERO,
+                false,
                 false
             )
             val punches = ArrayList<Punch>()

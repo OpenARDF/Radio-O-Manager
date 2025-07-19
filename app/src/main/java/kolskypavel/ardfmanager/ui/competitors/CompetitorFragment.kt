@@ -151,7 +151,7 @@ class CompetitorFragment : Fragment() {
                     intArrayOf(
                         R.string.competitor_start_number_header,
                         R.string.general_name,
-                        R.string.club,
+                        R.string.general_club,
                         R.string.category,
                         R.string.si_number
                     )
@@ -186,9 +186,9 @@ class CompetitorFragment : Fragment() {
                     intArrayOf(
                         R.string.general_name,
                         R.string.category,
-                        R.string.run_time,
+                        R.string.general_run_time,
                         R.string.general_start_time,
-                        R.string.finish_time,
+                        R.string.general_finish_time,
                     )
 
                 competitorTableView.setColumnComparator(0, CompetitorNameComparator())
@@ -204,7 +204,7 @@ class CompetitorFragment : Fragment() {
                         R.string.general_name,
                         R.string.category,
                         R.string.general_start_time,
-                        R.string.run_time,
+                        R.string.general_run_time,
                         R.string.competitor_to_limit,
                     )
                 for (i in 0..4) {
@@ -313,12 +313,12 @@ class CompetitorFragment : Fragment() {
         builder.setMessage(message)
 
         //TODO: Fix the readout removal
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteCompetitor(competitor.id, false)
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -329,12 +329,12 @@ class CompetitorFragment : Fragment() {
         builder.setTitle(getString(R.string.competitor_add_categories_automatically))
         builder.setMessage(R.string.competitor_add_categories_automatically_confirmation)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.addCategoriesAutomatically()
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -345,12 +345,12 @@ class CompetitorFragment : Fragment() {
         builder.setTitle(getString(R.string.competitor_delete_all))
         builder.setMessage(R.string.competitor_delete_all_confirmation)
 
-        builder.setPositiveButton(R.string.ok) { dialog, _ ->
+        builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.deleteAllCompetitorsByRace()
             dialog.dismiss()
         }
 
-        builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+        builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
             dialog.cancel()
         }
         builder.show()
@@ -363,12 +363,12 @@ class CompetitorFragment : Fragment() {
             val message = getString(R.string.race_end_confirmation)
             builder.setMessage(message)
 
-            builder.setPositiveButton(R.string.ok) { dialog, _ ->
-                dataProcessor.removeReaderRace()
+            builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
+                dataProcessor.removeCurrentRace()
                 findNavController().navigate(CompetitorFragmentDirections.closeRace())
             }
 
-            builder.setNegativeButton(R.string.cancel) { dialog, _ ->
+            builder.setNegativeButton(R.string.general_cancel) { dialog, _ ->
                 dialog.cancel()
             }
             builder.show()

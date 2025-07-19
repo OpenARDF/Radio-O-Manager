@@ -82,25 +82,25 @@ class PunchEditRecyclerViewAdapter(
         //Set watchers
         holder.code.doOnTextChanged { cs: CharSequence?, i: Int, i1: Int, i2: Int ->
             if (!codeWatcher(position, cs.toString())) {
-                holder.code.error = holder.code.context.getString(R.string.invalid)
+                holder.code.error = holder.code.context.getString(R.string.general_invalid)
             }
         }
 
         holder.time.doOnTextChanged { cs: CharSequence?, i: Int, i1: Int, i2: Int ->
             if (!timeWatcher(position, cs.toString())) {
-                holder.time.error = holder.code.context.getString(R.string.invalid)
+                holder.time.error = holder.code.context.getString(R.string.general_invalid)
             }
         }
 
         holder.weekday.doOnTextChanged { cs: CharSequence?, i: Int, i1: Int, i2: Int ->
             if (!dayWatcher(position, cs.toString())) {
-                holder.weekday.error = holder.code.context.getString(R.string.invalid)
+                holder.weekday.error = holder.code.context.getString(R.string.general_invalid)
             }
         }
 
         holder.week.doOnTextChanged { cs: CharSequence?, i: Int, i1: Int, i2: Int ->
             if (!weekWatcher(position, cs.toString())) {
-                holder.week.error = holder.code.context.getString(R.string.invalid)
+                holder.week.error = holder.code.context.getString(R.string.general_invalid)
             }
         }
     }

@@ -38,7 +38,9 @@ data class Result(
     @ColumnInfo(name = "result_status") var resultStatus: ResultStatus,
     @ColumnInfo(name = "points") var points: Int = 0,
     @ColumnInfo(name = "run_time") var runTime: Duration,
-    @ColumnInfo(name = "modified") var modified: Boolean
+    @ColumnInfo(name = "modified") var modified: Boolean,
+    @ColumnInfo(name = "sent") var sent: Boolean,      //Marked as sent to the server
+
 ) : Serializable, Comparable<Result> {
     @Ignore
     var place: Int = 0
