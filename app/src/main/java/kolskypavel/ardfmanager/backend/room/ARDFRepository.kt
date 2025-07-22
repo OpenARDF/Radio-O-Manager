@@ -162,6 +162,9 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun createOrUpdateResult(result: Result) =
         eventDatabase.resultDao().createOrUpdateResult(result)
 
+    suspend fun setAllResultsUnsent(raceId: UUID) =
+        eventDatabase.resultDao().setAllResultsUnsent(raceId)
+
     suspend fun saveResultPunches(
         result: Result,
         punches: List<Punch>
@@ -188,9 +191,11 @@ class ARDFRepository private constructor(context: Context) {
 
 
     //Result service
+    fun getResultServiceByRaceId(raceId: UUID) =
+        eventDatabase.resultServiceDao().getResultServiceByRaceId(raceId)
 
-    fun getResultServiceLiveDataByRaceId(raceId: UUID) =
-        eventDatabase.resultServiceDao().getResultServiceLiveDataByRaceId(raceId)
+    fun getResultServiceLiveDataWithCountByRaceId(raceId: UUID) =
+        eventDatabase.resultServiceDao().getResultServiceLiveDataWithCountByRaceId(raceId)
 
     suspend fun createOrUpdateResultService(resultService: ResultService) =
         eventDatabase.resultServiceDao().createOrUpdateResultService(resultService)

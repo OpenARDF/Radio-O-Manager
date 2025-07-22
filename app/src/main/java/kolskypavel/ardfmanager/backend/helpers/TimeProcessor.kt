@@ -14,6 +14,7 @@ object TimeProcessor {
         return DateTimeFormatter.ofPattern("HH:mm:ss").format(time).toString()
     }
 
+    // Converts a Duration to a string in the format "mm:ss"
     fun durationToMinuteString(duration: Duration): String {
         val seconds = duration.seconds
         return if (kotlin.math.abs(seconds / 60) <= 99) {

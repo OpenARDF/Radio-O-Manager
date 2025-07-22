@@ -46,6 +46,7 @@ class ResultServiceDialogFragment : DialogFragment() {
     private lateinit var apiKeyInput: TextInputEditText
     private lateinit var statusView: TextView
     private lateinit var errorTextView: TextView
+    private lateinit var resendResultsButton: Button
     private lateinit var closeButton: Button
 
     override fun onCreateView(
@@ -81,6 +82,7 @@ class ResultServiceDialogFragment : DialogFragment() {
         apiKeyInput = view.findViewById(R.id.results_service_dialog_api_key)
         statusView = view.findViewById(R.id.results_service_dialog_status)
         errorTextView = view.findViewById(R.id.results_service_dialog_error)
+        resendResultsButton = view.findViewById(R.id.results_service_dialog_resend_results)
         closeButton = view.findViewById(R.id.results_service_dialog_close)
 
         populateFields()
@@ -91,7 +93,8 @@ class ResultServiceDialogFragment : DialogFragment() {
         dialog?.setTitle(R.string.results_service)
 
         runBlocking {
-            resultService = selectedRaceViewModel.resultService.value ?: ResultService(currRace.id)
+            resultService = selectedRaceViewModel.resultService.value?.resultService
+                ?: ResultService(currRace.id)
         }
         enableSwitch.isChecked = resultService.enabled
         typePicker.setText(
@@ -102,14 +105,14 @@ class ResultServiceDialogFragment : DialogFragment() {
         apiKeyInput.setText(currRace.apiKey)
 
         // Result service observer
-        dataProcessor.getResultServiceLiveDataByRaceId(currRace.id)
-            .observe(viewLifecycleOwner) { service ->
-                if (service != null) {
+        dataProcessor.getResultServiceLiveDataWithCountByRaceId(currRace.id)
+            .observe(viewLifecycleOwner) { data ->
+                if (data != null && data.resultService != null) {
                     statusView.text = getString(
                         R.string.result_service_status_text,
                         dataProcessor.resultServiceStatusToString(resultService.status),
-                        service.sent,
-                        100 // TODO: Replace with actual sent count
+                        data.resultService.sent,
+                        data.resultCount
                     )
                     errorTextView.text = resultService.errorText
                 }
@@ -126,6 +129,20 @@ class ResultServiceDialogFragment : DialogFragment() {
                 enableResultService()
             } else {
                 enableSwitch.isChecked = false
+            }
+        }
+
+        // Set all results as unsent -> this will trigger the worker to resend them
+        resendResultsButton.setOnClickListener {
+            val currService = selectedRaceViewModel.resultService.value?.resultService
+            if (currService != null) {
+                selectedRaceViewModel.setAllResultsUnsent()
+                currService.sent = 0
+
+                // Update the service in the database
+                CoroutineScope(Dispatchers.IO).launch {
+                    dataProcessor.createOrUpdateResultService(currService)
+                }
             }
         }
 
@@ -166,7 +183,7 @@ class ResultServiceDialogFragment : DialogFragment() {
             dataProcessor.createOrUpdateResultService(resultService)
             dataProcessor.setResultServiceJob(
                 ResultServiceWorker.resultServiceJob(
-                    resultService,
+                    currRace.id,
                     dataProcessor,
                     requireContext()
                 )

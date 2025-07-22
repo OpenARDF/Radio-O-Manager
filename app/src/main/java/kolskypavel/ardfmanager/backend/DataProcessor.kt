@@ -409,9 +409,15 @@ class DataProcessor private constructor(context: Context) {
             competitorId
         )
 
+    suspend fun setAllResultsUnsent(raceId: UUID) =
+        ardfRepository.setAllResultsUnsent(raceId)
+
     //RESULT SERVICE
-    fun getResultServiceLiveDataByRaceId(raceId: UUID) =
-        ardfRepository.getResultServiceLiveDataByRaceId(raceId)
+    fun getResultServiceByRaceId(raceId: UUID) =
+        ardfRepository.getResultServiceByRaceId(raceId)
+
+    fun getResultServiceLiveDataWithCountByRaceId(raceId: UUID) =
+        ardfRepository.getResultServiceLiveDataWithCountByRaceId(raceId)
 
     suspend fun createOrUpdateResultService(resultService: ResultService) =
         ardfRepository.createOrUpdateResultService(resultService)
@@ -438,6 +444,7 @@ class DataProcessor private constructor(context: Context) {
             )
         })
     }
+
     //DATA IMPORT/EXPORT
     suspend fun importData(
         uri: Uri,

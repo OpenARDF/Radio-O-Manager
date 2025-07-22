@@ -1,12 +1,13 @@
 package kolskypavel.ardfmanager.backend.files.processors
 
+import ResultDataJsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.json.adapters.RaceDataJsonAdapter
-import kolskypavel.ardfmanager.backend.files.json.adapters.ResultDataJsonAdapter
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
@@ -66,11 +67,13 @@ object JsonProcessor : FormatProcessor {
 
     suspend fun exportResults(outStream: OutputStream, results: List<ResultData>) {
         withContext(Dispatchers.IO) {
-            val moshi: Moshi = Moshi.Builder().add(ResultDataJsonAdapter()).build()
+            val moshi: Moshi = Moshi.Builder()
+                .add(ResultDataJsonAdapter())
+                .add(KotlinJsonAdapterFactory())
+                .build()
             val adapter = moshi.adapter<List<ResultData>>()
 
             val json = adapter.toJson(results);
-
             outStream.write(json.toByteArray())
 
             outStream.flush()

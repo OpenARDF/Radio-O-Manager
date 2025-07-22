@@ -78,8 +78,8 @@ class ResultsFragment : Fragment() {
         }
 
         // Set results service icon
-        selectedRaceViewModel.resultService.observe(viewLifecycleOwner) { resultService ->
-            if (resultService != null && resultService.enabled) {
+        selectedRaceViewModel.resultService.observe(viewLifecycleOwner) { data ->
+            if (data != null && data.resultService?.enabled == true) {
                 resultsServiceMenuItem.icon =
                     ResourcesCompat.getDrawable(
                         resources,

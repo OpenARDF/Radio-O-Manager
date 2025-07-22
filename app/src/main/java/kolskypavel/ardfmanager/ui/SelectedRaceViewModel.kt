@@ -15,10 +15,10 @@ import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.Result
-import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultServiceData
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.StandardCategoryType
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
@@ -57,7 +57,7 @@ class SelectedRaceViewModel : ViewModel() {
         MutableStateFlow(emptyList())
     val resultData: StateFlow<List<ResultWrapper>> get() = _resultData.asStateFlow()
 
-    var resultService: LiveData<ResultService?> = MutableLiveData(null)
+    var resultService: LiveData<ResultServiceData> = MutableLiveData(null)
 
     @Throws(IllegalStateException::class)
     fun getCurrentRace(): Race {
@@ -75,7 +75,7 @@ class SelectedRaceViewModel : ViewModel() {
             val race = dataProcessor.setCurrentRace(id)
             _race.postValue(race)
 
-            resultService = dataProcessor.getResultServiceLiveDataByRaceId(id)
+            resultService = dataProcessor.getResultServiceLiveDataWithCountByRaceId(id)
 
             launch {
                 dataProcessor.getCategoryDataFlowForRace(id).collect {
@@ -270,14 +270,21 @@ class SelectedRaceViewModel : ViewModel() {
         }
 
     //RESULT SERVICE
+
     fun disableResultService() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (resultService.value != null) {
-                val rs = resultService.value!!
+            if (resultService.value?.resultService != null) {
+                val rs = resultService.value!!.resultService!!
                 dataProcessor.removeResultServiceJob()
-                resultService.value!!.enabled = false
+                rs.enabled = false
                 dataProcessor.createOrUpdateResultService(rs)
             }
+        }
+    }
+
+    fun setAllResultsUnsent() {
+        CoroutineScope(Dispatchers.IO).launch {
+            dataProcessor.setAllResultsUnsent(getCurrentRace().id)
         }
     }
 

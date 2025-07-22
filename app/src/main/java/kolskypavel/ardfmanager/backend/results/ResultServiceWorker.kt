@@ -24,35 +24,38 @@ import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.ByteArrayOutputStream
-
+import java.util.UUID
 
 object ResultServiceWorker {
 
     fun resultServiceJob(
-        resultService: ResultService,
+        raceId: UUID,
         dataProcessor: DataProcessor,
         context: Context
     ): Job {
         return CoroutineScope(Dispatchers.IO).launch {
             val httpClient = OkHttpClient.Builder().build()
+            var resultService: ResultService?
+
             while (true) {
 
-                //Test connection before sending - TODO: fix
-                if (!isNetworkConnected(context)) {
-                    resultService.status = ResultServiceStatus.NO_NETWORK
-                    updateResultService(dataProcessor, resultService)
-                    continue
-                } else {
-                    resultService.status = ResultServiceStatus.RUNNING
-                    updateResultService(dataProcessor, resultService)
-                }
+                // Get the result service from db
+                resultService = dataProcessor.getResultServiceByRaceId(raceId)
+                if (resultService != null) {
+                    //Test connection before sending - TODO: fix
+                    if (!isNetworkConnected(context)) {
+                        resultService.status = ResultServiceStatus.NO_NETWORK
+                        updateResultService(dataProcessor, resultService)
+                        continue
+                    }
 
-                when (resultService.serviceType) {
-                    ResultServiceType.ROBIS -> exportResultsRobis(
-                        dataProcessor,
-                        resultService,
-                        httpClient
-                    )
+                    when (resultService.serviceType) {
+                        ResultServiceType.ROBIS -> exportResultsRobis(
+                            dataProcessor,
+                            resultService,
+                            httpClient
+                        )
+                    }
                 }
                 delay(ResultsConstants.RESULT_DELAY)
             }
@@ -86,39 +89,47 @@ object ResultServiceWorker {
             .put(body)
             .build()
 
-        //TODO: Handle loging
-        httpClient.newCall(request).execute().use { response ->
-            when (response.code) {
-                in 200..299 -> {
-                    // If the response is successful, mark the results as sent
-                    updateSentResults(dataProcessor, filteredResults)
-                    resultService.status = ResultServiceStatus.OK
-                    resultService.sent += filteredResults.size
-                }
 
-                401 -> {
-                    // Handle unauthorized response
-                    resultService.status = ResultServiceStatus.UNAUTHORIZED
-                    resultService.errorText = response.message
+        try {
+            //TODO: Handle loging
+            httpClient.newCall(request).execute().use { response ->
+                when (response.code) {
+                    in 200..299 -> {
+                        // If the response is successful, mark the results as sent
+                        updateSentResults(dataProcessor, filteredResults)
+                        resultService.status = ResultServiceStatus.OK
+                        resultService.sent += filteredResults.size
+                    }
 
-                    Log.e(
-                        RESULTS_LOG_TAG,
-                        "Error ${response.code} sending results to ROBis: ${response.message}"
-                    )
-                }
+                    401 -> {
+                        // Handle unauthorized response
+                        resultService.status = ResultServiceStatus.UNAUTHORIZED
+                        resultService.errorText = response.message
 
-                else -> {
-                    // Handle error response and log it
-                    resultService.status = ResultServiceStatus.ERROR
-                    resultService.errorText = response.message
-                    Log.e(
-                        RESULTS_LOG_TAG,
-                        "Error ${response.code} sending results to ROBis: ${response.message}"
-                    )
+                        Log.e(
+                            RESULTS_LOG_TAG,
+                            "Error ${response.code} sending results to ROBis: ${response.message}"
+                        )
+                    }
+
+                    else -> {
+                        // Handle error response and log it
+                        resultService.status = ResultServiceStatus.ERROR
+                        resultService.errorText = response.message
+                        Log.e(
+                            RESULTS_LOG_TAG,
+                            "Error ${response.code} sending results to ROBis: ${response.message}"
+                        )
+                    }
                 }
             }
-            updateResultService(dataProcessor, resultService)
+        } catch (exception: Exception) {
+            // Handle exceptions during the request
+            resultService.status = ResultServiceStatus.ERROR
+            resultService.errorText = exception.message ?: "Unknown error"
+            Log.e(RESULTS_LOG_TAG, "Exception sending results to ROBis: ${exception.message}")
         }
+        updateResultService(dataProcessor, resultService)
     }
 
     private fun isNetworkConnected(context: Context): Boolean {

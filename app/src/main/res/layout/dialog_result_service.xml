@@ -88,7 +88,7 @@
             android:layout_height="wrap_content" />
 
         <Button
-            android:id="@+id/results_service_dialog_send_again"
+            android:id="@+id/results_service_dialog_resend_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="start"

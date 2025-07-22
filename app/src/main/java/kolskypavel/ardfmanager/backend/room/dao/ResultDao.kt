@@ -31,6 +31,9 @@ interface ResultDao {
     @Upsert
     suspend fun createOrUpdateResult(result: Result)
 
+    @Query("UPDATE result SET sent = 0 WHERE id =(:raceId)")
+    suspend fun setAllResultsUnsent(raceId: UUID)
+
     @Query("DELETE FROM result WHERE id =(:id)")
     suspend fun deleteResult(id: UUID)
 
