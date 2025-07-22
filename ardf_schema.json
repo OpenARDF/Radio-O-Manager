@@ -3,6 +3,11 @@
   "description": "Data standard for storing ARDF competition data",
   "type": "object",
   "properties": {
+    "format_version": {
+      "type": "integer",
+      "required": [],
+      "description": "Main version of the ARDF JSON standard - used for compatibility"
+    },
     "event_name": {
       "type": "string",
       "required": [],
