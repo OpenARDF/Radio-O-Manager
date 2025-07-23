@@ -112,7 +112,10 @@ class ResultsFragment : Fragment() {
             }
 
             R.id.result_menu_print_results -> {
-
+                dataProcessor.printResults(
+                    selectedRaceViewModel.resultWrappers.value,
+                    selectedRaceViewModel.getCurrentRace()
+                )
             }
 
             R.id.result_menu_edit_race -> {
@@ -178,7 +181,7 @@ class ResultsFragment : Fragment() {
     private fun setRecyclerViewAdapter() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                selectedRaceViewModel.resultData.collect { results ->
+                selectedRaceViewModel.resultWrappers.collect { results ->
                     resultsRecyclerView.adapter =
                         ResultsFragmentRecyclerViewAdapter(
                             ArrayList(results),

@@ -5,6 +5,7 @@
     <!--General strings -->
     <string name="general_race">Race</string>
     <string name="general_competitors">Competitors</string>
+    <string name="general_category">Category</string>
     <string name="general_categories">Categories</string>
     <string name="general_readouts">Readouts</string>
     <string name="general_results">Results</string>
@@ -19,6 +20,7 @@
     <string name="general_band">Band</string>
     <string name="general_display">Display</string>
     <string name="general_main">Main</string>
+    <string name="general_si_number">SI number</string>
 
     <string name="general_ok" translatable="false">OK</string>
     <string name="general_cancel">Cancel</string>
@@ -38,7 +40,9 @@
     <string name="general_finish_time">Finish time</string>
     <string name="general_run_time">Run time</string>
     <string name="general_minutes">minutes</string>
+    <string name="general_index">Index</string>
     <string name="general_limit">Limit</string>
+    <string name="general_controls">Controls</string>
 
     <string name="general_automatic">Automatic</string>
     <string name="general_print">Print</string>
@@ -50,7 +54,6 @@
     <string name="no_si_card">No SI card!</string>
     <string name="duplicate_si_number">Duplicate SI number!</string>
     <string name="si_number_invalid_range">Invalid SI number range!</string>
-    <string name="si_number">SI number</string>
 
     <!--Imports-->
     <string name="files_data">Files and data</string>
@@ -139,7 +142,6 @@
     <string name="competitor_add_categories_automatically_confirmation">Do you really want to add categories to competitors automatically (based on age)? Only the competitors without category and will be modified.</string>
     <string name="competitor_delete_confirmation">Do you really want to delete this competitor?</string>
     <string name="competitor_delete_all_confirmation">Do you really want to delete all competitors? This action CAN\'T be undone!</string>
-    <string name="index_callsign">Index/Callsign</string>
     <string name="competitor_rent_chip">Rent chip</string>
     <string name="competitor_edit_punches">Edit punches</string>
 

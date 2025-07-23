@@ -99,8 +99,8 @@
     <string name="competitor_delete_all">Smazat všechny závodníky</string>
     <string name="competitor_delete_confirmation">Opravdu chcete smazat tohoto závodníka?</string>
     <string name="competitor_delete_all_confirmation">Opravdu chcete smazat všechny závodníky? Tuto akci NELZE vrátit.</string>
-    <string name="index_callsign">Index/Volačka</string>
-    <string name="si_number">Číslo SI</string>
+    <string name="general_index">Index/Volačka</string>
+    <string name="general_si_number">Číslo SI</string>
     <string name="general_automatic">Automaticky</string>
     <string name="competitor_rent_chip">Půjčit čip</string>
     <string name="length">Délka (km)</string>

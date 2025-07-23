@@ -137,7 +137,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
             if (!args.resultData!!.result.automaticStatus) {
                 raceStatusPicker.setText(
-                    dataProcessor.raceStatusToString(args.resultData!!.result.resultStatus),
+                    dataProcessor.resultStatusToString(args.resultData!!.result.resultStatus),
                     false
                 )
             } else {
@@ -236,7 +236,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
         //Populate the status options
         for (status in ResultStatus.entries) {
-            statusArr.add(dataProcessor.raceStatusToString(status))
+            statusArr.add(dataProcessor.resultStatusToString(status))
         }
 
         statusArr.add(0, getString(R.string.general_automatic))
@@ -353,7 +353,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
         ) {
             null
         } else {
-            dataProcessor.raceStatusStringToEnum(raceStatusString)
+            dataProcessor.resultStatusStringToEnum(raceStatusString)
         }
     }
 

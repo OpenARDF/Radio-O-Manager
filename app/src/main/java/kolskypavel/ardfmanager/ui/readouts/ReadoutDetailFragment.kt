@@ -92,7 +92,7 @@ class ReadoutDetailFragment : Fragment() {
             indexView.text = getText(R.string.unknown)
         }
         raceStatusView.text =
-            dataProcessor.raceStatusToString(resultData.result.resultStatus)
+            dataProcessor.resultStatusToString(resultData.result.resultStatus)
 
         if (resultData.competitorCategory?.category != null) {
             categoryView.text = resultData.competitorCategory!!.category!!.name
@@ -129,7 +129,10 @@ class ReadoutDetailFragment : Fragment() {
                 }
 
                 R.id.readout_detail_menu_print_ticket -> {
-                    dataProcessor.printFinishTicket(resultData)
+                    dataProcessor.printFinishTicket(
+                        resultData,
+                        selectedRaceViewModel.getCurrentRace()
+                    )
                     true
                 }
 

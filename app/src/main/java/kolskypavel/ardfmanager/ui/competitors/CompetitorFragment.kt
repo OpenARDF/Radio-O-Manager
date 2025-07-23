@@ -153,7 +153,7 @@ class CompetitorFragment : Fragment() {
                         R.string.general_name,
                         R.string.general_club,
                         R.string.category,
-                        R.string.si_number
+                        R.string.general_si_number
                     )
 
                 //Set comparators
@@ -172,7 +172,7 @@ class CompetitorFragment : Fragment() {
                         R.string.general_start_time,
                         R.string.general_name,
                         R.string.category,
-                        R.string.si_number
+                        R.string.general_si_number
                     )
                 competitorTableView.setColumnComparator(0, CompetitorStartNumComparator())
                 competitorTableView.setColumnComparator(1, CompetitorStartTimeComparator())

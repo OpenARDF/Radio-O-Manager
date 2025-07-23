@@ -101,7 +101,7 @@ class ResultsFragmentRecyclerViewAdapter(
                         if (res.resultStatus == ResultStatus.VALID && res.place != null) {
                             res.place.toString()
                         } else {
-                            dataProcessor.raceStatusToShortString(res.resultStatus)
+                            dataProcessor.resultStatusToShortString(res.resultStatus)
                         }
                 } else {
                     competitorPlace.text = "-"

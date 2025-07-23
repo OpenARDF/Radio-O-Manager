@@ -1,6 +1,7 @@
 package kolskypavel.ardfmanager.backend.helpers
 
 import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -10,8 +11,11 @@ object TimeProcessor {
         return DateTimeFormatter.ofPattern("HH:mm").format(time).toString()
     }
 
-    fun localTimeFormatter(time: LocalTime): String {
-        return DateTimeFormatter.ofPattern("HH:mm:ss").format(time).toString()
+    fun formatLocalDate(time: LocalDate): String {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(time).toString()
+    }
+    fun formatLocalTime(time: LocalTime): String {
+        return DateTimeFormatter.ofPattern("hh:mm:ss").format(time).toString()
     }
 
     // Converts a Duration to a string in the format "mm:ss"
