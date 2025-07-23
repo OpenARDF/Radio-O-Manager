@@ -129,6 +129,7 @@ class ReadoutDetailFragment : Fragment() {
                 }
 
                 R.id.readout_detail_menu_print_ticket -> {
+                    dataProcessor.printFinishTicket(resultData)
                     true
                 }
 
@@ -185,8 +186,8 @@ class ReadoutDetailFragment : Fragment() {
             )
             val newData =
                 selectedRaceViewModel.getResultData(UUID.fromString(resultId))
-                resultData = newData
-                populateFields()
+            resultData = newData
+            populateFields()
 
         }
     }

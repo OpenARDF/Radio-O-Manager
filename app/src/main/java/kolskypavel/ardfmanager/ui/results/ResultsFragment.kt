@@ -111,6 +111,10 @@ class ResultsFragment : Fragment() {
                 findNavController().navigate(ResultsFragmentDirections.openResultService())
             }
 
+            R.id.result_menu_print_results -> {
+
+            }
+
             R.id.result_menu_edit_race -> {
                 findNavController().navigate(
                     BottomNavDirections.modifyRaceProperties(

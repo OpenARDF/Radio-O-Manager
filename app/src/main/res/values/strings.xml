@@ -18,6 +18,7 @@
     <string name="general_year_of_birth">Year of birth</string>
     <string name="general_band">Band</string>
     <string name="general_display">Display</string>
+    <string name="general_main">Main</string>
 
     <string name="general_ok" translatable="false">OK</string>
     <string name="general_cancel">Cancel</string>
@@ -31,6 +32,8 @@
     <string name="general_copy">Copy</string>
     <string name="general_status">Status</string>
 
+    <string name="general_start">Start</string>
+    <string name="general_finish">Finish</string>
     <string name="general_start_time">Start time</string>
     <string name="general_finish_time">Finish time</string>
     <string name="general_run_time">Run time</string>

@@ -27,6 +27,7 @@
     <!--PRINTING-->
     <string name="key_prints" translatable="false">prints</string>
     <string name="key_prints_enabled" translatable="false">prints_enabled</string>
-    <string name="key_prints_select_printer" translatable="false">select_printer</string>
+    <string name="key_prints_selected_printer_name" translatable="false">selected_printer_name</string>
+    <string name="key_prints_selected_printer_address" translatable="false">selected_printer_address</string>
     <string name="key_prints_automatic_printout" translatable="false">automatic_printout</string>
 </resources>

@@ -25,6 +25,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 import kolskypavel.ardfmanager.backend.room.enums.RaceBand
 import kolskypavel.ardfmanager.backend.room.enums.RaceLevel
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
@@ -59,7 +60,7 @@ class DataProcessor private constructor(context: Context) {
     var currentState = MutableLiveData<AppState>()
     var resultsProcessor: ResultsProcessor? = null
     var fileProcessor: FileProcessor? = null
-    var printProcessor = PrintProcessor()
+    var printProcessor = PrintProcessor(context)
 
     companion object {
         private var INSTANCE: DataProcessor? = null
@@ -490,9 +491,15 @@ class DataProcessor private constructor(context: Context) {
     fun getLastReadCard(): Int? = currentState.value?.siReaderState?.lastCard
 
     //PRINTING
-    fun enablePrinting() {
-        printProcessor.printerReady = true
+    fun disablePrinter() {
+        printProcessor.disablePrinter()
     }
+
+    fun printFinishTicket(resultData: ResultData) {
+        printProcessor.printFinishTicket(resultData)
+    }
+
+    fun printResults(results: List<ResultData>) {}
 
     //GENERAL HELPER METHODS
 
