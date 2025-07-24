@@ -23,8 +23,18 @@
         android:entries="@array/automatic_prints"
         android:entryValues="@array/automatic_prints"
         android:key="@string/key_prints_automatic_printout"
-        android:summary="@string/preferences_prints_automatic"
-        android:title="@string/preferences_prints_automatic_hint"
+        android:summary="@string/preferences_prints_automatic_hint"
+        android:title="@string/preferences_prints_automatic"
         app:iconSpaceReserved="false" />
+
+    <CheckBoxPreference
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:defaultValue="0"
+        android:key="@string/key_prints_remove_diacritics"
+        android:summary=""
+        android:title="@string/preferences_prints_remove_diacritics"
+        app:iconSpaceReserved="false"
+        app:summary="@string/preferences_prints_remove_diacritics_hint" />
 
 </PreferenceScreen>

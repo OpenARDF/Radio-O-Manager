@@ -141,7 +141,7 @@
     <string name="points">Body</string>
     <string name="placement">Umístění</string>
     <string name="readout_edit_readout">Upravit vyčítání</string>
-    <string name="readout_print_ticket">Vytisknout lísteček</string>
+    <string name="prints_result_ticket">Vytisknout lísteček</string>
     <string name="readout_delete_readout">Smazat vyčítání</string>
     <string name="readout_delete_readout_confirmation">Opravdu chcete smazat data čipu %1$d?</string>
     <string name="readout_create_category_from_readout">Vytvořit kategorii podle vyčítání</string>

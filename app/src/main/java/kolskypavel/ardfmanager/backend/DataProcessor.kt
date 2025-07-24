@@ -115,7 +115,7 @@ class DataProcessor private constructor(context: Context) {
     //METHODS TO HANDLE RACES
     fun getRaces(): Flow<List<Race>> = ardfRepository.getRaces()
 
-    private suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
+    suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
 
     suspend fun createRace(race: Race) = ardfRepository.createRace(race)
 

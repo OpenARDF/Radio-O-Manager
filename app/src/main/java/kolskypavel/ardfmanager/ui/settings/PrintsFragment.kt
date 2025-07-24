@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.CheckBoxPreference
 import androidx.preference.ListPreference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
@@ -164,7 +165,37 @@ class PrintsFragment : PreferenceFragmentCompat() {
 
             true
         }
+
+        val automaticPrintPreference =
+            findPreference<ListPreference>(requireContext().getString(R.string.key_prints_automatic_printout))
+
+        automaticPrintPreference?.setOnPreferenceChangeListener { _, action ->
+            editor.putString(
+                requireContext().getString(R.string.key_prints_automatic_printout),
+                action.toString()
+            )
+            editor.apply()
+
+            automaticPrintPreference.summary = requireContext().getString(
+                R.string.preferences_prints_automatic_hint,
+                action
+            )
+            true
+        }
+
+        val removeDiacriticsPreference =
+            findPreference<CheckBoxPreference>(requireContext().getString(R.string.key_prints_remove_diacritics))
+
+        removeDiacriticsPreference?.setOnPreferenceChangeListener { _, removeDiacritics ->
+            editor.putBoolean(
+                requireContext().getString(R.string.key_prints_remove_diacritics),
+                removeDiacritics as Boolean
+            )
+            editor.apply()
+            true
+        }
     }
+
 
     private fun enableOrDisablePreferences(enable: Boolean) {
         val printerSelectPreference =

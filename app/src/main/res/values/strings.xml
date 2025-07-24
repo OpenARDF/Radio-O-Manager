@@ -184,7 +184,6 @@
     <string name="readout_time">Readout time</string>
     <string name="readout_create_readout">Create readout</string>
     <string name="readout_edit_readout">Edit readout</string>
-    <string name="readout_print_ticket">Print ticket</string>
     <string name="readout_delete_readout">Delete readout</string>
     <string name="readout_delete_all">Delete all readouts</string>
     <string name="readout_delete_all_confirmation">Do you really want to delete all readouts? This action CAN\'T be undone!</string>
@@ -236,6 +235,12 @@
     <string name="result_service_send_again">Send results again</string>
     <string name="result_service_api_key_missing">API key must be set in race for ROBis</string>
     <string name="result_service_status_text">%1$s, sent %2$d/%3$d</string>
+
+    <!-- Prints -->
+    <string name="prints_result_ticket">Print ticket</string>
+    <string name="prints_bluetooth_disabled">Bluetooth needs to be on for printing!</string>
+    <string name="prints_error">Error when printing!</string>
+    <string name="prints_error_init">Error with printer init!</string>
 
     <!--    Preferences    -->
     <string name="global_settings">Global settings</string>
@@ -314,8 +319,10 @@
     <string name="preferences_prints_enable">Enable printing</string>
     <string name="preferences_prints_select_printer">Select printer</string>
     <string name="preferences_prints_select_printer_hint">Select the device you want to print with. Make sure Bluetooth is on and the device is paired.\n[%1$s]</string>
-    <string name="preferences_prints_automatic_hint">Automatic ticket printout </string>
-    <string name="preferences_prints_automatic">Select when to print the tickets automatically.\n[%1$s] </string>
+    <string name="preferences_prints_automatic">Automatic ticket printout </string>
+    <string name="preferences_prints_automatic_hint">Select when to print the tickets automatically.\n[%1$s] </string>
+    <string name="preferences_prints_remove_diacritics">Remove diacritics from printing </string>
+    <string name="preferences_prints_remove_diacritics_hint">Use this option if you face issues when printing tickets.</string>
 
     <!--Preferences: about the app-->
     <string name="preferences_changelog">Changelog</string>

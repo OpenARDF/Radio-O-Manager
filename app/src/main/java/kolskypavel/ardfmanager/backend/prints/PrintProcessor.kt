@@ -1,6 +1,7 @@
 package kolskypavel.ardfmanager.backend.prints
 
 import android.content.Context
+import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.dantsu.escposprinter.EscPosCharsetEncoding
 import com.dantsu.escposprinter.EscPosPrinter
@@ -8,6 +9,7 @@ import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
+import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
@@ -16,7 +18,11 @@ import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+import java.text.Normalizer
 
 
 class PrintProcessor(context: Context, private val dataProcessor: DataProcessor) {
@@ -40,48 +46,99 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
                 val bluetoothAdapter = (appContext.get()
                     ?.getSystemService(android.bluetooth.BluetoothManager::class.java))?.adapter
                 if (bluetoothAdapter != null) {
-                    printer =
-                        EscPosPrinter(
-                            BluetoothConnection(bluetoothAdapter.getRemoteDevice(address)),
-                            203,
-                            58f,
-                            32,
-                            EscPosCharsetEncoding("windows-1252", 16)
-                        )    // TODO: fix charset encoding
-                    printerReady = true
+
+                    if (bluetoothAdapter.isEnabled) {
+
+                        try {
+                            printer =
+                                EscPosPrinter(
+                                    BluetoothConnection(bluetoothAdapter.getRemoteDevice(address)),
+                                    203,
+                                    58f,
+                                    32,
+                                    EscPosCharsetEncoding("windows-1250", 72)
+                                )   // TODO: fix charset encoding
+                            printerReady = true
+                        } catch (e: Exception) {
+                            CoroutineScope(Dispatchers.Main).launch {
+                                Toast.makeText(
+                                    appContext.get(),
+                                    appContext.get()!!
+                                        .getString(R.string.prints_error_init),
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            printerReady = false
+                        }
+                    }
+                    //Inform about disabled bluetooth
+                    else {
+                        makeToast(R.string.prints_bluetooth_disabled)
+                    }
                 }
             }
         }
-
     }
 
     fun disablePrinter() {
         printerReady = false
     }
 
-    // TODO: fix diacritics printing
+    // TODO: add option to remove diacritics from the text
     private fun print(formatted: String) {
+        val context = appContext.get()!!
 
         if (!printerReady) {
             isPrintingEnabled()
         }
 
         if (printerReady) {
+            val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+            val preference =
+                sharedPref.getBoolean(
+                    context.getString(R.string.key_prints_remove_diacritics),
+                    false
+                )
             val version = "ARDF Manager v${dataProcessor.getAppVersion()}"
-            printer!!.printFormattedText(formatted + "\n\n[C]${version}", 100)
+
+            // Remove diacritics if the preference is set
+            val textToPrint = if (preference) {
+                removeDiacritics(formatted)
+            } else {
+                formatted
+            }
+
+            try {
+                printer!!.printFormattedText(textToPrint + "\n\n[C]${version}", 100)
+            } catch (e: Exception) {
+                makeToast(R.string.prints_error)
+            } finally {
+                printerReady = false
+            }
         }
     }
 
+    private fun removeDiacritics(text: String): String {
+        return Normalizer.normalize(text, Normalizer.Form.NFD)
+            .replace("\\p{Mn}+".toRegex(), "")
+    }
 
-    //TODO: adjust the max length of the text based on the printer width
+    private fun makeToast(stringRef: Int) {
+        CoroutineScope(Dispatchers.Main).launch {
+            Toast.makeText(
+                appContext.get(), appContext.get()!!
+                    .getText(stringRef), Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     fun printFinishTicket(resultData: ResultData, race: Race) {
         val context = appContext.get()!!
         val competitor = resultData.competitorCategory?.competitor
         val category = resultData.competitorCategory?.category?.name ?: "?"
         val punches = getPunchesFormatted(resultData.punches)
-        val compName = "${competitor?.firstName ?: "?"} ${competitor?.lastName ?: ""}"
         val compIndex =
-            "${competitor?.index ?: context.getString(R.string.unknown)} SI: ${resultData.result.siNumber ?: "?"}"
+            "SI: ${resultData.result.siNumber ?: "?"} ${competitor?.index ?: context.getString(R.string.unknown)}"
 
         val controls =
             "[R]${resultData.result.points} ${
@@ -100,7 +157,7 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
 
         val formatted = "[C]<b>${race.name}</b>\n" +
                 "[L]\n" +
-                "[L]$compName\n" +
+                "[L]${getMaxCompetitorName(competitor)}\n" +
                 "[L]$compIndex\n" +
                 "[L]$category\n\n" +
                 punches + "\n\n" +
@@ -108,6 +165,16 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
                 "[R]$controls\n"
 
         print(formatted)
+    }
+
+    private fun getMaxCompetitorName(competitor: Competitor?): String {
+        val maxLength = getCharactersPerLine()
+        val fullName = competitor?.getFullName() ?: "?"
+        return if (fullName.length > maxLength) {
+            fullName.substring(0, maxLength)
+        } else {
+            fullName
+        }
     }
 
     private fun getPunchesFormatted(punches: List<AliasPunch>): String {
