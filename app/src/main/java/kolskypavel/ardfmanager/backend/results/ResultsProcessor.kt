@@ -261,14 +261,17 @@ class ResultsProcessor(
     suspend fun processManualPunchData(
         result: Result,
         punches: ArrayList<Punch>,
-        race: Race,
         manualStatus: ResultStatus?
     ) {
-        val competitor = if (result.competitorID != null) {
-            dataProcessor.getCompetitor(result.competitorID!!)
-        } else {
-            null
+        var competitor: Competitor? = null
+
+        if (result.competitorID != null) {
+            competitor = dataProcessor.getCompetitor(result.competitorID!!)
+        } else if (result.siNumber != null) {
+            competitor = dataProcessor.getCompetitorBySINumber(result.siNumber!!, result.raceId)
+            result.competitorID = competitor!!.id
         }
+
         val category = if (competitor?.categoryId != null) {
             dataProcessor.getCategory(competitor.categoryId!!)
         } else {
@@ -468,6 +471,7 @@ class ResultsProcessor(
 
                 if (curr != null && prev != null
                     && curr.result.runTime == prev.result.runTime
+                    && curr.result.points == prev.result.points
                 ) {
                     curr.result.place = place
                 } else if (curr != null) {

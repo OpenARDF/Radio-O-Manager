@@ -292,19 +292,19 @@
     <string name="preferences_results_time_format_hours">hh:mm:ss</string>
     <string name="preferences_results_use_aliases">Use aliases</string>
     <string name="preferences_results_use_aliases_hint">Use defined aliases for control points instead of SI codes</string>
-    <string name="preferences_results_result_service">Result service sending</string>
-    <string name="preferences_results_result_service_hint">Select when to send the results with the result service\n[%1$s]</string>
-    <string name="preferences_results_result_service_matched">When competitor matched</string>
-    <string name="preferences_results_result_service_no_match">Even without match</string>
+    <string name="preferences_results_service">Result service sending</string>
+    <string name="preferences_results_service_hint">Select when to send the results with the result service\n[%1$s]</string>
+    <string name="preferences_result_service_matched">When competitor matched</string>
+    <string name="preferences_result_service_no_match">Even without match</string>
 
     <string-array name="preferences_results_time_format_options">
-        <item>@string/preferences_results_result_service_matched</item>
-        <item>@string/preferences_results_result_service_no_match</item>
+        <item>@string/preferences_results_time_format_hours</item>
+        <item>@string/preferences_results_time_format_minutes</item>
     </string-array>
 
     <string-array name="preferences_result_service_options">
-        <item>@string/preferences_results_result_service_matched</item>
-        <item>@string/preferences_results_result_service_no_match</item>
+        <item>@string/preferences_result_service_matched</item>
+        <item>@string/preferences_result_service_no_match</item>
     </string-array>
 
 

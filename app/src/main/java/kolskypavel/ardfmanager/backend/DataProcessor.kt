@@ -404,7 +404,6 @@ class DataProcessor private constructor(context: Context) {
     ) = resultsProcessor?.processManualPunchData(
         result,
         punches,
-        getRace(result.raceId),
         manualStatus
     )
 

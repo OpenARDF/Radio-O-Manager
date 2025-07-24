@@ -101,8 +101,8 @@
             android:entries="@array/preferences_result_service_options"
             android:entryValues="@array/preferences_result_service_options"
             android:key="@string/key_result_service"
-            android:summary="@string/preferences_results_result_service_hint"
-            android:title="@string/preferences_results_result_service"
+            android:summary="@string/preferences_results_service_hint"
+            android:title="@string/preferences_results_service"
             app:iconSpaceReserved="false" />
 
 
