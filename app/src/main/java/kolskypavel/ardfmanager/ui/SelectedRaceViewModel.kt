@@ -289,19 +289,17 @@ class SelectedRaceViewModel : ViewModel() {
     }
 
     //DATA IMPORT/EXPORT
-    fun importData(
+    suspend fun importData(
         uri: Uri,
         dataType: DataType,
         dataFormat: DataFormat
     ): DataImportWrapper? {
-        return runBlocking {
-            return@runBlocking dataProcessor.importData(
-                uri,
-                dataType,
-                dataFormat,
-                getCurrentRace().id
-            )
-        }
+        return dataProcessor.importData(
+            uri,
+            dataType,
+            dataFormat,
+            getCurrentRace().id
+        )
     }
 
     fun exportData(

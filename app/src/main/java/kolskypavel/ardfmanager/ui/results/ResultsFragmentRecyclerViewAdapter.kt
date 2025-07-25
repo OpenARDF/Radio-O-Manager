@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
-import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
@@ -23,7 +23,7 @@ class ResultsFragmentRecyclerViewAdapter(
     var values: ArrayList<ResultWrapper>,
     var context: Context,
     var selectedRaceViewModel: SelectedRaceViewModel,
-    private val openDetail: (resultData: ResultData) -> Unit
+    private val openDetail: (competitorData: CompetitorData) -> Unit
 ) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>(
     ) {
@@ -95,8 +95,8 @@ class ResultsFragmentRecyclerViewAdapter(
                 val singleResult = dataList.subList.first()
 
                 //Set the competitor place
-                if (singleResult.resultData != null) {
-                    val res = singleResult.resultData!!.result
+                if (singleResult.readoutData != null) {
+                    val res = singleResult.readoutData!!.result
                     competitorPlace.text =
                         if (res.resultStatus == ResultStatus.VALID && res.place != null) {
                             res.place.toString()
@@ -113,9 +113,9 @@ class ResultsFragmentRecyclerViewAdapter(
                     singleResult.competitorCategory.competitor.club.ifEmpty {
                         "-"
                     }
-                if (singleResult.resultData != null) {
+                if (singleResult.readoutData != null) {
                     competitorTime.text =
-                        TimeProcessor.durationToMinuteString(singleResult.resultData!!.result.runTime)
+                        TimeProcessor.durationToMinuteString(singleResult.readoutData!!.result.runTime)
                 } else if (singleResult.competitorCategory.competitor.drawnRelativeStartTime != null) {
 
                     CoroutineScope(Dispatchers.Main).launch {
@@ -130,14 +130,14 @@ class ResultsFragmentRecyclerViewAdapter(
                 } else {
                     competitorTime.text = "-"
                 }
-                competitorPoints.text = if (singleResult.resultData?.result?.points != null) {
-                    singleResult.resultData?.result?.points.toString()
+                competitorPoints.text = if (singleResult.readoutData?.result?.points != null) {
+                    singleResult.readoutData?.result?.points.toString()
                 } else {
                     "-"
                 }
                 holder.itemView.setOnClickListener {
-                    if (singleResult.resultData != null) {
-                        openDetail(singleResult.resultData!!)
+                    if (singleResult.readoutData != null) {
+                        openDetail(singleResult)
                     }
                 }
 

@@ -248,13 +248,13 @@ class CompetitorFragment : Fragment() {
 
             CompetitorTableDisplayType.FINISH_REACHED -> {
                 data.filter { cd ->
-                    cd.resultData != null
+                    cd.readoutData != null
                 }
             }
 
             CompetitorTableDisplayType.ON_THE_WAY -> {
                 data.filter { cd ->
-                    cd.resultData == null
+                    cd.readoutData == null
                 }
                 data.sortedWith(CompetitorStartTimeComparator())
             }

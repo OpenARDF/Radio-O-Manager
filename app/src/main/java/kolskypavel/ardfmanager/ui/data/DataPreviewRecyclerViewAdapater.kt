@@ -29,7 +29,12 @@ class DataPreviewRecyclerViewAdapater(
     override fun getItemCount(): Int {
         return when (dataType) {
             DataType.CATEGORIES -> value.categories.size
-            DataType.C0MPETITORS, DataType.COMPETITOR_STARTS_TIME -> value.competitorCategories.size
+            DataType.COMPETITORS, DataType.COMPETITOR_STARTS_TIME ->
+                if (value.competitorCategories.size < 5) {
+                    value.competitorCategories.size
+                } else {
+                    5
+                }
 
             else -> 0
         }
@@ -46,7 +51,7 @@ class DataPreviewRecyclerViewAdapater(
                     dataProcessor.getStringFromControlPoints(item.controlPoints)
             }
 
-            DataType.C0MPETITORS -> {
+            DataType.COMPETITORS -> {
                 val item = value.competitorCategories[position]
                 holder.columnOne.text = item.competitor.siNumber?.toString() ?: "-"
                 holder.columnTwo.text = item.competitor.getFullName()

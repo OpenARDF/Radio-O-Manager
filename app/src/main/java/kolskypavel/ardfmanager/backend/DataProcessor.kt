@@ -273,7 +273,7 @@ class DataProcessor private constructor(context: Context) {
             val competitor = cd.competitorCategory.competitor
             val category = cd.competitorCategory.category
 
-            if (cd.resultData == null) {
+            if (cd.readoutData == null) {
                 if (competitor.drawnRelativeStartTime != null) {
                     //Count started
                     if (TimeProcessor.hasStarted(

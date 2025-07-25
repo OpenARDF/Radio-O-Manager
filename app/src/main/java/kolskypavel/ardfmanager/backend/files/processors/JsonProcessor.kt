@@ -32,7 +32,7 @@ object JsonProcessor : FormatProcessor {
     ): DataImportWrapper {
         when (dataType) {
             DataType.CATEGORIES -> TODO()
-            DataType.C0MPETITORS -> TODO()
+            DataType.COMPETITORS -> TODO()
             else -> TODO()
         }
     }
@@ -46,7 +46,7 @@ object JsonProcessor : FormatProcessor {
     ): Boolean {
         when (dataType) {
             DataType.CATEGORIES -> TODO()
-            DataType.C0MPETITORS -> TODO()
+            DataType.COMPETITORS -> TODO()
             DataType.RESULTS_SIMPLE -> exportResults(
                 outStream,
                 dataProcessor.getResultDataFlowByRace(raceId).first()

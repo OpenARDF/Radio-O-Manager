@@ -153,7 +153,7 @@ class ResultsProcessor(
     suspend fun processCardData(cardData: CardData, race: Race, context: Context): Boolean {
 
         //Check if result already exists
-        if (dataProcessor.getResultBySINumber(cardData.siNumber, race.id) != null) {
+        if (dataProcessor.getResultBySINumber(cardData.siNumber, race.id) == null) {
             val competitor = dataProcessor.getCompetitorBySINumber(cardData.siNumber, race.id)
             val category = competitor?.categoryId?.let { dataProcessor.getCategory(it) }
 
@@ -212,10 +212,12 @@ class ResultsProcessor(
 
             // Add printing based on option
             if (isToPrintFinishTicket(competitor, category, context)) {
-                dataProcessor.printFinishTicket(
-                    dataProcessor.getResultData(result.id),
-                    dataProcessor.getRace(result.raceId)
-                )
+                CoroutineScope(Dispatchers.IO).launch {
+                    dataProcessor.printFinishTicket(
+                        dataProcessor.getResultData(result.id),
+                        dataProcessor.getRace(result.raceId)
+                    )
+                }
             }
             return true
         }
@@ -463,11 +465,11 @@ class ResultsProcessor(
 
         var place = 0
         for (cd in sorted.withIndex()) {
-            val curr = cd.value.resultData
+            val curr = cd.value.readoutData
 
             //Check for first element
             if (cd.index != 0) {
-                val prev = sorted[cd.index - 1].resultData
+                val prev = sorted[cd.index - 1].readoutData
 
                 if (curr != null && prev != null
                     && curr.result.runTime == prev.result.runTime

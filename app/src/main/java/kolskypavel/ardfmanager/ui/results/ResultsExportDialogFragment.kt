@@ -163,12 +163,11 @@ class ResultsExportDialogFragment : DialogFragment() {
 
         when (currType) {
             DataType.CATEGORIES -> TODO()
-            DataType.C0MPETITORS -> TODO()
+            DataType.COMPETITORS -> TODO()
             DataType.COMPETITOR_STARTS_TIME -> TODO()
             DataType.COMPETITOR_STARTS_CATEGORIES -> TODO()
             DataType.COMPETITOR_STARTS_CLUBS -> TODO()
             DataType.RESULTS_SIMPLE -> TODO()
-            DataType.RESULTS_SPLITS -> TODO()
             DataType.READOUT_DATA -> TODO()
         }
     }

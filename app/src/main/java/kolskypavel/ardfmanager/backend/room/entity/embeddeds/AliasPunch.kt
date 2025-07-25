@@ -6,6 +6,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Alias
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import java.io.Serializable
 
+// Contains information about a punch and its alias (if exists)
 data class AliasPunch(
     @Embedded var punch: Punch,
     @Relation(

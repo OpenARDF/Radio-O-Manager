@@ -39,7 +39,7 @@ object CsvProcessor : FormatProcessor {
     ): DataImportWrapper {
         return when (dataType) {
             DataType.CATEGORIES -> return importCategories(inStream, race)
-            DataType.C0MPETITORS -> return importCompetitorData(
+            DataType.COMPETITORS -> return importCompetitorData(
                 inStream,
                 race,
                 dataProcessor.getCategoryDataFlowForRace(race.id).first().toHashSet()
@@ -70,7 +70,7 @@ object CsvProcessor : FormatProcessor {
                     dataProcessor.getCategoryDataForRace(raceId)
                 )
 
-                DataType.C0MPETITORS -> exportCompetitors(
+                DataType.COMPETITORS -> exportCompetitors(
                     outStream,
                     dataProcessor.getCompetitorDataFlowByRace(raceId).first()
                 )
@@ -83,7 +83,7 @@ object CsvProcessor : FormatProcessor {
                     dataProcessor.getCurrentRace()
                 )
 
-                DataType.RESULTS_SIMPLE, DataType.RESULTS_SPLITS -> exportResults(
+                DataType.RESULTS_SIMPLE-> exportResults(
                     outStream,
                     dataProcessor.getResultWrapperFlowByRace(raceId).first()
                 )

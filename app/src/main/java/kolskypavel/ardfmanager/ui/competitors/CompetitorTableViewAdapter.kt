@@ -94,15 +94,15 @@ class CompetitorTableViewAdapter(
 
                     2 -> {
                         cell.text =
-                            TimeProcessor.durationToMinuteString(item.resultData!!.result.runTime)
+                            TimeProcessor.durationToMinuteString(item.readoutData!!.result.runTime)
                     }
 
                     3 -> {
-                        cell.text = item.resultData!!.result.startTime?.localTimeFormatter() ?: ""
+                        cell.text = item.readoutData!!.result.startTime?.localTimeFormatter() ?: ""
                     }
 
                     4 -> {
-                        cell.text = item.resultData!!.result.finishTime?.localTimeFormatter() ?: ""
+                        cell.text = item.readoutData!!.result.finishTime?.localTimeFormatter() ?: ""
                     }
                 }
             }
@@ -157,7 +157,7 @@ class CompetitorTableViewAdapter(
                         CoroutineScope(Dispatchers.Main).launch {
                             while (true) {
                                 if (item.competitorCategory.competitor.drawnRelativeStartTime != null) {
-                                    if (item.resultData == null) {
+                                    if (item.readoutData == null) {
 
                                         val limit: Duration =
                                             if (item.competitorCategory.category?.timeLimit != null) {

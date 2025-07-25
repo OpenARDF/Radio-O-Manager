@@ -2,13 +2,15 @@ package kolskypavel.ardfmanager.ui.data
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Resources
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ScrollView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
@@ -21,18 +23,9 @@ import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class DataImportDialogFragment : DialogFragment() {
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.dialog_data_import, container, false)
-    }
 
     private val dataProcessor = DataProcessor.get()
     private val selectedRaceViewModel: SelectedRaceViewModel by activityViewModels()
@@ -41,9 +34,10 @@ class DataImportDialogFragment : DialogFragment() {
 
     private lateinit var dataTypePicker: MaterialAutoCompleteTextView
     private lateinit var dataFormatPicker: MaterialAutoCompleteTextView
-    private lateinit var dataPreviewLayout: ScrollView
+    private lateinit var dataPreviewLayout: LinearLayout
     private lateinit var dataPreviewRecyclerView: RecyclerView
     private lateinit var errorView: TextView
+    private lateinit var importInfoView: TextView
     private lateinit var importButton: Button
     private lateinit var okButton: Button
     private lateinit var cancelButton: Button
@@ -61,8 +55,25 @@ class DataImportDialogFragment : DialogFragment() {
         }
     }
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return inflater.inflate(R.layout.dialog_data_import, container, false)
+    }
+
+    private fun DialogFragment.setWidthPercent(percentage: Int) {
+        val percent = percentage.toFloat() / 100
+        val dm = Resources.getSystem().displayMetrics
+        val rect = dm.run { Rect(0, 0, widthPixels, heightPixels) }
+        val percentWidth = rect.width() * percent
+        dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setWidthPercent(95)
         setStyle(STYLE_NORMAL, R.style.add_dialog)
         dialog?.setTitle(R.string.data_import_data)
 
@@ -71,6 +82,7 @@ class DataImportDialogFragment : DialogFragment() {
         importButton = view.findViewById(R.id.data_import_import_btn)
         dataPreviewLayout = view.findViewById(R.id.data_import_preview_layout)
         dataPreviewRecyclerView = view.findViewById(R.id.data_import_recyclerview)
+        importInfoView = view.findViewById(R.id.data_import_preview_info)
         errorView = view.findViewById(R.id.data_import_error)
         okButton = view.findViewById(R.id.data_import_ok)
         cancelButton = view.findViewById(R.id.data_import_cancel)
@@ -127,7 +139,7 @@ class DataImportDialogFragment : DialogFragment() {
         val currType = getCurrentType()
         val format = getCurrentFormat()
 
-        CoroutineScope(Dispatchers.Main).launch {
+        runBlocking {
             data = selectedRaceViewModel.importData(
                 uri, currType,
                 format
@@ -138,6 +150,10 @@ class DataImportDialogFragment : DialogFragment() {
             dataPreviewRecyclerView.adapter =
                 DataPreviewRecyclerViewAdapater(data!!, currType)
             errorView.error = null
+            importInfoView.text = getString(
+                R.string.data_import_preview_info,
+                data!!.getCount(currType)
+            )
             dataPreviewLayout.visibility = View.VISIBLE
 
         } else {
@@ -161,7 +177,7 @@ class DataImportDialogFragment : DialogFragment() {
                     }
                 }
 
-                DataType.C0MPETITORS -> {
+                DataType.COMPETITORS -> {
                     selectedRaceViewModel.saveDataImportWrapper(data!!)
                 }
 

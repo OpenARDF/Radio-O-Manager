@@ -22,6 +22,7 @@ import kolskypavel.ardfmanager.BottomNavDirections
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Race
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 import kolskypavel.ardfmanager.databinding.FragmentResultsBinding
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
@@ -174,7 +175,12 @@ class ResultsFragment : Fragment() {
 
     }
 
-    private fun openReadoutDetail(resultData: ResultData) {
+    private fun openReadoutDetail(competitorData: CompetitorData) {
+        val resultData = ResultData(
+            competitorData.readoutData!!.result,
+            competitorData.readoutData!!.punches,
+            competitorData.competitorCategory
+        )
         findNavController().navigate(ResultsFragmentDirections.openReadoutDetail(resultData))
     }
 

@@ -66,13 +66,13 @@ class CompetitorStartTimeComparator : Comparator<CompetitorData> {
 
 class CompetitorFinishTimeComparator : Comparator<CompetitorData> {
     override fun compare(o1: CompetitorData, o2: CompetitorData): Int {
-        return o1.resultData?.result?.finishTime?.compareTo(o2.resultData?.result?.finishTime) ?: -1
+        return o1.readoutData?.result?.finishTime?.compareTo(o2.readoutData?.result?.finishTime) ?: -1
     }
 }
 
 class CompetitorRunTimeComparator : Comparator<CompetitorData> {
     override fun compare(o1: CompetitorData, o2: CompetitorData): Int {
-        return o1.resultData?.result?.runTime?.compareTo(o2.resultData?.result?.runTime) ?: -1
+        return o1.readoutData?.result?.runTime?.compareTo(o2.readoutData?.result?.runTime) ?: -1
     }
 }
 

@@ -62,6 +62,7 @@
     <string name="data_import">Import</string>
     <string name="data_export">Export</string>
     <string name="data_import_data">Import data</string>
+    <string name="data_import_preview_info">Number of records: %1$d</string>
     <string name="data_import_error">Error when importing data!</string>
 
     <!--Race-->
@@ -378,7 +379,6 @@
     <string name="data_type_competitor_starts_categories">Competitor starts by categories</string>
     <string name="data_type_competitor_starts_clubs">Competitor starts by clubs</string>
     <string name="data_type_results">Results</string>
-    <string name="data_type_results_splits">Results with splits</string>
     <string name="data_type_readout_data">SI Readout data</string>
 
     <string name="result_service_type_robis" translatable="false">ROBis</string>
@@ -460,13 +460,13 @@
     <string-array name="category_data_formats">
         <item>@string/data_format_csv</item>
         <item>@string/data_format_json</item>
-        <item>@string/data_format_xml</item>
+        <!--        <item>@string/data_format_xml</item>-->
     </string-array>
 
     <string-array name="competitor_data_formats">
         <item>@string/data_format_csv</item>
         <item>@string/data_format_json</item>
-        <item>@string/data_format_xml</item>
+        <!--        <item>@string/data_format_xml</item>-->
     </string-array>
 
     <string-array name="results_data_formats">
@@ -484,7 +484,6 @@
         <item>@string/data_type_competitor_starts_categories</item>
         <item>@string/data_type_competitor_starts_clubs</item>
         <item>@string/data_type_results</item>
-        <item>@string/data_type_results_splits</item>
         <item>@string/data_type_readout_data</item>
     </string-array>
 
@@ -492,6 +491,11 @@
         <item>@string/data_type_categories</item>
         <item>@string/data_type_competitors</item>
         <item>@string/data_type_competitor_starts_time</item>
+    </string-array>
+
+    <string-array name="results_data_types">
+        <item>@string/data_type_results</item>
+        <item>@string/data_type_readout_data</item>
     </string-array>
 
     <string-array name="result_service_types">

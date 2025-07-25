@@ -53,48 +53,48 @@
 
         <TextView
             android:id="@+id/data_import_error"
+            style="@style/error_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/data_import_format_layout" />
 
-        <ScrollView
+
+        <LinearLayout
             android:id="@+id/data_import_preview_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="300dp"
+            android:orientation="vertical"
             android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/data_import_import_btn">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/data_import_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/general_preview"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/data_import_import_btn" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/data_import_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
 
-                <TextView
-                    android:id="@+id/data_import_preview"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/general_preview"
-                    android:textStyle="bold"
-                    android:visibility="visible"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/data_import_import_btn" />
+            </androidx.recyclerview.widget.RecyclerView>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/data_import_recyclerview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager">
+            <TextView
+                android:id="@+id/data_import_preview_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold" />
 
-                </androidx.recyclerview.widget.RecyclerView>
-
-            </LinearLayout>
-        </ScrollView>
+        </LinearLayout>
 
         <Button
             android:id="@+id/data_import_import_btn"

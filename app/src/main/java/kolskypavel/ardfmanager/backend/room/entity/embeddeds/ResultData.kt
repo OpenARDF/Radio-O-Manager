@@ -7,7 +7,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
 import java.io.Serializable
 
-
+// Contains all information about SI readout - including competitor (if matched)
 data class ResultData(
     @Embedded var result: Result,
 

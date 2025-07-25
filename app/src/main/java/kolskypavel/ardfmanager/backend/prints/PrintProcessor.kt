@@ -242,7 +242,7 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
 
                 // Format each competitor's result
                 result.subList.forEach { competitorData ->
-                    if (competitorData.resultData?.result != null) {
+                    if (competitorData.readoutData?.result != null) {
 
                         // Format the single result
                         sb.append(formatSingleResult(competitorData))
@@ -263,7 +263,7 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
     }
 
     private fun formatSingleResult(competitorData: CompetitorData): String {
-        val result = competitorData.resultData?.result!!
+        val result = competitorData.readoutData?.result!!
         var place = result.place.toString()
         var runTime = TimeProcessor.durationToMinuteString(result.runTime)
         val name = getMaxName(competitorData.competitorCategory.competitor.getFullName())

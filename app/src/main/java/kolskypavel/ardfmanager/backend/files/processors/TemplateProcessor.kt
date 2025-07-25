@@ -2,6 +2,8 @@ package kolskypavel.ardfmanager.backend.files.processors;
 
 import android.content.Context
 import kolskypavel.ardfmanager.backend.room.entity.Category
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
+import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import java.io.IOException
 
 object TemplateProcessor {
@@ -9,7 +11,6 @@ object TemplateProcessor {
     @Throws(IOException::class)
     fun loadTemplate(templateName: String, context: Context): String {
         return context.assets.open(templateName).readAllBytes().toString()
-
     }
 
     fun processTemplate(template: String, params: HashMap<String, String>): String {
@@ -23,7 +24,7 @@ object TemplateProcessor {
     }
 
     //Generates one line of competitor data
-    fun generateCompetitorData(context: Context): String {
+    fun generateCompetitorData(resultData: ResultData): String {
         var output = ""
 
         return output
