@@ -20,7 +20,6 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.preference.PreferenceManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.mazenrashed.printooth.Printooth
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.AppState
 import kolskypavel.ardfmanager.backend.DataProcessor
@@ -96,7 +95,6 @@ class MainActivity : AppCompatActivity() {
         dataProcessor = DataProcessor.get()
         dataProcessor.resultsProcessor = ResultsProcessor(dataProcessor)
         dataProcessor.fileProcessor = FileProcessor(WeakReference(this))
-        Printooth.init(baseContext)
 
         // Set the usb device
         if (intent != null) {

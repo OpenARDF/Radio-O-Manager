@@ -105,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.6"
-                android:hint="@string/index_callsign">
+                android:hint="@string/general_index">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/competitor_dialog_index_callsign"
@@ -183,7 +183,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="10dp"
                 android:layout_weight="0.6"
-                android:hint="@string/si_number"
+                android:hint="@string/general_si_number"
                 app:endIconDrawable="@drawable/ic_upload"
                 app:endIconMode="custom">
 

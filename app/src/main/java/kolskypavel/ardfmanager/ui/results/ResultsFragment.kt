@@ -1,4 +1,4 @@
-package kolskypavel.ardfmanager.ui.readouts
+package kolskypavel.ardfmanager.ui.results
 
 import android.app.AlertDialog
 import android.os.Build
@@ -26,7 +26,6 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 import kolskypavel.ardfmanager.databinding.FragmentResultsBinding
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kolskypavel.ardfmanager.ui.races.RaceCreateDialogFragment
-import kolskypavel.ardfmanager.ui.results.ResultsFragmentRecyclerViewAdapter
 import kotlinx.coroutines.launch
 
 class ResultsFragment : Fragment() {
@@ -112,6 +111,13 @@ class ResultsFragment : Fragment() {
                 findNavController().navigate(ResultsFragmentDirections.openResultService())
             }
 
+            R.id.result_menu_print_results -> {
+                dataProcessor.printResults(
+                    selectedRaceViewModel.resultWrappers.value,
+                    selectedRaceViewModel.getCurrentRace()
+                )
+            }
+
             R.id.result_menu_edit_race -> {
                 findNavController().navigate(
                     BottomNavDirections.modifyRaceProperties(
@@ -175,7 +181,7 @@ class ResultsFragment : Fragment() {
     private fun setRecyclerViewAdapter() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                selectedRaceViewModel.resultData.collect { results ->
+                selectedRaceViewModel.resultWrappers.collect { results ->
                     resultsRecyclerView.adapter =
                         ResultsFragmentRecyclerViewAdapter(
                             ArrayList(results),

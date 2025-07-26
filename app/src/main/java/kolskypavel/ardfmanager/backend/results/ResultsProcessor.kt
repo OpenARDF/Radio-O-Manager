@@ -3,10 +3,12 @@ package kolskypavel.ardfmanager.backend.results
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.preference.PreferenceManager
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
+import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Race
@@ -14,8 +16,8 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
-import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.sportident.SIConstants
 import kolskypavel.ardfmanager.backend.sportident.SIPort.CardData
@@ -207,6 +209,14 @@ class ResultsProcessor(
                 punches,
                 null
             )
+
+            // Add printing based on option
+            if (isToPrintFinishTicket(competitor, category, context)) {
+                dataProcessor.printFinishTicket(
+                    dataProcessor.getResultData(result.id),
+                    dataProcessor.getRace(result.raceId)
+                )
+            }
             return true
         }
         //Duplicate result
@@ -225,17 +235,43 @@ class ResultsProcessor(
         }
     }
 
+    // Returns if the ticket should be printed based on the current settings
+    private fun isToPrintFinishTicket(
+        competitor: Competitor?,
+        category: Category?,
+        context: Context,
+    ): Boolean {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val preference =
+            sharedPref.getString(context.getString(R.string.key_prints_automatic_printout), "")
+
+        when (preference) {
+            context.getString(R.string.print_automatic_always) -> return true
+            context.getString(R.string.print_automatic_competitor_matched) -> {
+                return competitor != null
+            }
+
+            context.getString(R.string.print_automatic_category_matched) -> {
+                return competitor != null && category != null
+            }
+        }
+        return false
+    }
+
     suspend fun processManualPunchData(
         result: Result,
         punches: ArrayList<Punch>,
-        race: Race,
         manualStatus: ResultStatus?
     ) {
-        val competitor = if (result.competitorID != null) {
-            dataProcessor.getCompetitor(result.competitorID!!)
-        } else {
-            null
+        var competitor: Competitor? = null
+
+        if (result.competitorID != null) {
+            competitor = dataProcessor.getCompetitor(result.competitorID!!)
+        } else if (result.siNumber != null) {
+            competitor = dataProcessor.getCompetitorBySINumber(result.siNumber!!, result.raceId)
+            result.competitorID = competitor!!.id
         }
+
         val category = if (competitor?.categoryId != null) {
             dataProcessor.getCategory(competitor.categoryId!!)
         } else {
@@ -435,6 +471,7 @@ class ResultsProcessor(
 
                 if (curr != null && prev != null
                     && curr.result.runTime == prev.result.runTime
+                    && curr.result.points == prev.result.points
                 ) {
                     curr.result.place = place
                 } else if (curr != null) {

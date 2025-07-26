@@ -2,6 +2,8 @@ package kolskypavel.ardfmanager.ui.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.fragment.findNavController
 import androidx.preference.CheckBoxPreference
 import androidx.preference.ListPreference
@@ -12,6 +14,15 @@ import kolskypavel.ardfmanager.R
 
 class SettingsFragment : PreferenceFragmentCompat() {
     private lateinit var prefs: SharedPreferences
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.findViewById<Toolbar>(R.id.settings_toolbar)?.let { toolbar ->
+            toolbar.title = getString(R.string.global_settings)
+            toolbar.subtitle = getString(R.string.general_main)
+        }
+    }
+
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
@@ -90,7 +101,33 @@ class SettingsFragment : PreferenceFragmentCompat() {
             }
 
         //Time format
+        val timeFormatPref =
+            findPreference<ListPreference>(requireContext().getString(R.string.key_results_time_format))
 
+        val currTimeFormatPref = prefs.getString(
+            requireContext().getString(R.string.key_results_time_format),
+            requireContext().getString(R.string.preferences_results_time_format_minutes)
+        )
+
+        timeFormatPref?.summary = requireContext().getString(
+            R.string.preferences_results_time_format_hint,
+            currTimeFormatPref
+        )
+
+        timeFormatPref?.setOnPreferenceChangeListener { _, timeFormat ->
+
+            editor.putString(
+                requireContext().getString(R.string.key_results_time_format),
+                timeFormat.toString()
+            )
+            editor.apply()
+
+            timeFormatPref.summary = requireContext().getString(
+                R.string.preferences_results_time_format_hint,
+                timeFormat
+            )
+            true
+        }
 
         //Aliases
         findPreference<CheckBoxPreference>(requireContext().getString(R.string.key_results_use_aliases))
@@ -104,8 +141,36 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 true
             }
 
+        // Result service
+        val resultServicePref =
+            findPreference<ListPreference>(requireContext().getString(R.string.key_result_service))
+
+        val currServicePref = prefs.getString(
+            requireContext().getString(R.string.key_result_service),
+            requireContext().getString(R.string.preferences_result_service_matched)
+        )
+
+        resultServicePref?.summary = requireContext().getString(
+            R.string.preferences_results_service_hint,
+            currServicePref
+        )
+
+        resultServicePref?.setOnPreferenceChangeListener { _, service ->
+            editor.putString(
+                requireContext().getString(R.string.key_result_service),
+                service.toString()
+            )
+            editor.apply()
+
+            resultServicePref.summary = requireContext().getString(
+                R.string.preferences_results_service_hint,
+                service
+            )
+            true
+        }
 
 
+        // Files and imports
         findPreference<CheckBoxPreference>(requireContext().getString(R.string.key_files_prefer_app_start_time))
             ?.setOnPreferenceChangeListener { _, keepOpen ->
 

@@ -25,6 +25,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 import kolskypavel.ardfmanager.backend.room.enums.RaceBand
 import kolskypavel.ardfmanager.backend.room.enums.RaceLevel
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
@@ -36,6 +37,7 @@ import kolskypavel.ardfmanager.backend.sportident.SIPort.CardData
 import kolskypavel.ardfmanager.backend.sportident.SIReaderService
 import kolskypavel.ardfmanager.backend.sportident.SIReaderState
 import kolskypavel.ardfmanager.backend.sportident.SIReaderStatus
+import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kolskypavel.ardfmanager.backend.wrappers.StatisticsWrapper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -59,7 +61,7 @@ class DataProcessor private constructor(context: Context) {
     var currentState = MutableLiveData<AppState>()
     var resultsProcessor: ResultsProcessor? = null
     var fileProcessor: FileProcessor? = null
-    var printProcessor = PrintProcessor()
+    var printProcessor = PrintProcessor(context, this)
 
     companion object {
         private var INSTANCE: DataProcessor? = null
@@ -81,6 +83,12 @@ class DataProcessor private constructor(context: Context) {
     }
 
     fun getContext(): Context = appContext.get()!!
+
+    fun getAppVersion(): String? {
+        val packageInfo =
+            appContext.get()!!.packageManager.getPackageInfo(appContext.get()!!.packageName, 0)
+        return packageInfo.versionName
+    }
 
     fun updateReaderState(newSIState: SIReaderState) {
         val stateToUpdate = currentState.value
@@ -107,7 +115,7 @@ class DataProcessor private constructor(context: Context) {
     //METHODS TO HANDLE RACES
     fun getRaces(): Flow<List<Race>> = ardfRepository.getRaces()
 
-    private suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
+    suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
 
     suspend fun createRace(race: Race) = ardfRepository.createRace(race)
 
@@ -396,7 +404,6 @@ class DataProcessor private constructor(context: Context) {
     ) = resultsProcessor?.processManualPunchData(
         result,
         punches,
-        getRace(result.raceId),
         manualStatus
     )
 
@@ -490,9 +497,16 @@ class DataProcessor private constructor(context: Context) {
     fun getLastReadCard(): Int? = currentState.value?.siReaderState?.lastCard
 
     //PRINTING
-    fun enablePrinting() {
-        printProcessor.printerReady = true
+    fun disablePrinter() {
+        printProcessor.disablePrinter()
     }
+
+    fun printFinishTicket(resultData: ResultData, race: Race) =
+        printProcessor.printFinishTicket(resultData, race)
+
+
+    fun printResults(results: List<ResultWrapper>, race: Race) =
+        printProcessor.printResults(results, race)
 
     //GENERAL HELPER METHODS
 
@@ -533,19 +547,19 @@ class DataProcessor private constructor(context: Context) {
         return RaceBand.getByValue(raceBandStrings.indexOf(string))
     }
 
-    fun raceStatusToString(resultStatus: ResultStatus): String {
+    fun resultStatusToString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
         return raceStatusStrings[resultStatus.value]
     }
 
-    fun raceStatusStringToEnum(string: String): ResultStatus {
+    fun resultStatusStringToEnum(string: String): ResultStatus {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
         return ResultStatus.getByValue(raceStatusStrings.indexOf(string))
     }
 
-    fun raceStatusToShortString(resultStatus: ResultStatus): String {
+    fun resultStatusToShortString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
             appContext.get()?.resources?.getStringArray(R.array.race_status_array_short)!!
         return raceStatusStrings[resultStatus.value]

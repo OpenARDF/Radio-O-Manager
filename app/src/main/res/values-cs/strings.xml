@@ -99,8 +99,8 @@
     <string name="competitor_delete_all">Smazat všechny závodníky</string>
     <string name="competitor_delete_confirmation">Opravdu chcete smazat tohoto závodníka?</string>
     <string name="competitor_delete_all_confirmation">Opravdu chcete smazat všechny závodníky? Tuto akci NELZE vrátit.</string>
-    <string name="index_callsign">Index/Volačka</string>
-    <string name="si_number">Číslo SI</string>
+    <string name="general_index">Index/Volačka</string>
+    <string name="general_si_number">Číslo SI</string>
     <string name="general_automatic">Automaticky</string>
     <string name="competitor_rent_chip">Půjčit čip</string>
     <string name="length">Délka (km)</string>
@@ -141,7 +141,7 @@
     <string name="points">Body</string>
     <string name="placement">Umístění</string>
     <string name="readout_edit_readout">Upravit vyčítání</string>
-    <string name="readout_print_ticket">Vytisknout lísteček</string>
+    <string name="prints_result_ticket">Vytisknout lísteček</string>
     <string name="readout_delete_readout">Smazat vyčítání</string>
     <string name="readout_delete_readout_confirmation">Opravdu chcete smazat data čipu %1$d?</string>
     <string name="readout_create_category_from_readout">Vytvořit kategorii podle vyčítání</string>

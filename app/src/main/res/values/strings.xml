@@ -5,6 +5,7 @@
     <!--General strings -->
     <string name="general_race">Race</string>
     <string name="general_competitors">Competitors</string>
+    <string name="general_category">Category</string>
     <string name="general_categories">Categories</string>
     <string name="general_readouts">Readouts</string>
     <string name="general_results">Results</string>
@@ -18,6 +19,8 @@
     <string name="general_year_of_birth">Year of birth</string>
     <string name="general_band">Band</string>
     <string name="general_display">Display</string>
+    <string name="general_main">Main</string>
+    <string name="general_si_number">SI number</string>
 
     <string name="general_ok" translatable="false">OK</string>
     <string name="general_cancel">Cancel</string>
@@ -31,11 +34,15 @@
     <string name="general_copy">Copy</string>
     <string name="general_status">Status</string>
 
+    <string name="general_start">Start</string>
+    <string name="general_finish">Finish</string>
     <string name="general_start_time">Start time</string>
     <string name="general_finish_time">Finish time</string>
     <string name="general_run_time">Run time</string>
     <string name="general_minutes">minutes</string>
+    <string name="general_index">Index</string>
     <string name="general_limit">Limit</string>
+    <string name="general_controls">Controls</string>
 
     <string name="general_automatic">Automatic</string>
     <string name="general_print">Print</string>
@@ -47,7 +54,6 @@
     <string name="no_si_card">No SI card!</string>
     <string name="duplicate_si_number">Duplicate SI number!</string>
     <string name="si_number_invalid_range">Invalid SI number range!</string>
-    <string name="si_number">SI number</string>
 
     <!--Imports-->
     <string name="files_data">Files and data</string>
@@ -136,7 +142,6 @@
     <string name="competitor_add_categories_automatically_confirmation">Do you really want to add categories to competitors automatically (based on age)? Only the competitors without category and will be modified.</string>
     <string name="competitor_delete_confirmation">Do you really want to delete this competitor?</string>
     <string name="competitor_delete_all_confirmation">Do you really want to delete all competitors? This action CAN\'T be undone!</string>
-    <string name="index_callsign">Index/Callsign</string>
     <string name="competitor_rent_chip">Rent chip</string>
     <string name="competitor_edit_punches">Edit punches</string>
 
@@ -179,7 +184,6 @@
     <string name="readout_time">Readout time</string>
     <string name="readout_create_readout">Create readout</string>
     <string name="readout_edit_readout">Edit readout</string>
-    <string name="readout_print_ticket">Print ticket</string>
     <string name="readout_delete_readout">Delete readout</string>
     <string name="readout_delete_all">Delete all readouts</string>
     <string name="readout_delete_all_confirmation">Do you really want to delete all readouts? This action CAN\'T be undone!</string>
@@ -232,6 +236,12 @@
     <string name="result_service_api_key_missing">API key must be set in race for ROBis</string>
     <string name="result_service_status_text">%1$s, sent %2$d/%3$d</string>
 
+    <!-- Prints -->
+    <string name="prints_result_ticket">Print ticket</string>
+    <string name="prints_bluetooth_disabled">Bluetooth needs to be on for printing!</string>
+    <string name="prints_error">Error when printing!</string>
+    <string name="prints_error_init">Error with printer init!</string>
+
     <!--    Preferences    -->
     <string name="global_settings">Global settings</string>
     <string name="about_the_app">About the app</string>
@@ -282,19 +292,19 @@
     <string name="preferences_results_time_format_hours">hh:mm:ss</string>
     <string name="preferences_results_use_aliases">Use aliases</string>
     <string name="preferences_results_use_aliases_hint">Use defined aliases for control points instead of SI codes</string>
-    <string name="preferences_results_result_service">Result service sending</string>
-    <string name="preferences_results_result_service_hint">Select when to send the results with the result service\n[%1$s]</string>
-    <string name="preferences_results_result_service_matched">When competitor matched</string>
-    <string name="preferences_results_result_service_no_match">Even without match</string>
+    <string name="preferences_results_service">Result service sending</string>
+    <string name="preferences_results_service_hint">Select when to send the results with the result service\n[%1$s]</string>
+    <string name="preferences_result_service_matched">When competitor matched</string>
+    <string name="preferences_result_service_no_match">Even without match</string>
 
     <string-array name="preferences_results_time_format_options">
-        <item>@string/preferences_results_result_service_matched</item>
-        <item>@string/preferences_results_result_service_no_match</item>
+        <item>@string/preferences_results_time_format_hours</item>
+        <item>@string/preferences_results_time_format_minutes</item>
     </string-array>
 
     <string-array name="preferences_result_service_options">
-        <item>@string/preferences_results_result_service_matched</item>
-        <item>@string/preferences_results_result_service_no_match</item>
+        <item>@string/preferences_result_service_matched</item>
+        <item>@string/preferences_result_service_no_match</item>
     </string-array>
 
 
@@ -309,8 +319,10 @@
     <string name="preferences_prints_enable">Enable printing</string>
     <string name="preferences_prints_select_printer">Select printer</string>
     <string name="preferences_prints_select_printer_hint">Select the device you want to print with. Make sure Bluetooth is on and the device is paired.\n[%1$s]</string>
-    <string name="preferences_prints_automatic_hint">Automatic ticket printout </string>
-    <string name="preferences_prints_automatic">Select when to print the tickets automatically.\n[%1$s] </string>
+    <string name="preferences_prints_automatic">Automatic ticket printout </string>
+    <string name="preferences_prints_automatic_hint">Select when to print the tickets automatically.\n[%1$s] </string>
+    <string name="preferences_prints_remove_diacritics">Remove diacritics from printing </string>
+    <string name="preferences_prints_remove_diacritics_hint">Use this option if you face issues when printing tickets.</string>
 
     <!--Preferences: about the app-->
     <string name="preferences_changelog">Changelog</string>

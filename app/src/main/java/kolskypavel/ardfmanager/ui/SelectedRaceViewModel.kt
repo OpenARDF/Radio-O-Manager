@@ -53,9 +53,9 @@ class SelectedRaceViewModel : ViewModel() {
         MutableStateFlow(emptyList())
     val readoutData: StateFlow<List<ResultData>> get() = _readoutData.asStateFlow()
 
-    private val _resultData: MutableStateFlow<List<ResultWrapper>> =
+    private val _resultWrappers: MutableStateFlow<List<ResultWrapper>> =
         MutableStateFlow(emptyList())
-    val resultData: StateFlow<List<ResultWrapper>> get() = _resultData.asStateFlow()
+    val resultWrappers: StateFlow<List<ResultWrapper>> get() = _resultWrappers.asStateFlow()
 
     var resultService: LiveData<ResultServiceData> = MutableLiveData(null)
 
@@ -95,7 +95,7 @@ class SelectedRaceViewModel : ViewModel() {
 
             launch {
                 dataProcessor.getResultWrapperFlowByRace(id).collect {
-                    _resultData.value = it
+                    _resultWrappers.value = it
                 }
             }
         }
