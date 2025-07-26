@@ -248,7 +248,6 @@ class CategoryCreateDialogFragment : DialogFragment() {
             try {
                 ControlPointsHelper.getControlPointsFromString(
                     text,
-                    category.id,
                     category.raceId,
                     category.raceType ?: selectedRaceViewModel.getCurrentRace().raceType,
                     requireContext()
@@ -339,7 +338,6 @@ class CategoryCreateDialogFragment : DialogFragment() {
                 //Get control points
                 val controlPoints = ControlPointsHelper.getControlPointsFromString(
                     controlPointsString,
-                    category.raceId,
                     category.id,
                     category.raceType ?: selectedRaceViewModel.getCurrentRace().raceType,
                     requireContext()

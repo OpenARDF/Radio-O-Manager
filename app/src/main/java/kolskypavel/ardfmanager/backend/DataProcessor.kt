@@ -232,11 +232,6 @@ class DataProcessor private constructor(context: Context) {
     suspend fun getControlPointsByCategory(categoryId: UUID) =
         ardfRepository.getControlPointsByCategory(categoryId)
 
-
-    suspend fun getControlPointByCode(raceId: UUID, code: Int) =
-        ardfRepository.getControlPointByCode(raceId, code)
-
-
     fun getStringFromControlPoints(controlPoints: List<ControlPoint>): String =
         ControlPointsHelper.getStringFromControlPoints(controlPoints)
 

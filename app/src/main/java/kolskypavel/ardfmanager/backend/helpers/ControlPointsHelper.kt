@@ -11,6 +11,9 @@ import kolskypavel.ardfmanager.backend.sportident.SIConstants.SI_MAX_CODE
 import kolskypavel.ardfmanager.backend.sportident.SIConstants.SI_MIN_CODE
 import java.util.UUID
 
+/**
+ * @author Vojtech Kopal
+ */
 object ControlPointsHelper {
     /**
      * Creates a control point from given string
@@ -19,7 +22,6 @@ object ControlPointsHelper {
     private fun parseControlPoint(
         order: Int,
         controlPointString: String,
-        raceId: UUID,
         categoryId: UUID,
         context: Context
     ): ControlPoint {
@@ -54,7 +56,6 @@ object ControlPointsHelper {
 
         return ControlPoint(
             UUID.randomUUID(),
-            raceId,
             categoryId,
             siCode,
             controlPointType,
@@ -206,7 +207,6 @@ object ControlPointsHelper {
      */
     fun getControlPointsFromString(
         input: String,
-        raceId: UUID,
         categoryId: UUID,
         raceType: RaceType,
         context: Context
@@ -215,7 +215,7 @@ object ControlPointsHelper {
             return ArrayList()
 
         val controlPoints = input.split("\\s+".toRegex()).mapIndexed { index, controlPointString ->
-            parseControlPoint(index + 1, controlPointString, raceId, categoryId, context)
+            parseControlPoint(index + 1, controlPointString, categoryId, context)
         }.toList()
 
         validateControlSequence(controlPoints, raceType, context)

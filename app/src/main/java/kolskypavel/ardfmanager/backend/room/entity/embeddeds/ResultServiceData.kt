@@ -7,5 +7,4 @@ import kolskypavel.ardfmanager.backend.room.entity.ResultService
 data class ResultServiceData(
     @Embedded val resultService: ResultService?,
     val resultCount: Int
-) {
-}
+) {}

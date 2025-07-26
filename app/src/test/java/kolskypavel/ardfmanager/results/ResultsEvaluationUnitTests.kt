@@ -66,7 +66,6 @@ class ResultsEvaluationUnitTests {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i
@@ -133,7 +132,6 @@ class ResultsEvaluationUnitTests {
                     ControlPoint(
                         UUID.randomUUID(),
                         UUID.randomUUID(),
-                        UUID.randomUUID(),
                         randCode,
                         ControlPointType.CONTROL,
                         i
@@ -189,7 +187,6 @@ class ResultsEvaluationUnitTests {
             )
             controlPoints.add(
                 ControlPoint(
-                    UUID.randomUUID(),
                     UUID.randomUUID(),
                     UUID.randomUUID(),
                     30 + i,
@@ -250,7 +247,6 @@ class ResultsEvaluationUnitTests {
         for (i in 1..6) {
             controlPoints.add(
                 ControlPoint(
-                    UUID.randomUUID(),
                     UUID.randomUUID(),
                     UUID.randomUUID(),
                     30 + i,
@@ -343,7 +339,6 @@ class ResultsEvaluationUnitTests {
             ControlPoint(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                UUID.randomUUID(),
                 31,
                 ControlPointType.CONTROL,
                 0
@@ -365,7 +360,6 @@ class ResultsEvaluationUnitTests {
         )
         controlPoints.add(
             ControlPoint(
-                UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 32,
@@ -420,7 +414,6 @@ class ResultsEvaluationUnitTests {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i
@@ -473,7 +466,6 @@ class ResultsEvaluationUnitTests {
             )
             controlPoints.add(
                 ControlPoint(
-                    UUID.randomUUID(),
                     UUID.randomUUID(),
                     UUID.randomUUID(),
                     30 + i,
@@ -557,7 +549,6 @@ class ResultsEvaluationUnitTests {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i
@@ -612,7 +603,6 @@ class ResultsEvaluationUnitTests {
             )
             controlPoints.add(
                 ControlPoint(
-                    UUID.randomUUID(),
                     UUID.randomUUID(),
                     UUID.randomUUID(),
                     30 + i,
@@ -711,7 +701,6 @@ class ResultsEvaluationUnitTests {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i
@@ -802,7 +791,6 @@ class ResultsEvaluationUnitTests {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i
@@ -866,7 +854,6 @@ class ResultsEvaluationUnitTests {
                 )
                 controlPoints.add(
                     ControlPoint(
-                        UUID.randomUUID(),
                         UUID.randomUUID(),
                         UUID.randomUUID(),
                         randCode,

@@ -16,7 +16,7 @@ object TextProcessor : FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper {
+    ): DataImportWrapper? {
         throw NotImplementedError("Text processor not intended for data import")
     }
 

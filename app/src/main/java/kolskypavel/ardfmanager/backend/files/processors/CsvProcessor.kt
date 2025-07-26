@@ -9,6 +9,7 @@ import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.constants.FileConstants
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
+import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
@@ -36,9 +37,9 @@ object CsvProcessor : FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper {
+    ): DataImportWrapper? {
         return when (dataType) {
-            DataType.CATEGORIES -> return importCategories(inStream, race)
+            DataType.CATEGORIES -> return importCategories(inStream, race, dataProcessor)
             DataType.COMPETITORS -> return importCompetitorData(
                 inStream,
                 race,
@@ -83,7 +84,7 @@ object CsvProcessor : FormatProcessor {
                     dataProcessor.getCurrentRace()
                 )
 
-                DataType.RESULTS_SIMPLE-> exportResults(
+                DataType.RESULTS_SIMPLE -> exportResults(
                     outStream,
                     dataProcessor.getResultWrapperFlowByRace(raceId).first()
                 )
@@ -109,28 +110,85 @@ object CsvProcessor : FormatProcessor {
     }
 
     //TODO: Finish
-    @Throws(IOException::class)
-    suspend fun importCategories(
+    private fun importCategories(
         inStream: InputStream,
-        race: Race
-    ): DataImportWrapper {
+        race: Race,
+        dataProcessor: DataProcessor
+    ): DataImportWrapper? {
         val readData = getReader().readAll(inStream)
-        val data = DataImportWrapper(emptyList(), emptyList())
+        val categories = ArrayList<CategoryData>()
+
         if (readData.isNotEmpty()) {
 
             for (row in readData) {
                 if (row.size == FileConstants.CATEGORY_CSV_COLUMNS) {
                     try {
+                        val categoryName = row[0]
+                        val isMan = row[1] == "1"
+                        val maxAge = row[2].toInt()
+                        val length = row[3].toFloat() ?: 0f
+                        val climb = row[4].toFloat() ?: 0f
+                        val orderInResults = row[5].toInt() ?: 0
+                        val followRacePresets = row[6] == "1"
 
-                        val controPointString = row[10]
+                        //Check validity
+                        if (categoryName.isEmpty() || maxAge <= 0 || length <= 0 || climb < 0 || orderInResults < 0) {
+                            throw IllegalArgumentException("Invalid category data: $row")
+                        }
 
+                        val category = Category(
+                            UUID.randomUUID(),
+                            race.id,
+                            categoryName,
+                            isMan,
+                            maxAge,
+                            length,
+                            climb,
+                            orderInResults,
+                            false,
+                            race.raceType,
+                            race.raceBand,
+                            race.timeLimit,
+                            ""
+                        )
+
+                        // Parse the category specific fields
+                        if (!followRacePresets) {
+                            val raceType =
+                                dataProcessor.raceTypeStringToEnum(row[7])
+                            val timeLimit = row[8].toLong()
+                            val band = row[9]
+
+                            category.raceType = raceType
+                            category.timeLimit = Duration.ofMinutes(timeLimit)
+                            category.categoryBand = dataProcessor.raceBandStringToEnum(band)
+                        }
+
+                        val controlPointString = row[10]
+                        val controlPoints = ControlPointsHelper.getControlPointsFromString(
+                            controlPointString,
+                            category.id,
+                            category.raceType ?: race.raceType,
+                            dataProcessor.getContext()
+                        )
+
+                        categories.add(
+                            CategoryData(
+                                category,
+                                controlPoints,
+                                emptyList()
+                            )
+                        )
                     } catch (e: Exception) {
-
+                        Log.e(
+                            "CSV import",
+                            "Failed to import categories: \n" + e.stackTraceToString()
+                        )
                     }
                 }
             }
         }
-        return data
+        return DataImportWrapper(emptyList(), categories.toList())
     }
 
     suspend fun importStandardCategories(
@@ -203,8 +261,8 @@ object CsvProcessor : FormatProcessor {
         }
     }
 
-    @Throws(IOException::class)
-    fun importCompetitorData(
+
+    private fun importCompetitorData(
         inStream: InputStream,
         race: Race,
         categories: HashSet<CategoryData>
@@ -254,9 +312,10 @@ object CsvProcessor : FormatProcessor {
                 val club = if (row.size > 7) row[7] else ""
                 val index = if (row.size > 8) row[8] else ""
                 val siNumber = row[0].toIntOrNull()
-                val drawnRelativeStartTime: Duration? = if (row.size > 9 && row[9].isNotEmpty()) {
-                    TimeProcessor.minuteStringToDuration(row[9])
-                } else null
+                val drawnRelativeStartTime: Duration? =
+                    if (row.size > 9 && row[9].isNotEmpty()) {
+                        TimeProcessor.minuteStringToDuration(row[9])
+                    } else null
 
                 val competitor = Competitor(
                     UUID.randomUUID(),

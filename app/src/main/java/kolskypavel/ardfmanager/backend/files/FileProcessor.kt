@@ -47,11 +47,15 @@ class FileProcessor(appContext: WeakReference<Context>) {
         race: Race
     ): DataImportWrapper? {
 
-        val inStream = openInputStream(uri)
-        if (inStream != null) {
-            val formatProcessorFactory = FormatProcessorFactory()
-            val proc = formatProcessorFactory.getFormatProcessor(format)
-            return proc.importData(inStream, type, race, dataProcessor)
+        try {
+            val inStream = openInputStream(uri)
+            if (inStream != null) {
+                val formatProcessorFactory = FormatProcessorFactory()
+                val proc = formatProcessorFactory.getFormatProcessor(format)
+                return proc.importData(inStream, type, race, dataProcessor)
+            }
+        } catch (_: Exception) {
+            Log.e("FileProcessor", "Failed to import data from $uri")
         }
         return null
     }

@@ -31,7 +31,6 @@ class CsvExportInstrumentedTest {
                 ControlPoint(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
-                    UUID.randomUUID(),
                     30 + i,
                     ControlPointType.CONTROL,
                     i,

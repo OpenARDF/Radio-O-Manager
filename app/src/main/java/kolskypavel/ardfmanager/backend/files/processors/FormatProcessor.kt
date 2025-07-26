@@ -15,7 +15,7 @@ interface FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper
+    ): DataImportWrapper?
 
     suspend fun exportData(
         outStream: OutputStream,

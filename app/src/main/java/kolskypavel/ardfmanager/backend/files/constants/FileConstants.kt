@@ -2,7 +2,7 @@ package kolskypavel.ardfmanager.backend.files.constants
 
 object FileConstants {
     const val OCM_START_CSV_COLUMNS = 3
-    const val CATEGORY_CSV_COLUMNS = 12
+    const val CATEGORY_CSV_COLUMNS = 11
 
     //Used for template replacing
     const val KEY_TITLE_RESULTS = "\${title_results}"

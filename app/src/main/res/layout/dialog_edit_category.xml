@@ -108,7 +108,7 @@
                     style="@style/dialog_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="numberSigned"
+                    android:inputType="numberDecimal"
                     android:maxLength="5" />
             </com.google.android.material.textfield.TextInputLayout>
 

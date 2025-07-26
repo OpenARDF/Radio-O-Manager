@@ -17,7 +17,7 @@ object IofXmlProcessor : FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper {
+    ): DataImportWrapper? {
         TODO("Not yet implemented")
     }
 
