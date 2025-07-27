@@ -8,20 +8,26 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 class ResultDataJsonAdapter {
     @ToJson
     fun toJson(resultData: ResultData): ResultDataJson {
-        //TODO: add competitors
+
         return ResultDataJson(
             run_time = TimeProcessor.durationToMinuteString(resultData.result.runTime),
             place = resultData.result.place,
             controls_num = resultData.result.points,
-            result_status = resultData.result.resultStatus.name,
-            punches = resultData.punches.map { ap ->
-                ResultPunchJson(
-                    code = ap.alias?.name ?: ap.punch.siCode.toString(),
-                    control_type = ap.punch.punchType.name,
-                    punch_status = ap.punch.punchStatus.name,
-                    split_time = TimeProcessor.durationToMinuteString(ap.punch.split)
-                )
-            }
+            result_status = resultData.result.resultStatus.toRobisCode(),
+            punches = resultData.punches
+                .filter { ap -> ap.punch.punchType.name != "START" }
+                .map { ap ->
+                    val controlType = ap.punch.punchType.name
+                    val rawCode = ap.alias?.name ?: ap.punch.siCode.toString()
+                    val code = if (controlType == "FINISH" && rawCode == "0") "F" else rawCode
+
+                    ResultPunchJson(
+                        code = ap.alias?.name ?: ap.punch.siCode.toString(),
+                        control_type = ap.punch.punchType.name,
+                        punch_status = ap.punch.punchStatus.toRobisCode(),
+                        split_time = TimeProcessor.durationToMinuteString(ap.punch.split)
+                    )
+                    }
         )
     }
 
