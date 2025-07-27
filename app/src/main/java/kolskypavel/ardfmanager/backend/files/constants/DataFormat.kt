@@ -5,8 +5,7 @@ enum class DataFormat(var value: Int) {
     CSV(1),
     JSON(2),
     IOF_XML(3),
-    PDF(4),
-    HTML(5);
+    HTML(4);
 
     companion object {
         fun getByValue(value: Int) = DataFormat.entries.firstOrNull { it.value == value }

@@ -84,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:hint="@string/length">
+                android:hint="@string/category_length_title">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/category_dialog_length"
@@ -101,7 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_weight="1"
-                android:hint="@string/climb">
+                android:hint="@string/category_climb_title">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/category_dialog_climb"

@@ -46,28 +46,4 @@ data class ControlPoint(
         ControlPointType.CONTROL,
         0
     )
-
-
-//        @Throws(java.lang.IllegalArgumentException::class)
-//        fun parseControlPoint(string: String, raceId: UUID, categoryId: UUID): ControlPoint {
-//            try {
-////                when (val lastCharacter = string.last()) {
-////                    SPECTATOR_CONTROL_MARKER -> ControlPointType.SEPARATOR
-////                    BEACON_CONTROL_MARKER -> ControlPointType.BEACON
-////                    else -> if (lastCharacter.isDigit()) ControlPointType.CONTROL
-////                    else throw IllegalArgumentException("Can't parse last char $lastCharacter")
-////                }
-////
-////                return ControlPoint(
-////                    UUID.randomUUID(),
-////                    raceId,
-////                    categoryId,
-////                    split[0].toInt(),
-////                    ControlPointType.getByValue(split[2].toInt())!!,
-////                    split[3].toInt()
-////                )
-//            } catch (e: Exception) {
-//                throw IllegalArgumentException("Invalid control point format")
-//            }
-//        }
 }

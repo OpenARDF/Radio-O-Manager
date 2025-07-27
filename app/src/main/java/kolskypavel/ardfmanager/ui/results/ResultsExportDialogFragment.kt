@@ -111,11 +111,6 @@ class ResultsExportDialogFragment : DialogFragment() {
                 intent.putExtra(Intent.EXTRA_TITLE, "results.xml")
             }
 
-            DataFormat.PDF -> {
-                intent.type = "application/pdf"
-                intent.putExtra(Intent.EXTRA_TITLE, "results.pdf")
-            }
-
             DataFormat.HTML -> {
                 intent.type = "text/html"
                 intent.putExtra(Intent.EXTRA_TITLE, "results.html")

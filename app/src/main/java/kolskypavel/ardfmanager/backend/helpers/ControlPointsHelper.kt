@@ -4,6 +4,7 @@ import android.content.Context
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
@@ -241,6 +242,13 @@ object ControlPointsHelper {
             }
         }
         return codes
+    }
+
+    fun getStringFromAliasPunch(
+        controlPoints: List<AliasPunch>,
+        context: Context
+    ): String {
+       var string =""
     }
 
     fun getStringFromPunches(punches: List<Punch>): String {

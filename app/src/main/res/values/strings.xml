@@ -3,52 +3,50 @@
     <string name="unknown" translatable="false">\?</string>
 
     <!--General strings -->
-    <string name="general_race">Race</string>
-    <string name="general_competitors">Competitors</string>
-    <string name="general_category">Category</string>
+    <string name="general_automatic">Automatic</string>
+    <string name="general_band">Band</string>
+    <string name="general_cancel">Cancel</string>
     <string name="general_categories">Categories</string>
-    <string name="general_readouts">Readouts</string>
-    <string name="general_results">Results</string>
+    <string name="general_category">Category</string>
     <string name="general_club">Club</string>
-    <string name="general_name">Name</string>
+    <string name="general_close">Close</string>
+    <string name="general_competitors">Competitors</string>
+    <string name="general_controls">Controls</string>
+    <string name="general_copy">Copy</string>
     <string name="general_date">Date</string>
+    <string name="general_disabled">Disabled</string>
+    <string name="general_display">Display</string>
+    <string name="general_duplicate">Duplicate</string>
+    <string name="general_finish">Finish</string>
+    <string name="general_finish_time">Finish time</string>
     <string name="general_gender">Gender</string>
     <string name="general_gender_man">Man</string>
     <string name="general_gender_woman">Woman</string>
-    <string name="general_max_age">Maximal age</string>
-    <string name="general_year_of_birth">Year of birth</string>
-    <string name="general_band">Band</string>
-    <string name="general_display">Display</string>
-    <string name="general_main">Main</string>
-    <string name="general_si_number">SI number</string>
-
-    <string name="general_ok" translatable="false">OK</string>
-    <string name="general_cancel">Cancel</string>
-    <string name="general_close">Close</string>
-    <string name="general_required">Required</string>
-    <string name="general_invalid">Invalid</string>
-    <string name="general_disabled">Disabled</string>
-    <string name="general_preview">Preview</string>
-    <string name="general_share">Share</string>
-    <string name="general_duplicate">Duplicate</string>
-    <string name="general_copy">Copy</string>
-    <string name="general_status">Status</string>
-
-    <string name="general_start">Start</string>
-    <string name="general_finish">Finish</string>
-    <string name="general_start_time">Start time</string>
-    <string name="general_finish_time">Finish time</string>
-    <string name="general_run_time">Run time</string>
-    <string name="general_minutes">minutes</string>
     <string name="general_index">Index</string>
+    <string name="general_invalid">Invalid</string>
+    <string name="general_length">Length</string>
     <string name="general_limit">Limit</string>
-    <string name="general_controls">Controls</string>
-
-    <string name="general_automatic">Automatic</string>
+    <string name="general_main">Main</string>
+    <string name="general_max_age">Maximal age</string>
+    <string name="general_minutes">minutes</string>
+    <string name="general_name">Name</string>
+    <string name="general_ok" translatable="false">OK</string>
+    <string name="general_preview">Preview</string>
     <string name="general_print">Print</string>
     <string name="general_preset">Preset</string>
+    <string name="general_race">Race</string>
+    <string name="general_readouts">Readouts</string>
+    <string name="general_required">Required</string>
+    <string name="general_results">Results</string>
+    <string name="general_run_time">Run time</string>
+    <string name="general_share">Share</string>
+    <string name="general_si_number">SI number</string>
+    <string name="general_start">Start</string>
+    <string name="general_start_time">Start time</string>
+    <string name="general_status">Status</string>
     <string name="general_type">Type</string>
     <string name="general_url" translatable="false">URL</string>
+    <string name="general_year_of_birth">Year of birth</string>
 
     <!--    Sportident-->
     <string name="no_si_card">No SI card!</string>
@@ -97,8 +95,8 @@
     <string name="category_delete">Delete category</string>
     <string name="category_delete_confirmation">Do you really want to delete this category?</string>
     <string name="last_name">Last name</string>
-    <string name="length">Length (km)</string>
-    <string name="climb">Climb (m)</string>
+    <string name="category_length_title">Length (km)</string>
+    <string name="category_climb_title">Climb (m)</string>
     <string name="category_exists">Category already exists!</string>
     <string name="control_points">Control points</string>
     <string name="nonexistent_year">Invalid year</string>
@@ -223,12 +221,12 @@
     <string name="results_share">Share results</string>
     <string name="results_service">Results service</string>
     <string name="results_export_error">Error when exporting data!</string>
+    <string name="results_generated_with">Results generated with</string>
 
     <string name="data_format_txt" translatable="false">TXT</string>
     <string name="data_format_csv" translatable="false">CSV</string>
     <string name="data_format_json" translatable="false">JSON</string>
     <string name="data_format_xml" translatable="false">XML</string>
-    <string name="data_format_pdf" translatable="false">PDF</string>
     <string name="data_format_html" translatable="false">HTML</string>
 
     <!-- Result service -->
@@ -453,7 +451,6 @@
         <item>@string/data_format_csv</item>
         <item>@string/data_format_json</item>
         <item>@string/data_format_xml</item>
-        <item>@string/data_format_pdf</item>
         <item>@string/data_format_html</item>
     </string-array>
 
@@ -473,7 +470,6 @@
         <item>@string/data_format_txt</item>
         <item>@string/data_format_csv</item>
         <item>@string/data_format_json</item>
-        <item>@string/data_format_pdf</item>
         <item>@string/data_format_html</item>
     </string-array>
 

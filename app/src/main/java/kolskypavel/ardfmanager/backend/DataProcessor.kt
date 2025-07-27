@@ -84,10 +84,10 @@ class DataProcessor private constructor(context: Context) {
 
     fun getContext(): Context = appContext.get()!!
 
-    fun getAppVersion(): String? {
+    fun getAppVersion(): String {
         val packageInfo =
             appContext.get()!!.packageManager.getPackageInfo(appContext.get()!!.packageName, 0)
-        return packageInfo.versionName
+        return packageInfo.versionName ?: "Unknown Version"
     }
 
     fun updateReaderState(newSIState: SIReaderState) {
