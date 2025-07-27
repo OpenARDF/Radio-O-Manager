@@ -11,21 +11,6 @@ enum class ResultStatus(val value: Int) : Comparable<ResultStatus> {
     UNOFFICIAL(7),          //Did not run officially
     ERROR(8);              //Error - missing finish record etc
 
-    // Translate enums to ROBIS
-   fun toRobisCode(): String = when(this) {
-        VALID           -> "OK"
-        MISPUNCHED      -> "MP"
-        NO_RANKING      -> "NR"
-        DISQUALIFIED    -> "DSQ"
-        DID_NOT_START   -> "DNS"
-        DID_NOT_FINISH  -> "DNF"
-        OVER_TIME_LIMIT -> "OVT"
-        UNOFFICIAL      -> "UNF"
-        ERROR           -> "ERR"
-    }
-
-
-
     companion object {
         fun getByValue(value: Int) =
             ResultStatus.entries.firstOrNull { it.value == value } ?: NO_RANKING
