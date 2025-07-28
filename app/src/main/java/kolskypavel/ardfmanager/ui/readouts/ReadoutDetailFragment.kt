@@ -19,6 +19,7 @@ import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import java.util.UUID
 
@@ -83,8 +84,7 @@ class ReadoutDetailFragment : Fragment() {
         if (resultData.competitorCategory?.competitor != null) {
             clubView.text = resultData.competitorCategory!!.competitor.club
             indexView.text = resultData.competitorCategory!!.competitor.index
-            competitorNameView.text =
-                "${resultData.competitorCategory!!.competitor.firstName} ${resultData.competitorCategory!!.competitor.lastName}"
+            competitorNameView.text = resultData.competitorCategory!!.competitor.getFullName()
             pointsView.text = resultData.result.points.toString()
         } else {
             competitorNameView.text = getText(R.string.unknown_competitor)
@@ -109,8 +109,11 @@ class ReadoutDetailFragment : Fragment() {
         runTimeView.text =
             TimeProcessor.durationToMinuteString(resultData.result.runTime)
 
-        placeView.text = resultData.result.place.toString()
-            ?: getText(R.string.unknown) //TODO: Place
+        placeView.text = if (resultData.result.resultStatus == ResultStatus.OK) {
+            resultData.result.place.toString()
+        } else {
+            "-"
+        }
 
         setMenuActions()
         setRecyclerViewAdapter(resultData.punches)

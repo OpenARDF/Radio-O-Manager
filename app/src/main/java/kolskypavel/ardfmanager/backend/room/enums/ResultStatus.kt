@@ -1,7 +1,7 @@
 package kolskypavel.ardfmanager.backend.room.enums
 
 enum class ResultStatus(val value: Int) : Comparable<ResultStatus> {
-    VALID(0),
+    OK(0),
     MISPUNCHED(1),
     NO_RANKING(2),          //Did not fulfill the min CP requirement
     DISQUALIFIED(3),

@@ -74,7 +74,7 @@ class ResultsEvaluationUnitTests {
         }
         controlPoints.last().type = ControlPointType.BEACON
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         //Check the punches
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)
@@ -141,7 +141,7 @@ class ResultsEvaluationUnitTests {
 
             controlPoints.last().type = ControlPointType.BEACON
             ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-            assertEquals(ResultStatus.VALID, result.resultStatus)
+            assertEquals(ResultStatus.OK, result.resultStatus)
             assertEquals(randLength + 1, result.points)
         }
     }
@@ -211,7 +211,7 @@ class ResultsEvaluationUnitTests {
         )
 
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
 
         //Check the punches
         assertEquals(6, result.points)
@@ -289,7 +289,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
 
         //Check the punches
         assertEquals(5, result.points)
@@ -368,7 +368,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateClassics(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
     }
 
     @Test
@@ -421,7 +421,7 @@ class ResultsEvaluationUnitTests {
             )
         }
         ResultsProcessor.evaluateOrienteering(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(6, result.points)
     }
 
@@ -500,7 +500,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateOrienteering(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(6, result.points)
         assertEquals(PunchStatus.INVALID, punches[2].punchStatus)
         assertEquals(PunchStatus.INVALID, punches[4].punchStatus)
@@ -616,7 +616,7 @@ class ResultsEvaluationUnitTests {
         controlPoints.last().type = ControlPointType.BEACON
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(12, result.points)
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)
@@ -649,7 +649,7 @@ class ResultsEvaluationUnitTests {
             )
         )
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(12, result.points)
         assertEquals(PunchStatus.UNKNOWN, punches[5].punchStatus)
         assertEquals(PunchStatus.UNKNOWN, punches[9].punchStatus)
@@ -742,7 +742,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(12, result.points)
         assertEquals(PunchStatus.DUPLICATE, punches[4].punchStatus)
         assertEquals(PunchStatus.DUPLICATE, punches[8].punchStatus)
@@ -799,7 +799,7 @@ class ResultsEvaluationUnitTests {
         }
 
         ResultsProcessor.evaluateSprint(punches, controlPoints, result)
-        assertEquals(ResultStatus.VALID, result.resultStatus)
+        assertEquals(ResultStatus.OK, result.resultStatus)
         assertEquals(12, result.points)
         for (punch in punches) {
             assertEquals(PunchStatus.VALID, punch.punchStatus)

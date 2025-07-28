@@ -15,7 +15,7 @@ object TimeProcessor {
         return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(time).toString()
     }
     fun formatLocalTime(time: LocalTime): String {
-        return DateTimeFormatter.ofPattern("hh:mm:ss").format(time).toString()
+        return DateTimeFormatter.ofPattern("HH:mm:ss").format(time).toString()
     }
 
     // Converts a Duration to a string in the format "mm:ss"

@@ -98,7 +98,7 @@ class ResultsFragmentRecyclerViewAdapter(
                 if (singleResult.readoutData != null) {
                     val res = singleResult.readoutData!!.result
                     competitorPlace.text =
-                        if (res.resultStatus == ResultStatus.VALID && res.place != null) {
+                        if (res.resultStatus == ResultStatus.OK && res.place != null) {
                             res.place.toString()
                         } else {
                             dataProcessor.resultStatusToShortString(res.resultStatus)
@@ -107,8 +107,14 @@ class ResultsFragmentRecyclerViewAdapter(
                     competitorPlace.text = "-"
                 }
 
-                competitorName.text =
-                    " ${singleResult.competitorCategory.competitor.lastName.uppercase()} ${singleResult.competitorCategory.competitor.firstName}"
+                var compName = singleResult.competitorCategory.competitor.getFullName()
+
+                // Inform that the readout was modified
+                if (singleResult.readoutData?.result?.modified == true) {
+                    compName += " *"
+                }
+
+                competitorName.text = compName
                 competitorClub.text =
                     singleResult.competitorCategory.competitor.club.ifEmpty {
                         "-"
@@ -141,8 +147,12 @@ class ResultsFragmentRecyclerViewAdapter(
                     }
                 }
 
+
                 if (dataList.childPosition % 2 == 1)
                     holder.itemView.setBackgroundResource(R.color.light_grey)
+                else {
+                    holder.itemView.setBackgroundResource(R.color.white)
+                }
             }
         }
     }

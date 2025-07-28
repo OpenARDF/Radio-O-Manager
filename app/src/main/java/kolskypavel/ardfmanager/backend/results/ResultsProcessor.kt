@@ -327,8 +327,8 @@ class ResultsProcessor(
             card5TimeAdjust(result, punches, zeroTimeBase)
         }
 
-        // Add back start and finish
-        if (result.startTime != null) {
+        // Add back start and finish - TODO: finish double start and finish punch bug
+        if (punches[0].punchType != SIRecordType.START && result.startTime != null) {
 
             punches.add(
                 0,
@@ -349,7 +349,7 @@ class ResultsProcessor(
         }
 
         //Add finish punch
-        if (result.finishTime != null) {
+        if (punches.last.punchType != SIRecordType.FINISH && result.finishTime != null) {
             punches.add(
                 Punch(
                     UUID.randomUUID(),
@@ -448,10 +448,21 @@ class ResultsProcessor(
     }
 
     suspend fun updateResultsForCompetitor(competitorId: UUID) {
-        val result = dataProcessor.getResultByCompetitor(competitorId)
+        var result = dataProcessor.getResultByCompetitor(competitorId)
         val competitor = dataProcessor.getCompetitor(competitorId)
 
         //Try to get result by SI instead and update competitor ID
+        if (result == null && competitor?.siNumber != null) {
+            val siResult = dataProcessor.getResultBySINumber(
+                competitor.siNumber!!, competitor.raceId
+            )
+            if (siResult != null) {
+                result = siResult
+                result.competitorID = competitorId
+            }
+        }
+
+        //If result is found, recalculate it
         if (result != null) {
             val punches = ArrayList(dataProcessor.getPunchesByResult(result.id))
             val category = competitor?.categoryId?.let { dataProcessor.getCategory(it) }
@@ -588,7 +599,7 @@ class ResultsProcessor(
 
             //Set the status accordingly
             if (result.points > 1) {
-                result.resultStatus = ResultStatus.VALID
+                result.resultStatus = ResultStatus.OK
             } else {
                 result.resultStatus = ResultStatus.NO_RANKING
             }
@@ -656,7 +667,7 @@ class ResultsProcessor(
             //Set the status accordingly
             result.points = points
             if (result.points > 1) {
-                result.resultStatus = ResultStatus.VALID
+                result.resultStatus = ResultStatus.OK
             } else {
                 result.resultStatus = ResultStatus.NO_RANKING
             }
@@ -691,7 +702,7 @@ class ResultsProcessor(
             }
 
             if (result.points == controlPoints.size) {
-                result.resultStatus = ResultStatus.VALID
+                result.resultStatus = ResultStatus.OK
             } else {
                 result.resultStatus = ResultStatus.DISQUALIFIED
             }

@@ -139,7 +139,7 @@ object TextProcessor : FormatProcessor {
         val result = competitorData.readoutData?.result!!
 
         params[FileConstants.KEY_COMP_PLACE] =
-            if (result.resultStatus == ResultStatus.VALID) {
+            if (result.resultStatus == ResultStatus.OK) {
                 "${result.place}."
             } else {
                 dataProcessor.resultStatusToShortString(result.resultStatus)

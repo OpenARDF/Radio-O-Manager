@@ -268,7 +268,7 @@ class PrintProcessor(context: Context, private val dataProcessor: DataProcessor)
         var runTime = TimeProcessor.durationToMinuteString(result.runTime)
         val name = getMaxName(competitorData.competitorCategory.competitor.getFullName())
 
-        if (result.resultStatus != ResultStatus.VALID) {
+        if (result.resultStatus != ResultStatus.OK) {
             place = "-"
             runTime = dataProcessor.resultStatusToShortString(result.resultStatus)
         }

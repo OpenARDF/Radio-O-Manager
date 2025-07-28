@@ -49,7 +49,7 @@ object SIConstants {
     const val SI_CARD_PCARD_MAX_PUNCHES = 20
 
     //Code ranges
-    const val SI_MIN_CODE = 31
+    const val SI_MIN_CODE = 1
     const val SI_MAX_CODE = 255
 
     fun isSINumberValid(siNumber: Int): Boolean {
@@ -57,6 +57,6 @@ object SIConstants {
     }
 
     fun isSICodeValid(siCode: Int): Boolean {
-        return (siCode in (SI_MIN_CODE + 1)..SI_MAX_CODE)
+        return (siCode in SI_MIN_CODE ..SI_MAX_CODE)
     }
 }
