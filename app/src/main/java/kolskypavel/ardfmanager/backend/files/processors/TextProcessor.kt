@@ -7,11 +7,13 @@ import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.constants.FileConstants
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
+import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
+import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kotlinx.coroutines.flow.first
 import java.io.InputStream
@@ -62,8 +64,12 @@ object TextProcessor : FormatProcessor {
             dataProcessor.getRace(raceId)
         )
 
-        val out = TemplateProcessor.processTemplate(
+        val template = TemplateProcessor.loadTemplate(
             FileConstants.TEMPLATE_TEXT,
+            dataProcessor.getContext()
+        )
+        val out = TemplateProcessor.processTemplate(
+            template,
             params
         )
 
@@ -79,6 +85,7 @@ object TextProcessor : FormatProcessor {
         race: Race
     ) {
 
+        params[FileConstants.KEY_TAB] = "\t"
         params[FileConstants.KEY_TITLE_RESULTS] = context.getString(R.string.general_results)
 
         params[FileConstants.KEY_TITLE_RACE_NAME] = context.getString(R.string.general_race)
@@ -90,10 +97,17 @@ object TextProcessor : FormatProcessor {
             context.getString(R.string.general_start_time)
         params[FileConstants.KEY_RACE_START_TIME] =
             TimeProcessor.formatLocalTime(race.startDateTime.toLocalTime())
-        params[FileConstants.KEY_TITLE_RACE_LEVEL] = context.getString(R.string.general_band)
+        params[FileConstants.KEY_TITLE_RACE_LEVEL] = context.getString(R.string.race_level)
         params[FileConstants.KEY_RACE_LEVEL] = dataProcessor.raceLevelToString(race.raceLevel)
         params[FileConstants.KEY_TITLE_RACE_BAND] = context.getString(R.string.general_band)
         params[FileConstants.KEY_RACE_BAND] = context.getString(R.string.general_band)
+
+        params[FileConstants.KEY_TITLE_PLACE] = context.getString(R.string.general_place)
+        params[FileConstants.KEY_TITLE_NAME] = context.getString(R.string.general_name)
+        params[FileConstants.KEY_TITLE_INDEX] = context.getString(R.string.general_index)
+        params[FileConstants.KEY_TITLE_RUN_TIME] = context.getString(R.string.general_run_time)
+        params[FileConstants.KEY_TITLE_POINTS] = context.getString(R.string.general_points)
+        params[FileConstants.KEY_TITLE_CONTROLS] = context.getString(R.string.general_controls)
 
         params[FileConstants.KEY_RACE_RESULTS] =
             generateTxtResults(dataProcessor, context, results, race)
@@ -104,10 +118,42 @@ object TextProcessor : FormatProcessor {
     }
 
     //Generates one line of competitor data
-    private fun generateCompetitorData(competitorData: CompetitorData): String {
-        val output = ""
+    private fun generateCompetitorData(
+        dataProcessor: DataProcessor,
+        context: Context,
+        competitorData: CompetitorData
+    ): String {
+        val template =
+            TemplateProcessor.loadTemplate(FileConstants.TEMPLATE_TEXT_COMPETITOR, context)
+        val params = HashMap<String, String>()
 
-        return output
+        val result = competitorData.readoutData?.result!!
+
+        params[FileConstants.KEY_COMP_PLACE] =
+            if (result.resultStatus == ResultStatus.VALID) {
+                result.place.toString()
+            } else {
+                dataProcessor.resultStatusToShortString(result.resultStatus)
+            }
+
+        params[FileConstants.KEY_COMP_NAME] =
+            competitorData.competitorCategory.competitor.getFullName()
+        params[FileConstants.KEY_COMP_INDEX] =
+            competitorData.competitorCategory.competitor.index
+        params[FileConstants.KEY_COMP_RUN_TIME] =
+            TimeProcessor.durationToMinuteString(
+                result.runTime
+            )
+        params[FileConstants.KEY_COMP_POINTS] =
+            result.points.toString()
+
+        // TODO: remove for orienteering
+        params[FileConstants.KEY_COMP_CONTROLS] = ControlPointsHelper.getStringFromAliasPunches(
+            competitorData.readoutData!!.punches,
+            context
+        )
+        val out = TemplateProcessor.processTemplate(template, params)
+        return out
     }
 
 
@@ -120,6 +166,7 @@ object TextProcessor : FormatProcessor {
         val template = TemplateProcessor.loadTemplate(FileConstants.TEMPLATE_TEXT_CATEGORY, context)
         val params = HashMap<String, String>()
 
+        params[FileConstants.KEY_TITLE_CATEGORY] = context.getString(R.string.category)
         params[FileConstants.KEY_CAT_NAME] = category.name
         params[FileConstants.KEY_TITLE_LIMIT] = context.getString(R.string.general_limit)
         params[FileConstants.KEY_CAT_LIMIT] = if (category.timeLimit != null) {
@@ -134,7 +181,8 @@ object TextProcessor : FormatProcessor {
         params[FileConstants.KEY_TITLE_CONTROLS] = context.getString(R.string.general_controls)
         params[FileConstants.KEY_CAT_CONTROLS] = controlPoints.size.toString()
 
-        return TemplateProcessor.processTemplate(template, params)
+        val gen = TemplateProcessor.processTemplate(template, params)
+        return gen
     }
 
     // Generates the whole result block
@@ -157,14 +205,15 @@ object TextProcessor : FormatProcessor {
                 output += "\n"
 
                 for (rd in result.subList) {
-                    val competitorData = generateCompetitorData(rd)
-                    output += competitorData + "\n"
+                    if (rd.readoutData != null) {
+                        val competitorData = generateCompetitorData(dataProcessor, context, rd)
+                        output += competitorData + "\n"
+                    }
                 }
+                output += "\n\n"
             }
         }
 
         return output
     }
-
-
 }

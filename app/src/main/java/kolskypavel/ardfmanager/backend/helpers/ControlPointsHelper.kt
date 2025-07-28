@@ -1,6 +1,7 @@
 package kolskypavel.ardfmanager.backend.helpers
 
 import android.content.Context
+import androidx.preference.PreferenceManager
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
@@ -13,7 +14,8 @@ import kolskypavel.ardfmanager.backend.sportident.SIConstants.SI_MIN_CODE
 import java.util.UUID
 
 /**
- * @author Vojtech Kopal
+ * @author Vojtech Kopal, Pavel Kolsky
+ * General helper for control points - parsing, validation, export to string, etc.
  */
 object ControlPointsHelper {
     /**
@@ -244,18 +246,34 @@ object ControlPointsHelper {
         return codes
     }
 
-    fun getStringFromAliasPunch(
-        controlPoints: List<AliasPunch>,
-        context: Context
-    ): String {
-       var string =""
-    }
-
     fun getStringFromPunches(punches: List<Punch>): String {
         var string = ""
         for (punch in punches) {
             if (punch.punchType == SIRecordType.CONTROL) {
                 string += "${punch.siCode} "
+            }
+        }
+        return string
+    }
+
+    fun getStringFromAliasPunches(punches: List<AliasPunch>, context: Context): String {
+        var string = ""
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val useAlias =
+            sharedPref.getBoolean(context.getString(R.string.key_results_use_aliases), true)
+
+        for ((index, aliasPunch) in punches.withIndex()) {
+            if (aliasPunch.punch.punchType == SIRecordType.CONTROL) {
+
+                //Use alias if available and enabled
+                string += if (useAlias && aliasPunch.alias != null) {
+                    aliasPunch.alias
+                } else {
+                    aliasPunch.punch.siCode
+                }
+            }
+            if (index < punches.size - 1) {
+                string += " "
             }
         }
         return string

@@ -15,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
+import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
@@ -142,7 +143,7 @@ class ReadoutDetailFragment : Fragment() {
                             true,
                             -1,
                             null,
-                            dataProcessor.getStringFromPunches(resultData.getPunchList())
+                            ControlPointsHelper.getStringFromPunches(resultData.getPunchList())
                         )
                     )
                     true

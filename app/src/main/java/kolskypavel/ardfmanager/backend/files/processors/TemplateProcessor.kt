@@ -1,15 +1,14 @@
 package kolskypavel.ardfmanager.backend.files.processors;
 
 import android.content.Context
-import kolskypavel.ardfmanager.backend.room.entity.Category
 import java.io.IOException
 
 object TemplateProcessor {
 
     @Throws(IOException::class)
     fun loadTemplate(templateName: String, context: Context): String {
-        return context.assets.open(templateName).readAllBytes().toString()
-
+        val inputStream = context.assets.open(templateName)
+        return inputStream.bufferedReader().use { it.readText() }
     }
 
     fun processTemplate(template: String, params: HashMap<String, String>): String {

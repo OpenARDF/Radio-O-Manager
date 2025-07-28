@@ -31,6 +31,8 @@
     <string name="general_minutes">minutes</string>
     <string name="general_name">Name</string>
     <string name="general_ok" translatable="false">OK</string>
+    <string name="general_points">Points</string>
+    <string name="general_place">Place</string>
     <string name="general_preview">Preview</string>
     <string name="general_print">Print</string>
     <string name="general_preset">Preset</string>
@@ -178,8 +180,6 @@
     <string name="readout_si_exists">Readout with this SI number already exists!</string>
     <string name="readout_competitor_exists">Readout for this competitor already exists!</string>
     <string name="unknown_competitor">Unknown competitor</string>
-    <string name="points">Points</string>
-    <string name="placement">Place</string>
     <string name="readout_time">Readout time</string>
     <string name="readout_create_readout">Create readout</string>
     <string name="readout_edit_readout">Edit readout</string>

@@ -9,6 +9,7 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
+import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 
 class DataPreviewRecyclerViewAdapater(
@@ -48,7 +49,7 @@ class DataPreviewRecyclerViewAdapater(
                 holder.columnTwo.text = dataProcessor.genderToString(item.category.isMan)
                 holder.columnThree.text = item.category.maxAge.toString()
                 holder.columnFour.text =
-                    dataProcessor.getStringFromControlPoints(item.controlPoints)
+                    ControlPointsHelper.getStringFromControlPoints(item.controlPoints)
             }
 
             DataType.COMPETITORS -> {
