@@ -3,6 +3,7 @@ package kolskypavel.ardfmanager.backend.files
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
@@ -44,20 +45,16 @@ class FileProcessor(appContext: WeakReference<Context>) {
         uri: Uri,
         type: DataType,
         format: DataFormat,
-        race: Race
-    ): DataImportWrapper? {
-
-        try {
-            val inStream = openInputStream(uri)
-            if (inStream != null) {
-                val formatProcessorFactory = FormatProcessorFactory()
-                val proc = formatProcessorFactory.getFormatProcessor(format)
-                return proc.importData(inStream, type, race, dataProcessor)
-            }
-        } catch (_: Exception) {
-            Log.e("FileProcessor", "Failed to import data from $uri")
+        race: Race,
+        context: Context
+    ): DataImportWrapper {
+        val inStream = openInputStream(uri)
+        if (inStream != null) {
+            val formatProcessorFactory = FormatProcessorFactory()
+            val proc = formatProcessorFactory.getFormatProcessor(format)
+            return proc.importData(inStream, type, race, dataProcessor)
         }
-        return null
+        throw RuntimeException(context.getString(R.string.data_import_file_error))
     }
 
     suspend fun importRaceData(uri: Uri): RaceData? {

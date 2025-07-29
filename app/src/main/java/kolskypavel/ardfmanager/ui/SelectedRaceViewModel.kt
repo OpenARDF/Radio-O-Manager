@@ -8,6 +8,7 @@ import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
+import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Alias
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
@@ -94,7 +95,7 @@ class SelectedRaceViewModel : ViewModel() {
             }
 
             launch {
-                dataProcessor.getResultWrapperFlowByRace(id).collect {
+                ResultsProcessor.getResultWrapperFlowByRace(id, dataProcessor).collect {
                     _resultWrappers.value = it
                 }
             }
@@ -231,12 +232,12 @@ class SelectedRaceViewModel : ViewModel() {
 
     fun getLastReadCard() = dataProcessor.getLastReadCard()
 
-    suspend fun processManualPunches(
+    suspend fun processManualPunchData(
         result: Result,
         punches: ArrayList<Punch>,
         manualStatus: ResultStatus?
     ) {
-        dataProcessor.processManualPunches(result, punches, manualStatus)
+        ResultsProcessor.processManualPunchData(result, punches, manualStatus, DataProcessor.get())
     }
 
     fun getResultData(id: UUID): ResultData {
@@ -293,7 +294,7 @@ class SelectedRaceViewModel : ViewModel() {
         uri: Uri,
         dataType: DataType,
         dataFormat: DataFormat
-    ): DataImportWrapper? {
+    ): DataImportWrapper {
         return dataProcessor.importData(
             uri,
             dataType,

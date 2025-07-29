@@ -122,7 +122,10 @@ class ResultsFragmentRecyclerViewAdapter(
                 if (singleResult.readoutData != null) {
                     competitorTime.text =
                         TimeProcessor.durationToMinuteString(singleResult.readoutData!!.result.runTime)
-                } else if (singleResult.competitorCategory.competitor.drawnRelativeStartTime != null) {
+                }
+
+                // TODO: fix when collapsing results
+                else if (singleResult.competitorCategory.competitor.drawnRelativeStartTime != null) {
 
                     CoroutineScope(Dispatchers.Main).launch {
                         while (true) {

@@ -261,7 +261,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
                     (punchEditRecyclerView.adapter as PunchEditRecyclerViewAdapter).values
                 )
                 runBlocking {
-                    selectedRaceViewModel.processManualPunches(
+                    selectedRaceViewModel.processManualPunchData(
                         result,
                         punches,
                         getRaceStatusFromPicker()

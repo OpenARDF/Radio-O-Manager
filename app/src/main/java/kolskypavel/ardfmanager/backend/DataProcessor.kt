@@ -10,17 +10,17 @@ import kolskypavel.ardfmanager.backend.files.FileProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
-import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.prints.PrintProcessor
 import kolskypavel.ardfmanager.backend.results.ResultsProcessor
+import kolskypavel.ardfmanager.backend.results.ResultsProcessor.updateResultsForCategory
 import kolskypavel.ardfmanager.backend.room.ARDFRepository
 import kolskypavel.ardfmanager.backend.room.entity.Alias
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
-import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.Punch
+import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.ResultService
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
@@ -48,6 +48,7 @@ import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.jvm.Throws
 
 
 /**
@@ -59,7 +60,6 @@ class DataProcessor private constructor(context: Context) {
     private var appContext: WeakReference<Context> = WeakReference(context)
 
     var currentState = MutableLiveData<AppState>()
-    var resultsProcessor: ResultsProcessor? = null
     var fileProcessor: FileProcessor? = null
     var printProcessor = PrintProcessor(context, this)
 
@@ -181,7 +181,7 @@ class DataProcessor private constructor(context: Context) {
 
     suspend fun createOrUpdateCategory(category: Category, controlPoints: List<ControlPoint>?) {
         ardfRepository.createOrUpdateCategory(category, controlPoints)
-        updateResultsForCategory(category.id, false)
+        ResultsProcessor.updateResultsForCategory(category.id, false, this)
     }
 
     /**
@@ -215,7 +215,7 @@ class DataProcessor private constructor(context: Context) {
     suspend fun deleteCategory(id: UUID, raceId: UUID) {
         ardfRepository.deleteCategory(id)
         ardfRepository.deleteControlPointsByCategory(id)
-        updateResultsForCategory(id, true)
+        updateResultsForCategory(id, true, this)
         updateCategoryOrder(raceId)
     }
 
@@ -312,7 +312,7 @@ class DataProcessor private constructor(context: Context) {
         competitor: Competitor,
     ) {
         ardfRepository.createCompetitor(competitor)
-        updateResultsForCompetitor(competitor.id)
+        ResultsProcessor.updateResultsForCompetitor(competitor.id, this)
     }
 
     suspend fun deleteCompetitor(id: UUID, deleteResult: Boolean) {
@@ -346,9 +346,6 @@ class DataProcessor private constructor(context: Context) {
 
     fun getResultDataFlowByRace(raceId: UUID) = ardfRepository.getResultDataFlowByRace(raceId)
 
-    fun getResultWrapperFlowByRace(raceId: UUID) =
-        resultsProcessor!!.getResultWrappersByRace(raceId)
-
     suspend fun getResultByCompetitor(competitorId: UUID) =
         ardfRepository.getResultByCompetitor(competitorId)
 
@@ -363,7 +360,7 @@ class DataProcessor private constructor(context: Context) {
 
     private suspend fun updateResults(raceId: UUID) {
         getCategoriesForRace(raceId).forEach { category ->
-            updateResultsForCategory(category.id, false)
+            updateResultsForCategory(category.id, false, this)
         }
     }
 
@@ -384,26 +381,7 @@ class DataProcessor private constructor(context: Context) {
     }
 
     suspend fun processCardData(cardData: CardData, race: Race) =
-        appContext.get()?.let { resultsProcessor?.processCardData(cardData, race, it) }
-
-    suspend fun processManualPunches(
-        result: Result,
-        punches: ArrayList<Punch>,
-        manualStatus: ResultStatus?
-    ) = resultsProcessor?.processManualPunchData(
-        result,
-        punches,
-        manualStatus
-    )
-
-
-    private suspend fun updateResultsForCategory(categoryId: UUID, delete: Boolean) =
-        resultsProcessor?.updateResultsForCategory(categoryId, delete)
-
-    private suspend fun updateResultsForCompetitor(competitorId: UUID) =
-        resultsProcessor?.updateResultsForCompetitor(
-            competitorId
-        )
+        appContext.get()?.let { ResultsProcessor.processCardData(cardData, race, it, this) }
 
     suspend fun setAllResultsUnsent(raceId: UUID) =
         ardfRepository.setAllResultsUnsent(raceId)
@@ -447,8 +425,106 @@ class DataProcessor private constructor(context: Context) {
         dataType: DataType,
         dataFormat: DataFormat,
         raceId: UUID
-    ): DataImportWrapper? {
-        return fileProcessor?.importData(uri, dataType, dataFormat, getRace(raceId))
+    ): DataImportWrapper {
+        val data =
+            fileProcessor?.importData(uri, dataType, dataFormat, getRace(raceId), getContext())
+
+        validateDataImport(data!!, raceId, dataType, getContext())
+
+        return data
+    }
+
+    @Throws(IllegalArgumentException::class)
+    private fun validateDataImport(
+        data: DataImportWrapper,
+        raceId: UUID,
+        dataType: DataType,
+        context: Context
+    ) {
+        when (dataType) {
+
+            //Name is required for each category and must be unique, categories can be empty
+            DataType.CATEGORIES -> {
+                val names = data.categories.map { it.category.name }
+
+                val duplicates = names.groupingBy { it }.eachCount().filter { it.value > 1 }.keys
+                if (duplicates.isNotEmpty()) {
+                    throw IllegalArgumentException(
+                        context.getString(
+                            R.string.data_import_category_duplicate,
+                            duplicates.joinToString(", ")
+                        )
+                    )
+                }
+            }
+
+            // SI number and start number must be unique
+            DataType.COMPETITORS -> {
+
+                //TODO: add check for duplicate names
+                val startNumbers = HashSet<Int>()
+                val siNumbers = HashSet<Int>()
+                for (comp in data.competitorCategories) {
+                    val siNumber = comp.competitor.siNumber
+                    val startNumber = comp.competitor.startNumber
+
+                    // Check if SI is duplicated in the list or in the database
+                    if (siNumber != null) {
+                        if (siNumbers.contains(siNumber)
+                        ) {
+                            throw IllegalArgumentException(
+                                context.getString(
+                                    R.string.data_import_competitor_duplicate_si_file,
+                                    siNumber
+                                )
+                            )
+                        }
+                        if (checkIfSINumberExists(siNumber, raceId)) {
+                            throw IllegalArgumentException(
+                                context.getString(
+                                    R.string.data_import_competitor_duplicate_si_race,
+                                    siNumber
+                                )
+                            )
+                        }
+                    }
+
+                    // Start number checks
+                    if (startNumbers.contains(startNumber)
+                    ) {
+                        throw IllegalArgumentException(
+                            context.getString(
+                                R.string.data_import_competitor_duplicate_start_number_file,
+                                startNumber
+                            )
+                        )
+                    }
+
+                    if (checkIfStartNumberExists(startNumber, raceId)) {
+                        throw IllegalArgumentException(
+                            context.getString(
+                                R.string.data_import_competitor_duplicate_start_number_race,
+                                startNumber
+                            )
+                        )
+                    }
+
+                    // Add the numbers to the sets
+                    if (siNumber != null) {
+                        siNumbers.add(siNumber)
+                    }
+                    startNumbers.add(startNumber)
+                }
+            }
+
+            DataType.COMPETITOR_STARTS_TIME -> {
+                // TODO: implement - based on settings
+            }
+
+            else -> {
+                throw IllegalArgumentException(context.getString(R.string.data_import_format_not_supported))
+            }
+        }
     }
 
     suspend fun exportData(

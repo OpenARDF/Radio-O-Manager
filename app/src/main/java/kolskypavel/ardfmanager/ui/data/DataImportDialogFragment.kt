@@ -140,25 +140,30 @@ class DataImportDialogFragment : DialogFragment() {
         val currType = getCurrentType()
         val format = getCurrentFormat()
 
-        runBlocking {
-            data = selectedRaceViewModel.importData(
-                uri, currType,
-                format
-            )
-        }
+        try {
+            runBlocking {
+                data = selectedRaceViewModel.importData(
+                    uri, currType,
+                    format
+                )
+            }
 
-        if (data != null) {
             dataPreviewRecyclerView.adapter =
                 DataPreviewRecyclerViewAdapater(data!!, currType)
-            errorView.error = null
+            errorView.text = ""
             importInfoView.text = getString(
                 R.string.data_import_preview_info,
                 data!!.getCount(currType)
             )
             dataPreviewLayout.visibility = View.VISIBLE
 
-        } else {
-            errorView.error = getString(R.string.data_import_error)
+        } catch (e: IllegalArgumentException) {
+            errorView.text = e.message
+            dataPreviewLayout.visibility = View.GONE
+        }
+        // Generic error message for other exceptions
+        catch (e: Exception) {
+            errorView.text = getString(R.string.data_import_file_error)
             dataPreviewLayout.visibility = View.GONE
         }
     }

@@ -7,7 +7,7 @@
     <string name="general_readouts">Vyčítání</string>
     <string name="general_results">Výsledky</string>
     <string name="global_settings">Globální nastavení</string>
-    <string name="data_import_error">Chyba při importování dat</string>
+    <string name="data_import_file_error">Chyba při otevírání souboru</string>
     <string name="race_import_text">Importovat závod ze souboru</string>
     <string name="race_toolbar_title">Přehled závodů</string>
     <string name="about_the_app">O aplikaci</string>
@@ -145,7 +145,7 @@
     <string name="readout_delete_readout">Smazat vyčítání</string>
     <string name="readout_delete_readout_confirmation">Opravdu chcete smazat data čipu %1$d?</string>
     <string name="readout_create_category_from_readout">Vytvořit kategorii podle vyčítání</string>
-    <string name="race_status_valid">Validní</string>
+    <string name="race_status_ok">OK</string>
     <string name="race_status_mispunched">Chyba ražení</string>
     <string name="race_status_no_ranking">Nehodnocen</string>
     <string name="race_status_disqualified">Diskvalfikován</string>

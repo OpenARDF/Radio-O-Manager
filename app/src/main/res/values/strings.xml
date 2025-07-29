@@ -63,7 +63,17 @@
     <string name="data_export">Export</string>
     <string name="data_import_data">Import data</string>
     <string name="data_import_preview_info">Number of records: %1$d</string>
-    <string name="data_import_error">Error when importing data!</string>
+    <string name="data_import_file_error">Error when opening file!</string>
+    <string name="data_import_format_not_supported">Given datatype is not supported for import</string>
+    <string name="data_import_category_blank_name">Category name must not be blank!</string>
+    <string name="data_import_category_duplicate">Duplicate category names: %1$s</string>
+
+    <string name="data_import_competitor_blank_name">Missing first/last name at line: %1$d</string>
+    <string name="data_import_competitor_invalid_si">Invalid SI number at line: %1$d</string>
+    <string name="data_import_competitor_duplicate_si_file">Duplicate SI number in file: %1$d</string>
+    <string name="data_import_competitor_duplicate_si_race">SI number already exists in race: %1$d</string>
+    <string name="data_import_competitor_duplicate_start_number_file">Duplicate start number in file: %1$d</string>
+    <string name="data_import_competitor_duplicate_start_number_race">Start number already exists in race: %1$d</string>
 
     <!--Race-->
     <string name="race_title">Races</string>
@@ -197,7 +207,7 @@
     <string name="punch_type_start" translatable="false">S</string>
     <string name="punch_type_finish" translatable="false">F</string>
 
-    <string name="race_status_valid">Valid</string>
+    <string name="race_status_ok">OK</string>
     <string name="race_status_mispunched">Mispunched</string>
     <string name="race_status_no_ranking">No ranking</string>
     <string name="race_status_disqualified">Disqualified</string>
@@ -424,7 +434,7 @@
     </string-array>
 
     <string-array name="race_status_array">
-        <item>@string/race_status_valid</item>
+        <item>@string/race_status_ok</item>
         <item>@string/race_status_mispunched</item>
         <item>@string/race_status_no_ranking</item>
         <item>@string/race_status_disqualified</item>

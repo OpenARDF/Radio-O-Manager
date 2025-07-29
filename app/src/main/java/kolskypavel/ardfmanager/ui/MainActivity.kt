@@ -24,7 +24,6 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.AppState
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.FileProcessor
-import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.ARDFRepository
 import kolskypavel.ardfmanager.backend.sportident.SIReaderStatus
 import kolskypavel.ardfmanager.databinding.ActivityMainBinding
@@ -93,7 +92,6 @@ class MainActivity : AppCompatActivity() {
         ARDFRepository.initialize(this)
         DataProcessor.initialize(this)
         dataProcessor = DataProcessor.get()
-        dataProcessor.resultsProcessor = ResultsProcessor(dataProcessor)
         dataProcessor.fileProcessor = FileProcessor(WeakReference(this))
 
         // Set the usb device

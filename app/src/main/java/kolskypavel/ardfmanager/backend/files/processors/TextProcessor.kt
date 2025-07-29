@@ -9,6 +9,7 @@ import kolskypavel.ardfmanager.backend.files.constants.FileConstants
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
 import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
+import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Race
@@ -28,7 +29,7 @@ object TextProcessor : FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper? {
+    ): DataImportWrapper {
         throw NotImplementedError("Text processor not intended for data import")
     }
 
@@ -53,7 +54,7 @@ object TextProcessor : FormatProcessor {
         raceId: UUID,
         dataProcessor: DataProcessor
     ) {
-        val results = dataProcessor.getResultWrapperFlowByRace(raceId).first()
+        val results = ResultsProcessor.getResultWrapperFlowByRace(raceId, dataProcessor).first()
         val params = HashMap<String, String>()
 
         // Init all the parameters for the template

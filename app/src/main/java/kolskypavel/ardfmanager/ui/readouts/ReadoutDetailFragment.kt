@@ -17,10 +17,12 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
+import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ResultData
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
+import kotlinx.coroutines.runBlocking
 import java.util.UUID
 
 class ReadoutDetailFragment : Fragment() {
@@ -109,8 +111,17 @@ class ReadoutDetailFragment : Fragment() {
         runTimeView.text =
             TimeProcessor.durationToMinuteString(resultData.result.runTime)
 
-        placeView.text = if (resultData.result.resultStatus == ResultStatus.OK) {
-            resultData.result.place.toString()
+        placeView.text = if (resultData.competitorCategory?.competitor != null &&
+            resultData.result.resultStatus == ResultStatus.OK
+        ) {
+            runBlocking {
+                val place = ResultsProcessor.getCompetitorPlace(
+                    resultData.competitorCategory!!.competitor.id,
+                    resultData.result.raceId,
+                    DataProcessor.get()
+                )
+                "${place.toString()}."
+            }
         } else {
             "-"
         }

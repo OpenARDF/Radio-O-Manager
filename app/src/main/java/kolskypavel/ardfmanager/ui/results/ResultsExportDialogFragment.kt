@@ -137,7 +137,7 @@ class ResultsExportDialogFragment : DialogFragment() {
             )
         ) {
             try {
-                errorText.error = null
+                errorText.text = ""
                 val intent = Intent()
                 intent.setAction(Intent.ACTION_VIEW)
                 intent.setData(uri)
@@ -145,10 +145,10 @@ class ResultsExportDialogFragment : DialogFragment() {
                 startActivity(intent)
             } catch (e: Exception) {
                 Log.e("File intent opening", e.stackTraceToString())
-                errorText.error = getString(R.string.results_export_error)
+                errorText.text = getString(R.string.results_export_error)
             }
         } else {
-            errorText.error = getString(R.string.results_export_error)
+            errorText.text = getString(R.string.results_export_error)
         }
     }
 

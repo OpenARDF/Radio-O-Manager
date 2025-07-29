@@ -29,7 +29,7 @@ object JsonProcessor : FormatProcessor {
         dataType: DataType,
         race: Race,
         dataProcessor: DataProcessor
-    ): DataImportWrapper? {
+    ): DataImportWrapper {
         when (dataType) {
             DataType.CATEGORIES -> TODO()
             DataType.COMPETITORS -> TODO()
