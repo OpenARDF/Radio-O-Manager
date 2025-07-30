@@ -156,8 +156,7 @@ object ResultServiceWorker {
     private fun filterResultDataBySent(
         resultData: List<ResultData>
     ): List<ResultData> {
-        return resultData
-//        return resultData.filter { !it.result.sent } TODO commented for testing
+        return resultData.filter { !it.result.sent }
     }
 
     // Mark the results as sent
