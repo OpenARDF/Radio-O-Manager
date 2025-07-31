@@ -5,7 +5,6 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/competitor_dialog_main_layout"
         style="@style/add_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -36,7 +35,7 @@
             style="@style/dialog_textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/last_name">
+            android:hint="@string/competitor_last_name">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/competitor_dialog_last_name"

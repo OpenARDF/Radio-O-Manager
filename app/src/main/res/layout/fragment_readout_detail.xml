@@ -116,7 +116,6 @@
             android:background="@android:color/black" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/readout_detail_category_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="8dp">
