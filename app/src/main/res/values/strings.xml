@@ -101,7 +101,7 @@
     <string name="category_duplicate">Duplicate category</string>
     <string name="category_delete">Delete category</string>
     <string name="category_delete_confirmation">Do you really want to delete this category?</string>
-     <string name="category_length_title">Length (km)</string>
+    <string name="category_length_title">Length (km)</string>
     <string name="category_climb_title">Climb (m)</string>
     <string name="category_exists">Category already exists!</string>
     <string name="control_points">Control points</string>
@@ -245,7 +245,6 @@
 
     <!--    Preferences    -->
     <string name="global_settings">Global settings</string>
-    <string name="about_the_app">About the app</string>
 
     <string name="preferences_general">General</string>
     <string name="preferences_prints">Prints</string>
@@ -326,6 +325,10 @@
 
     <!--Preferences: about the app-->
     <string name="preferences_changelog">Changelog</string>
+    <string name="preferences_about_app">About the app</string>
+    <string name="about_app_version">Version %1$s</string>
+    <string name="about_app_description">ARDF Manager is an open-source tool for organizing Amateur Radio Direction Finding (ARDF) and orienteering competitions. </string>
+    <string name="about_app_link" translatable="false">GitHub: https://github.com/kolskypavel/ARDF-Manager </string>
 
     <!--Preference values -->
     <string name="lang_en" translatable="false">English</string>
@@ -470,9 +473,9 @@
     <string-array name="results_data_formats">
         <item>@string/data_format_txt</item>
         <item>@string/data_format_html</item>
-<!--        <item>@string/data_format_json</item>-->
-<!--        <item>@string/data_format_csv</item>-->
-<!--        <item>@string/data_format_xml</item>-->
+        <!--        <item>@string/data_format_json</item>-->
+        <!--        <item>@string/data_format_csv</item>-->
+        <!--        <item>@string/data_format_xml</item>-->
     </string-array>
 
     <string-array name="readout_data_data_formats">

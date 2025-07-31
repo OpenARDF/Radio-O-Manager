@@ -66,9 +66,10 @@ dependencies {
     implementation 'com.github.ISchwarz23:SortableTableView:2.8.1'
     implementation('com.github.doyaaaaaken:kotlin-csv-jvm:1.10.0')
     implementation('com.github.felHR85:UsbSerial:6.1.0')
-    implementation('com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.3.0')
+    implementation('com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.4.0')
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation('com.squareup.okhttp3:okhttp:5.1.0')
+    implementation ('io.noties.markwon:core:4.6.2')
 
     //Testing libraries
     testImplementation("junit:junit:4.13.2")

@@ -11,7 +11,7 @@
     <string name="data_import_file_error">Chyba při otevírání souboru</string>
     <string name="race_import_text">Importovat závod ze souboru</string>
     <string name="race_toolbar_title">Přehled závodů</string>
-    <string name="about_the_app">O aplikaci</string>
+    <string name="preferences_about_app">O aplikaci</string>
     <string name="race_level_international">Národní</string>
     <string name="race_level_national">Národní</string>
     <string name="race_level_regional">Krajský</string>
@@ -251,5 +251,7 @@
     <string name="prints_bluetooth_disabled">Bluetooth musí být zapnutý pro tisk!</string>
     <string name="prints_error">Chyba při tisku!</string>
     <string name="preferences_readout_duplicate_hint">Zvolte akci pro dvojité vyčtení stejného čipu. [%1$s]</string>
+    <string name="about_app_version">Verze %1$s</string>
+    <string name="about_app_description">ARDF Manager je open-source nástroj pro organizaci soutěží v radiovém (ARDF) orientačním běhu a orientačním běhu.</string>
 
 </resources>
