@@ -43,6 +43,7 @@
     <string name="general_run_time">Run time</string>
     <string name="general_share">Share</string>
     <string name="general_si_number">SI number</string>
+    <string name="general_splits">Splits</string>
     <string name="general_start">Start</string>
     <string name="general_start_time">Start time</string>
     <string name="general_status">Status</string>

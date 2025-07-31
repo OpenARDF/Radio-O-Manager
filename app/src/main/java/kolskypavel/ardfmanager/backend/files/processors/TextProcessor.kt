@@ -113,8 +113,6 @@ object TextProcessor : FormatProcessor {
             TimeProcessor.formatLocalTime(race.startDateTime.toLocalTime())
         params[FileConstants.KEY_TITLE_RACE_LEVEL] = context.getString(R.string.race_level)
         params[FileConstants.KEY_RACE_LEVEL] = dataProcessor.raceLevelToString(race.raceLevel)
-        params[FileConstants.KEY_TITLE_RACE_BAND] = context.getString(R.string.general_band)
-        params[FileConstants.KEY_RACE_BAND] = dataProcessor.raceBandToString(race.raceBand)
 
         params[FileConstants.KEY_TITLE_PLACE] = context.getString(R.string.general_place)
         params[FileConstants.KEY_TITLE_NAME] = context.getString(R.string.general_name)
@@ -210,6 +208,7 @@ object TextProcessor : FormatProcessor {
 
     private fun generateCategoryHeader(
         templateName: String,
+        dataProcessor: DataProcessor,
         context: Context,
         category: Category,
         controlPoints: List<ControlPoint>,
@@ -227,16 +226,26 @@ object TextProcessor : FormatProcessor {
             TimeProcessor.durationToMinuteString(race.timeLimit)
         }
 
+        params[FileConstants.KEY_TITLE_BAND] = context.getString(R.string.general_band)
+        params[FileConstants.KEY_CAT_BAND] = if (category.categoryBand != null) {
+            dataProcessor.raceBandToString(category.categoryBand!!)
+        } else {
+            dataProcessor.raceBandToString(race.raceBand)
+        }
+
         params[FileConstants.KEY_TITLE_LENGTH] = context.getString(R.string.general_length)
         params[FileConstants.KEY_CAT_LENGTH] = category.length.toString()
 
         params[FileConstants.KEY_TITLE_CONTROLS] = context.getString(R.string.general_controls)
-        params[FileConstants.KEY_CAT_CONTROLS] = controlPoints.size.toString()
+        params[FileConstants.KEY_CAT_CONTROLS] =
+            ControlPointsHelper.getStringFromControlPoints(controlPoints)
 
         params[FileConstants.KEY_TITLE_PLACE] = context.getString(R.string.general_place)
         params[FileConstants.KEY_TITLE_NAME] = context.getString(R.string.general_name)
+        params[FileConstants.KEY_TITLE_CLUB] = context.getString(R.string.general_club)
         params[FileConstants.KEY_TITLE_POINTS] = context.getString(R.string.general_points)
         params[FileConstants.KEY_TITLE_RUN_TIME] = context.getString(R.string.general_run_time)
+        params[FileConstants.KEY_TITLE_SPLITS] = context.getString(R.string.general_splits)
 
         val gen = TemplateProcessor.processTemplate(template, params)
         return gen
@@ -256,7 +265,7 @@ object TextProcessor : FormatProcessor {
             if (result.category != null) {
                 output += generateCategoryHeader(
                     FileConstants.TEMPLATE_TEXT_CATEGORY,
-                    context,
+                    dataProcessor, context,
                     result.category,
                     dataProcessor.getControlPointsByCategory(result.category.id),
                     race
@@ -288,11 +297,10 @@ object TextProcessor : FormatProcessor {
 
         for (result in results.withIndex()) {
 
-            output += FileConstants.HTML_TABLE_START
-
             if (result.value.category != null) {
                 output += generateCategoryHeader(
                     FileConstants.TEMPLATE_HTML_CATEGORY,
+                    dataProcessor,
                     context,
                     result.value.category!!,
                     dataProcessor.getControlPointsByCategory(result.value.category!!.id),
@@ -304,10 +312,6 @@ object TextProcessor : FormatProcessor {
                         val competitorData =
                             generateHtmlCompetitorData(dataProcessor, context, rd.value)
                         output += competitorData
-
-                        if (rd.index < result.value.subList.size - 1) {
-                            output += FileConstants.HTML_EMPTY_ROW
-                        }
                     }
                 }
                 output += FileConstants.HTML_TABLE_END
@@ -325,9 +329,8 @@ object TextProcessor : FormatProcessor {
     private fun generateHtmlCompetitorSplits(
         splits: List<AliasPunch>,
         context: Context
-    ): Pair<String, String> {
-        var row1 = ""
-        var row2 = ""
+    ): String {
+        var out = ""
 
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val useAlias =
@@ -342,25 +345,21 @@ object TextProcessor : FormatProcessor {
                     split.punch.siCode.toString()
                 }
 
-                val splitCode = TemplateProcessor.processTemplate(
+                val split = TemplateProcessor.processTemplate(
                     FileConstants.HTML_SPLITS_CODE,
-                    mapOf(FileConstants.KEY_COMP_SPLIT_CODE to aliasCode)
-                )
-                val splitTime = TemplateProcessor.processTemplate(
-                    FileConstants.HTML_SPLITS_TIME,
                     mapOf(
+                        FileConstants.KEY_COMP_SPLIT_CODE to aliasCode,
                         FileConstants.KEY_COMP_SPLIT_TIME to TimeProcessor.durationToMinuteString(
                             split.punch.split
                         )
                     )
                 )
 
-                row1 += splitCode
-                row2 += splitTime
+                out += split
             }
         }
 
-        return Pair(row1, row2)
+        return out
     }
 
     private fun generateHtmlCompetitorData(
@@ -384,6 +383,7 @@ object TextProcessor : FormatProcessor {
 
         params[FileConstants.KEY_COMP_NAME] =
             competitorData.competitorCategory.competitor.getFullName()
+        params[FileConstants.KEY_COMP_CLUB] = competitorData.competitorCategory.competitor.club
         params[FileConstants.KEY_COMP_INDEX] =
             competitorData.competitorCategory.competitor.index
         params[FileConstants.KEY_COMP_RUN_TIME] =
@@ -393,10 +393,8 @@ object TextProcessor : FormatProcessor {
         params[FileConstants.KEY_COMP_POINTS] =
             result.points.toString()
 
-        val splits = generateHtmlCompetitorSplits(competitorData.readoutData!!.punches, context)
-
-        params[FileConstants.KEY_COMP_SPLITS_CODES] = splits.first
-        params[FileConstants.KEY_COMP_SPLITS_TIMES] = splits.second
+        params[FileConstants.KEY_COMP_SPLITS] =
+            generateHtmlCompetitorSplits(competitorData.readoutData!!.punches, context)
 
         val out = TemplateProcessor.processTemplate(template, params)
         return out
