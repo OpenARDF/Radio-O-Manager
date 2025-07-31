@@ -486,6 +486,10 @@
 <!--        <item>@string/data_format_xml</item>-->
     </string-array>
 
+    <string-array name="readout_data_data_formats">
+        <item>@string/data_format_csv</item>
+    </string-array>
+
     <string-array name="data_types">
         <item>@string/data_type_categories</item>
         <item>@string/data_type_competitors</item>

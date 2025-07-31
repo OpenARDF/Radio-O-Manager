@@ -235,6 +235,9 @@ class DataProcessor private constructor(context: Context) {
     //ALIASES
     suspend fun getAliasesByRace(raceId: UUID) = ardfRepository.getAliasesByRace(raceId)
 
+    suspend fun getControlPointAliasesByCategory(categoryId: UUID) =
+        ardfRepository.getControlPointAliasesByCategory(categoryId)
+
     suspend fun createOrUpdateAliases(aliases: List<Alias>, raceId: UUID) {
         ardfRepository.deleteAliasesByRace(raceId)
         for (alias in aliases) {

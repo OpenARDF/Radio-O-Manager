@@ -90,6 +90,9 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun getControlPointsByCategory(categoryId: UUID) =
         eventDatabase.controlPointDao().getControlPointsByCategory(categoryId)
 
+    suspend fun getControlPointAliasesByCategory(categoryId: UUID) =
+        eventDatabase.controlPointDao().getControlPointAliasesByCategory(categoryId)
+
     suspend fun deleteControlPointsByCategory(categoryId: UUID) =
         eventDatabase.controlPointDao().deleteControlPointsByCategory(categoryId)
 

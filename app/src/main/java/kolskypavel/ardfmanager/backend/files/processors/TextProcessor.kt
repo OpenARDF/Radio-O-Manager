@@ -12,10 +12,10 @@ import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.results.ResultsProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
-import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ControlPointAlias
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
@@ -211,7 +211,7 @@ object TextProcessor : FormatProcessor {
         dataProcessor: DataProcessor,
         context: Context,
         category: Category,
-        controlPoints: List<ControlPoint>,
+        controlPointsAliases: List<ControlPointAlias>,
         race: Race
     ): String {
         val template = TemplateProcessor.loadTemplate(templateName, context)
@@ -238,7 +238,7 @@ object TextProcessor : FormatProcessor {
 
         params[FileConstants.KEY_TITLE_CONTROLS] = context.getString(R.string.general_controls)
         params[FileConstants.KEY_CAT_CONTROLS] =
-            ControlPointsHelper.getStringFromControlPoints(controlPoints)
+            ControlPointsHelper.getStringFromControlPointAliases(controlPointsAliases, context)
 
         params[FileConstants.KEY_TITLE_PLACE] = context.getString(R.string.general_place)
         params[FileConstants.KEY_TITLE_NAME] = context.getString(R.string.general_name)
@@ -267,7 +267,7 @@ object TextProcessor : FormatProcessor {
                     FileConstants.TEMPLATE_TEXT_CATEGORY,
                     dataProcessor, context,
                     result.category,
-                    dataProcessor.getControlPointsByCategory(result.category.id),
+                    dataProcessor.getControlPointAliasesByCategory(result.category.id),
                     race
                 )
                 output += "\n"
@@ -303,7 +303,7 @@ object TextProcessor : FormatProcessor {
                     dataProcessor,
                     context,
                     result.value.category!!,
-                    dataProcessor.getControlPointsByCategory(result.value.category!!.id),
+                    dataProcessor.getControlPointAliasesByCategory(result.value.category!!.id),
                     race
                 )
 

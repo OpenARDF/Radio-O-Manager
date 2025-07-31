@@ -46,39 +46,16 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <LinearLayout
-        android:id="@+id/results_button_bar"
-        android:layout_width="match_parent"
+
+    <Button
+        android:id="@+id/results_file_export_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/results_data_format_layout">
+        android:layout_marginTop="12dp"
+        android:text="@string/data_export"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/results_data_format_layout" />
 
-        <Button
-            android:id="@+id/results_file_preview_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:text="@string/general_preview"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/results_file_share_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:text="@string/general_share"
-            android:visibility="gone" />
-
-        <Button
-            android:id="@+id/results_file_export_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/data_export" />
-    </LinearLayout>
 
     <Button
         android:id="@+id/results_file_cancel"
@@ -88,7 +65,7 @@
         android:layout_weight="1"
         android:text="@string/general_cancel"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/results_button_bar"
+        app:layout_constraintTop_toBottomOf="@+id/results_file_export_button"
         tools:layout_editor_absoluteY="217dp" />
 
     <TextView

@@ -6,6 +6,7 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.room.entity.ControlPoint
 import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
+import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ControlPointAlias
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import kolskypavel.ardfmanager.backend.room.enums.RaceType
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
@@ -246,6 +247,29 @@ object ControlPointsHelper {
         return codes
     }
 
+    fun getStringFromControlPointAliases(
+        controlPoints: List<ControlPointAlias>,
+        context: Context
+    ): String {
+        var codes = ""
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
+        val useAlias =
+            sharedPref.getBoolean(context.getString(R.string.key_results_use_aliases), true)
+
+        for (cp in controlPoints.withIndex()) {
+            codes += if (useAlias && cp.value.alias != null) {
+                cp.value.alias!!.name
+            } else {
+                cp.value.controlPoint.siCode.toString()
+            }
+
+            if (cp.index < controlPoints.size - 1) {
+                codes += " "
+            }
+        }
+        return codes
+    }
+
     fun getStringFromPunches(punches: List<Punch>): String {
         var string = ""
         for (punch in punches) {
@@ -267,7 +291,7 @@ object ControlPointsHelper {
 
                 //Use alias if available and enabled
                 string += if (useAlias && aliasPunch.alias != null) {
-                    aliasPunch.alias
+                    aliasPunch.alias!!.name
                 } else {
                     aliasPunch.punch.siCode
                 }
