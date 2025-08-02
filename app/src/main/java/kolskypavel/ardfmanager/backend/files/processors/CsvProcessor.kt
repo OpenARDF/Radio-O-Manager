@@ -68,7 +68,7 @@ object CsvProcessor : FormatProcessor {
                 dataProcessor.getContext()
             )
 
-            else -> DataImportWrapper(emptyList(), emptyList())
+            else -> DataImportWrapper(emptyList(), emptyList(), ArrayList())
         }
     }
 
@@ -137,7 +137,7 @@ object CsvProcessor : FormatProcessor {
     ): DataImportWrapper {
         val readData = getReader().readAll(inStream)
         val categories = ArrayList<CategoryData>()
-
+        val invalidLines = ArrayList<Pair<Int, String>>()
 
         if (readData.isNotEmpty()) {
 
@@ -217,15 +217,17 @@ object CsvProcessor : FormatProcessor {
                             throw IllegalArgumentException(
                                 context.getString(
                                     R.string.data_import_invalid_line,
-                                    csvRow.index
+                                    csvRow.index,
+                                    e.message
                                 )
                             )
                         }
+                        invalidLines.add(Pair(csvRow.index, e.message ?: ""))
                     }
                 }
             }
         }
-        return DataImportWrapper(emptyList(), categories.toList())
+        return DataImportWrapper(emptyList(), categories.toList(), invalidLines)
     }
 
     suspend fun importStandardCategories(
@@ -284,6 +286,7 @@ object CsvProcessor : FormatProcessor {
         val competitors = ArrayList<CompetitorCategory>()
         var currOrder =
             dataProcessor.getHighestCategoryOrder(race.id) + 1    // Used to keep order of categories correct
+        val invalidLines = ArrayList<Pair<Int, String>>()
 
         for (csvRow in csvReader.withIndex()) {
             try {
@@ -387,13 +390,15 @@ object CsvProcessor : FormatProcessor {
                     throw IllegalArgumentException(
                         context.getString(
                             R.string.data_import_invalid_line,
-                            csvRow.index
+                            csvRow.index,
+                            e.message
                         )
                     )
                 }
+                invalidLines.add(Pair(csvRow.index, e.message ?: ""))
             }
         }
-        return DataImportWrapper(competitors, categories.toList())
+        return DataImportWrapper(competitors, categories.toList(), invalidLines)
     }
 
     private fun importCompetitorStarts(
@@ -409,6 +414,7 @@ object CsvProcessor : FormatProcessor {
                 context.getString(R.string.key_files_prefer_app_start_time),
                 false
             )
+        val invalidLines = ArrayList<Pair<Int, String>>()
 
         for (csvRow in csvReader.withIndex()) {
             val row = csvRow.value
@@ -449,15 +455,21 @@ object CsvProcessor : FormatProcessor {
                         throw IllegalArgumentException(
                             context.getString(
                                 R.string.data_import_invalid_line,
-                                csvRow.index
+                                csvRow.index,
+                                e.message
                             )
                         )
                     }
+                    invalidLines.add(Pair(csvRow.index, e.message ?: ""))
                 }
             }
         }
 
-        return DataImportWrapper(competitors.map { it.competitorCategory }, emptyList())
+        return DataImportWrapper(
+            competitors.map { it.competitorCategory },
+            emptyList(),
+            invalidLines
+        )
     }
 
 

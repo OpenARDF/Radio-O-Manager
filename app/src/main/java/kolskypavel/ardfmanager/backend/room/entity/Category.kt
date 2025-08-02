@@ -14,10 +14,15 @@ import java.time.Duration
 import java.util.UUID
 
 @Entity(
-    tableName = "category", indices = [Index(
-        value = ["name", "race_id", "order"],
-        unique = true
-    )],
+    tableName = "category", indices = [
+        Index(
+            value = ["name", "race_id"],
+            unique = true
+        ),
+//        Index(
+//            value = ["order", "race_id"],
+//            unique = true        )        // TODO: finish
+                                      ],
     foreignKeys = [ForeignKey(
         entity = Race::class,
         parentColumns = arrayOf("id"),

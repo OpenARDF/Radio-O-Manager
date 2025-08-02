@@ -159,7 +159,7 @@ class ResultServiceDialogFragment : DialogFragment() {
         val url = urlInput.text.toString()
 
         when (serviceType) {
-            ResultServiceType.ROBIS -> {
+            ResultServiceType.ROBIS, ResultServiceType.ROBIS_TEST -> {
 
                 if (apiKeyInput.text.toString().isEmpty()) {
                     valid = false

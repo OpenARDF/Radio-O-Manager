@@ -65,7 +65,7 @@ object JsonProcessor : FormatProcessor {
         race: Race,
         categories: HashSet<CategoryData>
     ): DataImportWrapper {
-        return DataImportWrapper(emptyList(), categories.toList())
+        TODO()
     }
 
     suspend fun exportResults(

@@ -38,6 +38,6 @@ object IofXmlProcessor : FormatProcessor {
         race: Race,
         categories: HashSet<CategoryData>
     ): DataImportWrapper {
-        return DataImportWrapper(emptyList(), categories.toList())
+        TODO("Not yet implemented")
     }
 }

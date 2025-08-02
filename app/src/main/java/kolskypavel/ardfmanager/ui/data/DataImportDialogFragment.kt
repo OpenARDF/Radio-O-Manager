@@ -151,7 +151,22 @@ class DataImportDialogFragment : DialogFragment() {
 
             dataPreviewRecyclerView.adapter =
                 DataPreviewRecyclerViewAdapater(data!!, currType)
-            errorView.text = ""
+
+            //Inform about invalid lines
+            if (data!!.invalidLines.isNotEmpty()) {
+                var errorText = ""
+                for (err in data!!.invalidLines) {
+                    errorText += requireContext().getString(
+                        R.string.data_import_invalid_line,
+                        err.first,
+                        err.second
+                    )
+                }
+                errorView.text = errorText
+            } else {
+                errorView.text = ""
+            }
+
             importInfoView.text = getString(
                 R.string.data_import_preview_info,
                 data!!.getCount(currType)

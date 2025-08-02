@@ -50,10 +50,11 @@ object ResultServiceWorker {
                     }
 
                     when (resultService.serviceType) {
-                        ResultServiceType.ROBIS -> exportResultsRobis(
+                        ResultServiceType.ROBIS, ResultServiceType.ROBIS_TEST -> exportResultsRobis(
                             dataProcessor,
                             resultService,
-                            httpClient
+                            httpClient,
+                            resultService.serviceType == ResultServiceType.ROBIS_TEST
                         )
                     }
                 }
@@ -65,7 +66,8 @@ object ResultServiceWorker {
     private suspend fun exportResultsRobis(
         dataProcessor: DataProcessor,
         resultService: ResultService,
-        httpClient: OkHttpClient
+        httpClient: OkHttpClient,
+        test: Boolean
     ) {
         Log.i(RESULTS_LOG_TAG, ">> exportResultsRobis START")
         // Fetch results and convert them to JSON
@@ -87,7 +89,13 @@ object ResultServiceWorker {
 
         // Send the results to the ROBIS API
         val request: Request = Request.Builder()
-            .url(ResultsConstants.ROBIS_API_URL)
+            .url(
+                if (test) {
+                    ResultsConstants.ROBIS_PLAYGROUND_API_URL
+                } else {
+                    ResultsConstants.ROBIS_API_URL
+                }
+            )
             .addHeader(ROBIS_API_HEADER, resultService.apiKey)
             .put(body)
             .build()

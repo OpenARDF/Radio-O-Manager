@@ -58,10 +58,9 @@
             style="@style/error_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/data_import_format_layout" />
+            app:layout_constraintTop_toBottomOf="@+id/data_import_import_btn" />
 
         <LinearLayout
             android:id="@+id/data_import_preview_layout"
@@ -69,7 +68,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/data_import_import_btn">
+            app:layout_constraintTop_toBottomOf="@id/data_import_error">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -100,13 +99,13 @@
             android:id="@+id/data_import_import_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/data_import"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/data_import_error" />
+            app:layout_constraintTop_toBottomOf="@+id/data_import_format_layout" />
 
         <LinearLayout
+            android:id="@+id/linearLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"

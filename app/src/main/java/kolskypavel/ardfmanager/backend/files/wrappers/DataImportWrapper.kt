@@ -6,7 +6,8 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorCategory
 
 data class DataImportWrapper(
     var competitorCategories: List<CompetitorCategory>,
-    var categories: List<CategoryData>
+    var categories: List<CategoryData>,
+    var invalidLines: ArrayList<Pair<Int, String>>      // Marks each error with cause
 ) {
     fun getCount(dataType: DataType): Int {
         return when (dataType) {
