@@ -145,25 +145,22 @@ class ResultsExportDialogFragment : DialogFragment() {
     }
 
     private fun exportData(uri: Uri) {
-        if (selectedRaceViewModel.exportData(
+
+        try {
+            selectedRaceViewModel.exportData(
                 uri,
                 getCurrentType(),
                 getCurrentFormat()
             )
-        ) {
-            try {
-                errorText.text = ""
-                val intent = Intent()
-                intent.setAction(Intent.ACTION_VIEW)
-                intent.setData(uri)
-                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                startActivity(intent)
-            } catch (e: Exception) {
-                Log.e("File intent opening", e.stackTraceToString())
-                errorText.text = getString(R.string.results_export_error)
-            }
-        } else {
-            errorText.text = getString(R.string.results_export_error)
+            errorText.text = ""
+            val intent = Intent()
+            intent.setAction(Intent.ACTION_VIEW)
+            intent.setData(uri)
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("File intent opening", e.stackTraceToString())
+            errorText.text = e.message
         }
     }
 

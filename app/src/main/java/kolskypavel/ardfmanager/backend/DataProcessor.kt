@@ -129,22 +129,6 @@ class DataProcessor private constructor(context: Context) {
         ardfRepository.deleteRace(id)
     }
 
-    //RACE DATA
-    suspend fun getRaceData(raceId: UUID): RaceData {
-        val race = getRace(raceId)
-        val categories = getCategoryDataForRace(raceId)
-        val aliases = getAliasesByRace(raceId)
-        val competitorData = ResultsProcessor.getCompetitorDataByRace(raceId, this)
-
-        return RaceData(race, categories, aliases, competitorData)
-    }
-
-    suspend fun importRaceData() {
-
-    }
-
-    suspend fun exportRaceData() {}
-
     //CATEGORIES
     fun getCategoryDataFlowForRace(raceId: UUID) =
         ardfRepository.getCategoryDataFlowForRace(raceId)
@@ -544,14 +528,32 @@ class DataProcessor private constructor(context: Context) {
         dataType: DataType,
         dataFormat: DataFormat,
         raceId: UUID
-    ): Boolean {
-        return fileProcessor?.exportData(
+    ) =
+        fileProcessor?.exportData(
             uri,
             dataType,
             dataFormat,
             raceId
-        ) ?: false
+        )
+
+    //RACE DATA
+    suspend fun getRaceData(raceId: UUID): RaceData {
+        val race = getRace(raceId)
+        val categories = getCategoryDataForRace(raceId)
+        val aliases = getAliasesByRace(raceId)
+        val competitorData = ResultsProcessor.getCompetitorDataByRace(raceId, this)
+
+        return RaceData(race, categories, aliases, competitorData)
     }
+
+    suspend fun importRaceData() {
+
+    }
+
+    suspend fun exportRaceData(uri: Uri, raceId: UUID) {
+        fileProcessor?.exportRaceData(uri, raceId)
+    }
+
 
     suspend fun saveDataImportWrapper(
         data: DataImportWrapper
@@ -600,7 +602,7 @@ class DataProcessor private constructor(context: Context) {
     fun printResults(results: List<ResultWrapper>, race: Race) =
         printProcessor.printResults(results, race)
 
-    //GENERAL HELPER METHODS
+//GENERAL HELPER METHODS
 
     //Enums manipulation
     fun raceTypeToString(raceType: RaceType): String {

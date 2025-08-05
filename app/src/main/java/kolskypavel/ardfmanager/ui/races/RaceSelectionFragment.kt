@@ -1,12 +1,15 @@
 package kolskypavel.ardfmanager.ui.races
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,6 +24,7 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * A fragment representing a list of Items.
@@ -31,9 +35,24 @@ class RaceSelectionFragment : Fragment() {
     private lateinit var raceAddFAB: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private var mLastClickTime: Long = 0
+    private var selectedRaceId: UUID? = null
 
     private val raceViewModel: RaceViewModel by activityViewModels()
     private val selectedRaceViewModel: SelectedRaceViewModel by activityViewModels()
+
+    // Race export
+    private val getResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            val value = it.data
+            val uri = value?.data
+
+            if (uri != null && selectedRaceId != null) {
+                selectedRaceViewModel.exportRaceData(uri, selectedRaceId!!)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -122,7 +141,8 @@ class RaceSelectionFragment : Fragment() {
                 )
             )
 
-            1 -> confirmRaceDeletion(race)
+            1 -> exportRace(race.id)
+            2 -> confirmRaceDeletion(race)
         }
     }
 
@@ -144,6 +164,16 @@ class RaceSelectionFragment : Fragment() {
             dialog.cancel()
         }
         builder.show()
+    }
+
+    private fun exportRace(raceId: UUID) {
+        selectedRaceId = raceId
+
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/json"
+        intent.putExtra(Intent.EXTRA_TITLE, "race.ardfjs")
+        getResult.launch(intent)
     }
 
     private fun setRecyclerAdapter() {

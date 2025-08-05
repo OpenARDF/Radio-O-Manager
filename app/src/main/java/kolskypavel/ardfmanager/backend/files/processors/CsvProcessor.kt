@@ -78,45 +78,39 @@ object CsvProcessor : FormatProcessor {
         format: DataFormat,
         dataProcessor: DataProcessor,
         raceId: UUID
-    ): Boolean {
-        try {
+    ) {
 
-            when (dataType) {
-                DataType.CATEGORIES -> exportCategories(
+        when (dataType) {
+            DataType.CATEGORIES -> exportCategories(
+                outStream,
+                dataProcessor.getCategoryDataForRace(raceId)
+            )
+
+            DataType.COMPETITORS -> exportCompetitors(
+                outStream,
+                dataProcessor.getCompetitorDataFlowByRace(raceId).first()
+            )
+
+            DataType.COMPETITOR_STARTS_TIME,
+            DataType.COMPETITOR_STARTS_CATEGORIES,
+            DataType.COMPETITOR_STARTS_CLUBS -> exportStarts(
+                outStream,
+                dataProcessor.getCompetitorDataFlowByRace(raceId).first(),
+                dataProcessor.getCurrentRace()
+            )
+
+            DataType.RESULTS -> exportResults(
+                outStream,
+                ResultsProcessor.getResultWrapperFlowByRace(raceId, dataProcessor).first()
+            )
+
+            DataType.READOUT_DATA -> {
+                exportReadoutData(
                     outStream,
-                    dataProcessor.getCategoryDataForRace(raceId)
+                    dataProcessor.getResultDataFlowByRace(raceId).first()
                 )
-
-                DataType.COMPETITORS -> exportCompetitors(
-                    outStream,
-                    dataProcessor.getCompetitorDataFlowByRace(raceId).first()
-                )
-
-                DataType.COMPETITOR_STARTS_TIME,
-                DataType.COMPETITOR_STARTS_CATEGORIES,
-                DataType.COMPETITOR_STARTS_CLUBS -> exportStarts(
-                    outStream,
-                    dataProcessor.getCompetitorDataFlowByRace(raceId).first(),
-                    dataProcessor.getCurrentRace()
-                )
-
-                DataType.RESULTS -> exportResults(
-                    outStream,
-                    ResultsProcessor.getResultWrapperFlowByRace(raceId, dataProcessor).first()
-                )
-
-                DataType.READOUT_DATA -> {
-                    exportReadoutData(
-                        outStream,
-                        dataProcessor.getResultDataFlowByRace(raceId).first()
-                    )
-                }
-
             }
-            return true
-        } catch (e: Exception) {
-            Log.e("EXPORT", e.stackTraceToString())
-            return false
+
         }
     }
 

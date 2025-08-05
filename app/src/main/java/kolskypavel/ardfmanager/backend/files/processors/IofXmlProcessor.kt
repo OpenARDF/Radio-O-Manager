@@ -28,7 +28,7 @@ object IofXmlProcessor : FormatProcessor {
         format: DataFormat,
         dataProcessor: DataProcessor,
         raceId: UUID
-    ): Boolean {
+    ) {
         TODO("Not yet implemented")
     }
 

@@ -51,11 +51,9 @@ class SelectedRaceViewModel : ViewModel() {
     private val _competitorData: MutableStateFlow<List<CompetitorData>> =
         MutableStateFlow(emptyList())
     val competitorData: StateFlow<List<CompetitorData>>
-        get() =
-            _competitorData.asStateFlow()
+        get() = _competitorData.asStateFlow()
 
-    private val _readoutData: MutableStateFlow<List<ResultData>> =
-        MutableStateFlow(emptyList())
+    private val _readoutData: MutableStateFlow<List<ResultData>> = MutableStateFlow(emptyList())
     val readoutData: StateFlow<List<ResultData>> get() = _readoutData.asStateFlow()
 
     private val _resultWrappers: MutableStateFlow<List<ResultWrapper>> =
@@ -130,8 +128,7 @@ class SelectedRaceViewModel : ViewModel() {
     // get current locale
     fun getCurrentLocale(context: Context): Locale {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
-        val preference =
-            sharedPref.getString(context.getString(R.string.key_app_language), "en")
+        val preference = sharedPref.getString(context.getString(R.string.key_app_language), "en")
 
         return Locale(preference)
     }
@@ -175,13 +172,11 @@ class SelectedRaceViewModel : ViewModel() {
         }
     }
 
-    fun deleteCategory(categoryId: UUID) =
-        CoroutineScope(Dispatchers.IO).launch {
-            dataProcessor.deleteCategory(
-                categoryId,
-                getCurrentRace().id
-            )
-        }
+    fun deleteCategory(categoryId: UUID) = CoroutineScope(Dispatchers.IO).launch {
+        dataProcessor.deleteCategory(
+            categoryId, getCurrentRace().id
+        )
+    }
 
 
     fun getControlPointsByCategory(categoryId: UUID): ArrayList<ControlPoint> {
@@ -207,27 +202,24 @@ class SelectedRaceViewModel : ViewModel() {
         return@runBlocking dataProcessor.getCompetitor(id)
     }
 
-    fun createOrUpdateCompetitor(competitor: Competitor) =
-        CoroutineScope(Dispatchers.IO).launch {
-            dataProcessor.createOrUpdateCompetitor(competitor)
-        }
+    fun createOrUpdateCompetitor(competitor: Competitor) = CoroutineScope(Dispatchers.IO).launch {
+        dataProcessor.createOrUpdateCompetitor(competitor)
+    }
 
     fun deleteCompetitor(competitorId: UUID, deleteResult: Boolean) =
         CoroutineScope(Dispatchers.IO).launch {
             dataProcessor.deleteCompetitor(
-                competitorId,
-                deleteResult
+                competitorId, deleteResult
             )
         }
 
-    fun deleteAllCompetitorsByRace() =
-        CoroutineScope(Dispatchers.IO).launch {
-            race.value?.let {
-                dataProcessor.deleteAllCompetitorsByRace(
-                    it.id
-                )
-            }
+    fun deleteAllCompetitorsByRace() = CoroutineScope(Dispatchers.IO).launch {
+        race.value?.let {
+            dataProcessor.deleteAllCompetitorsByRace(
+                it.id
+            )
         }
+    }
 
     fun addCategoriesAutomatically() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -258,9 +250,7 @@ class SelectedRaceViewModel : ViewModel() {
     fun getLastReadCard() = dataProcessor.getLastReadCard()
 
     suspend fun processManualPunchData(
-        result: Result,
-        punches: ArrayList<Punch>,
-        manualStatus: ResultStatus?
+        result: Result, punches: ArrayList<Punch>, manualStatus: ResultStatus?
     ) {
         ResultsProcessor.processManualPunchData(result, punches, manualStatus, DataProcessor.get())
     }
@@ -271,10 +261,9 @@ class SelectedRaceViewModel : ViewModel() {
         }
     }
 
-    fun getResultBySINumber(siNumber: Int) =
-        runBlocking {
-            return@runBlocking dataProcessor.getResultBySINumber(siNumber, getCurrentRace().id)
-        }
+    fun getResultBySINumber(siNumber: Int) = runBlocking {
+        return@runBlocking dataProcessor.getResultBySINumber(siNumber, getCurrentRace().id)
+    }
 
     fun getResultByCompetitor(competitorId: UUID) = runBlocking {
         return@runBlocking dataProcessor.getResultByCompetitor(competitorId)
@@ -286,14 +275,13 @@ class SelectedRaceViewModel : ViewModel() {
         }
     }
 
-    fun deleteAllResultsByRace() =
-        CoroutineScope(Dispatchers.IO).launch {
-            race.value?.let {
-                dataProcessor.deleteAllResultsByRace(
-                    it.id
-                )
-            }
+    fun deleteAllResultsByRace() = CoroutineScope(Dispatchers.IO).launch {
+        race.value?.let {
+            dataProcessor.deleteAllResultsByRace(
+                it.id
+            )
         }
+    }
 
     //RESULT SERVICE
 
@@ -316,32 +304,27 @@ class SelectedRaceViewModel : ViewModel() {
 
     //DATA IMPORT/EXPORT
     suspend fun importData(
-        uri: Uri,
-        dataType: DataType,
-        dataFormat: DataFormat
+        uri: Uri, dataType: DataType, dataFormat: DataFormat
     ): DataImportWrapper {
         return dataProcessor.importData(
-            uri,
-            dataType,
-            dataFormat,
-            getCurrentRace().id
+            uri, dataType, dataFormat, getCurrentRace().id
         )
     }
 
     fun exportData(
-        uri: Uri,
-        dataType: DataType,
-        dataFormat: DataFormat
-    ): Boolean {
-        return runBlocking {
-            return@runBlocking dataProcessor.exportData(
-                uri,
-                dataType,
-                dataFormat,
-                getCurrentRace().id
-            )
-        }
+        uri: Uri, dataType: DataType, dataFormat: DataFormat
+    ) = runBlocking {
+        dataProcessor.exportData(
+            uri, dataType, dataFormat, getCurrentRace().id
+        )
     }
+
+    fun exportRaceData(
+        uri: Uri, raceId: UUID
+    ) = runBlocking {
+        dataProcessor.exportRaceData(uri, raceId)
+    }
+
 
     fun saveDataImportWrapper(
         dataImportWrapper: DataImportWrapper

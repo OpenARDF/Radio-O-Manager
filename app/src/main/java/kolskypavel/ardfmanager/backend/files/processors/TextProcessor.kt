@@ -43,14 +43,13 @@ object TextProcessor : FormatProcessor {
         format: DataFormat,
         dataProcessor: DataProcessor,
         raceId: UUID
-    ): Boolean {
+    ) {
         when (dataType) {
             DataType.RESULTS -> exportResults(format, outStream, raceId, dataProcessor)
             else -> {
                 TODO()
             }
         }
-        return true
     }
 
     @Throws(IllegalArgumentException::class)

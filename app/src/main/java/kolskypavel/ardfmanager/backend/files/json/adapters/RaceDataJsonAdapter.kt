@@ -1,5 +1,6 @@
 package kolskypavel.ardfmanager.backend.files.json.adapters
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 import kolskypavel.ardfmanager.backend.files.json.temps.AliasJson
 import kolskypavel.ardfmanager.backend.files.json.temps.RaceJson
@@ -25,8 +26,8 @@ class RaceDataJsonAdapter {
         )
     }
 
-//    @FromJson
-//    fun fromJson(jsonString: String):RaceData{
-//        return RaceData();
-//    }
+    @FromJson
+    fun fromJson(jsonString: String): RaceData {
+        TODO()
+    }
 }

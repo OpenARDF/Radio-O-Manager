@@ -10,11 +10,13 @@ import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.processors.CsvProcessor
 import kolskypavel.ardfmanager.backend.files.processors.FormatProcessorFactory
+import kolskypavel.ardfmanager.backend.files.processors.JsonProcessor
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
 import kolskypavel.ardfmanager.backend.room.enums.StandardCategoryType
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.lang.ref.WeakReference
@@ -67,13 +69,6 @@ class FileProcessor(appContext: WeakReference<Context>) {
         throw RuntimeException(context.getString(R.string.data_import_file_error))
     }
 
-    suspend fun importRaceData(uri: Uri): RaceData? {
-        val inStream = openInputStream(uri)
-        if (inStream != null) {
-
-        }
-        return null
-    }
 
     suspend fun importStandardCategories(
         type: StandardCategoryType,
@@ -86,13 +81,13 @@ class FileProcessor(appContext: WeakReference<Context>) {
         type: DataType,
         format: DataFormat,
         raceId: UUID,
-    ): Boolean {
+    ) {
         val outStream = openOutputStream(uri)
         if (outStream != null) {
             val formatProcessorFactory = FormatProcessorFactory()
             val proc = formatProcessorFactory.getFormatProcessor(format)
 
-            return proc.exportData(
+            proc.exportData(
                 outStream,
                 type,
                 format,
@@ -100,11 +95,24 @@ class FileProcessor(appContext: WeakReference<Context>) {
                 raceId
             )
         }
-        return false
+        throw IOException(dataProcessor.getContext().getString(R.string.data_import_file_error))
     }
 
-    suspend fun exportRaceData(uri: Uri, raceData: RaceData) {
 
+    // Race data
+    suspend fun importRaceData(uri: Uri): RaceData? {
+        val inStream = openInputStream(uri)
+        if (inStream != null) {
+
+        }
+        return null
     }
 
+    suspend fun exportRaceData(uri: Uri, raceId: UUID) {
+        val outStream = openOutputStream(uri)
+        if (outStream != null) {
+            return JsonProcessor.exportRaceData(outStream,dataProcessor,raceId)
+        }
+        throw RuntimeException()
+    }
 }

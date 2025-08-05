@@ -8,6 +8,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
+import kolskypavel.ardfmanager.backend.files.json.adapters.LocalDateTimeAdapter
 import kolskypavel.ardfmanager.backend.files.json.adapters.RaceDataJsonAdapter
 import kolskypavel.ardfmanager.backend.files.json.temps.ResultCompetitorJson
 import kolskypavel.ardfmanager.backend.files.json.temps.RobisResponseJson
@@ -46,7 +47,7 @@ object JsonProcessor : FormatProcessor {
         format: DataFormat,
         dataProcessor: DataProcessor,
         raceId: UUID
-    ): Boolean {
+    ) {
         when (dataType) {
             DataType.CATEGORIES -> TODO()
             DataType.COMPETITORS -> TODO()
@@ -57,7 +58,6 @@ object JsonProcessor : FormatProcessor {
 
             else -> TODO()
         }
-        return true
     }
 
     fun importCompetitorData(
@@ -135,6 +135,7 @@ object JsonProcessor : FormatProcessor {
         withContext(Dispatchers.IO) {
             val moshi: Moshi = Moshi.Builder()
                 .add(RaceDataJsonAdapter())
+                .add(LocalDateTimeAdapter())
                 .add(KotlinJsonAdapterFactory())
                 .build()
             val raceData: RaceData = dataProcessor.getRaceData(raceId);
