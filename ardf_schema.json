@@ -95,8 +95,8 @@
           },
           "race_time_limit": {
             "type": "string",
-            "format": "time",
-            "description": "Time limit in mm:ss"
+            "pattern": "^\\d{1,3}:[0-5]\\d$",
+            "description": "Time limit in MM:ss"
           },
           "race_start_time_source": {
             "type": "string",
@@ -192,7 +192,7 @@
                 },
                 "category_time_limit": {
                   "type": "string",
-                  "format": "time",
+                  "pattern": "^$|^(?:[0-5]\\d):[0-5]\\d$",
                   "description": "Category - different time limit in mm:ss"
                 },
                 "category_start_time_source": {
@@ -371,7 +371,7 @@
                           },
                           "split_time": {
                             "type": "string",
-                            "format": "duration",
+                            "pattern": "^(?:[0-5]\\d):[0-5]\\d$",
                             "required": [],
                             "description": "Split from the last control, format MM:ss"
                           },
