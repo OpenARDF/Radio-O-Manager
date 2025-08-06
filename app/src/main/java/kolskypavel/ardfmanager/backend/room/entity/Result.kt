@@ -24,6 +24,12 @@ import java.util.UUID
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("competitor_id"),
             onDelete = ForeignKey.SET_NULL
+        ),
+        ForeignKey(
+            entity = Category::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("category_id"),
+            onDelete = ForeignKey.SET_NULL
         )
     ]
 )
