@@ -59,7 +59,9 @@ class CategoryJsonAdapter {
             differentProperties = categoryJson.category_different_properties,
             raceType = categoryJson.category_race_type,
             categoryBand = categoryJson.category_band,
-            timeLimit = TimeProcessor.minuteStringToDuration(categoryJson.category_time_limit),
+            timeLimit = if (categoryJson.category_time_limit.isNotBlank()) {
+                TimeProcessor.minuteStringToDuration(categoryJson.category_time_limit)
+            } else null,
             controlPointsString = ControlPointsHelper.getStringFromControlPoints(controlPoints)
         )
 

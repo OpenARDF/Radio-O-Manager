@@ -46,18 +46,22 @@ class CompetitorJsonAdapter {
             categoryId = null,
             firstName = competitorJson.first_name,
             lastName = competitorJson.last_name,
-            club = competitorJson.competitor_club,
-            index = competitorJson.competitor_index,
+            club = competitorJson.competitor_club ?: "",
+            index = competitorJson.competitor_index ?: "",
             isMan = competitorJson.competitor_gender,
             birthYear = competitorJson.birth_year,
             siNumber = competitorJson.si_number,
-            siRent = competitorJson.si_rent,
-            startNumber = competitorJson.start_number,
-            drawnRelativeStartTime = TimeProcessor.minuteStringToDuration(competitorJson.competitor_start_time)
+            siRent = competitorJson.si_rent ?: false,
+            startNumber = competitorJson.start_number ?: 0,
+            drawnRelativeStartTime = if (competitorJson.competitor_start_time?.isNotEmpty() == true) {
+                TimeProcessor.minuteStringToDuration(competitorJson.competitor_start_time)
+            } else null
         )
-        val resultData = ResultJsonAdapter().fromJson(competitorJson.result)
-        val readoutData = ReadoutData(resultData.result, resultData.punches)
-
-        return CompetitorData(CompetitorCategory(competitor, null), readoutData)
+        if (competitorJson.result != null) {
+            val resultData = ResultJsonAdapter().fromJson(competitorJson.result)
+            val readoutData = ReadoutData(resultData.result, resultData.punches)
+            return CompetitorData(CompetitorCategory(competitor, null), readoutData)
+        }
+        return CompetitorData(CompetitorCategory(competitor, null), null)
     }
 }

@@ -44,14 +44,14 @@ data class AliasJson(
 data class CompetitorJson(
     val first_name: String,
     val last_name: String,
-    val competitor_club: String,
+    val competitor_club: String?,
     val competitor_category: String,
-    val competitor_index: String,
+    val competitor_index: String?,
     val competitor_gender: Boolean,
     val birth_year: Int?,
     val si_number: Int?,
-    val si_rent: Boolean,
-    val start_number: Int,
-    val competitor_start_time: String,
+    val si_rent: Boolean?,
+    val start_number: Int?,
+    val competitor_start_time: String?,
     val result: ResultJson?
 ) {}

@@ -698,6 +698,12 @@ class DataProcessor private constructor(context: Context) {
         return arr[punchStatus.ordinal]
     }
 
+    fun shortStringToPunchStatus(string: String): PunchStatus {
+        val punchStatusStrings =
+            appContext.get()?.resources?.getStringArray(R.array.punch_status_array_short)!!
+        return PunchStatus.getByValue(punchStatusStrings.indexOf(string))
+    }
+
     /**
      * @return false for woman, true for man
      */

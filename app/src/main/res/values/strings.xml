@@ -74,6 +74,7 @@
 
     <!--Race-->
     <string name="race_import_text">Import race from a file</string>
+    <string name="race_import_failure">Failed to import race</string>
     <string name="race_toolbar_title">Races overview</string>
     <string name="race_level">Level</string>
     <string name="race_type">Race type</string>

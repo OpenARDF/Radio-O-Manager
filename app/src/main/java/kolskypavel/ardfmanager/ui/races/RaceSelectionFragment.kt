@@ -3,6 +3,7 @@ package kolskypavel.ardfmanager.ui.races
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -25,6 +26,7 @@ import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.launch
 import java.util.UUID
+
 
 /**
  * A fragment representing a list of Items.
@@ -50,11 +52,7 @@ class RaceSelectionFragment : Fragment() {
             val uri = value?.data
 
             if (uri != null) {
-                if (exportData && selectedRaceId != null) {
-                    selectedRaceViewModel.exportRaceData(uri, selectedRaceId!!)
-                } else {
-                    selectedRaceViewModel.importRaceData(uri)
-                }
+                exportImportRaceData(uri)
             }
         }
     }
@@ -152,6 +150,28 @@ class RaceSelectionFragment : Fragment() {
 
             1 -> exportRace(race.id)
             2 -> confirmRaceDeletion(race)
+        }
+    }
+
+    private fun displayAlert(message: String) {
+        val alertDialog = AlertDialog.Builder(requireContext()).create()
+        alertDialog.setTitle(getString(R.string.race_import_failure))
+        alertDialog.setMessage(message)
+        alertDialog.setButton(
+            AlertDialog.BUTTON_POSITIVE, getString(R.string.general_ok)
+        ) { dialog, which -> dialog.dismiss() }
+        alertDialog.show()
+    }
+
+    private fun exportImportRaceData(uri: Uri) {
+        if (exportData && selectedRaceId != null) {
+            selectedRaceViewModel.exportRaceData(uri, selectedRaceId!!)
+        } else {
+            try {
+                selectedRaceViewModel.importRaceData(uri)
+            } catch (e: Exception) {
+                displayAlert(e.message.toString())
+            }
         }
     }
 
