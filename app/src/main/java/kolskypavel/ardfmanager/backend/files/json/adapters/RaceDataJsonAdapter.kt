@@ -1,8 +1,8 @@
 package kolskypavel.ardfmanager.backend.files.json.adapters
 
+import UnmatchedResultJsonAdapter
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
-import kolskypavel.ardfmanager.backend.files.constants.FileConstants
 import kolskypavel.ardfmanager.backend.files.json.temps.AliasJson
 import kolskypavel.ardfmanager.backend.files.json.temps.RaceJson
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
@@ -10,14 +10,15 @@ import kolskypavel.ardfmanager.backend.room.entity.Alias
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.RaceData
-import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
 import java.util.UUID
 
 class RaceDataJsonAdapter {
     @ToJson
     fun toJson(raceData: RaceData): RaceJson {
-        val categoryAdapter = CategoryJsonAdapter()
-        val competitorAdapter = CompetitorJsonAdapter()
+        val categoryAdapter = CategoryJsonAdapter(raceData.race.id)
+        val competitorAdapter = CompetitorJsonAdapter(raceData.race.id)
+        val unmatchedAdapter = UnmatchedResultJsonAdapter(raceData.race.id)
+
         val race = raceData.race
         return RaceJson(
             race_name = race.name,
@@ -28,14 +29,13 @@ class RaceDataJsonAdapter {
             race_time_limit = TimeProcessor.durationToMinuteString(race.timeLimit),
             categories = raceData.categories.map { cat -> categoryAdapter.toJson(cat) },
             aliases = raceData.aliases.map { al -> AliasJson(al.siCode, al.name) },
-            competitors = raceData.competitorData.map { cd -> competitorAdapter.toJson(cd) }
+            competitors = raceData.competitorData.map { cd -> competitorAdapter.toJson(cd) },
+            unmatched_results = raceData.unmatchedReadoutData.map { rd -> unmatchedAdapter.toJson(rd) }
         )
     }
 
     @FromJson
     fun fromJson(raceJson: RaceJson): RaceData {
-        val categoryAdapter = CategoryJsonAdapter()
-        val competitorAdapter = CompetitorJsonAdapter()
 
         val race = Race(
             id = UUID.randomUUID(),
@@ -47,6 +47,9 @@ class RaceDataJsonAdapter {
             raceLevel = raceJson.race_level,
             timeLimit = TimeProcessor.minuteStringToDuration(raceJson.race_time_limit)
         )
+        val categoryAdapter = CategoryJsonAdapter(race.id)
+        val competitorAdapter = CompetitorJsonAdapter(race.id)
+        val unmatchedAdapter = UnmatchedResultJsonAdapter(race.id)
 
         val categories = raceJson.categories.map { catJson ->
             categoryAdapter.fromJson(catJson).also { it.category.raceId = race.id }
@@ -62,27 +65,26 @@ class RaceDataJsonAdapter {
         }
 
         val competitorData = ArrayList<CompetitorData>()
-        val unknownData = ArrayList<ReadoutData>()
-        raceJson.competitors.forEach { compJson ->
+
+        for (compJson in raceJson.competitors) {
             val cd = competitorAdapter.fromJson(compJson)
                 .also { it.competitorCategory.competitor.raceId = race.id }
 
-            // Filter out the unknown results
-            if (compJson.first_name == FileConstants.UNKNOWN_COMPETITOR_SYMBOL && cd.readoutData != null) {
-                unknownData.add(ReadoutData(cd.readoutData!!.result, cd.readoutData!!.punches))
-            }
-            else if (compJson.competitor_category.isNotBlank()) {
+            if (compJson.competitor_category.isNotBlank()) {
                 cd.competitorCategory.competitor.categoryId =
                     categories.find { compJson.competitor_category == it.category.name }?.category?.id
             }
+            competitorData.add(cd)
         }
+        val unmatchedData =
+            raceJson.unmatched_results.map { json -> unmatchedAdapter.fromJson(json) }
 
         return RaceData(
             race = race,
             categories = categories,
             aliases = aliases,
             competitorData = competitorData,
-            unknowReadoutData = unknownData.toList()
+            unmatchedReadoutData = unmatchedData.toList()
         )
     }
 }

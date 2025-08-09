@@ -10,6 +10,7 @@ import android.os.SystemClock
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -95,6 +96,7 @@ class RaceSelectionFragment : Fragment() {
         toolbar.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.race_menu_import_file -> {
+                    exportData = false
                     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)
                     intent.type = "*/*"
@@ -166,9 +168,25 @@ class RaceSelectionFragment : Fragment() {
     private fun exportImportRaceData(uri: Uri) {
         if (exportData && selectedRaceId != null) {
             selectedRaceViewModel.exportRaceData(uri, selectedRaceId!!)
+
+            // Inform user about successful export
+            Toast.makeText(
+                requireContext(),
+                requireContext().getText(R.string.race_export_success),
+                Toast.LENGTH_SHORT
+            ).show()
+
         } else {
             try {
                 selectedRaceViewModel.importRaceData(uri)
+
+                // Inform user about successful import
+                Toast.makeText(
+                    requireContext(),
+                    requireContext().getText(R.string.race_import_success),
+                    Toast.LENGTH_SHORT
+                ).show()
+
             } catch (e: Exception) {
                 displayAlert(e.message.toString())
             }
@@ -197,6 +215,7 @@ class RaceSelectionFragment : Fragment() {
 
     private fun exportRace(raceId: UUID) {
         selectedRaceId = raceId
+        exportData = true
 
         val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)

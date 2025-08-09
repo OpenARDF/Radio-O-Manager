@@ -11,7 +11,7 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
 import java.util.UUID
 
-class CompetitorJsonAdapter {
+class CompetitorJsonAdapter(val raceId: UUID) {
     @ToJson
     fun toJson(competitorData: CompetitorData): CompetitorJson {
         val competitor = competitorData.competitorCategory.competitor
@@ -33,7 +33,7 @@ class CompetitorJsonAdapter {
                 )
             } ?: "",
             result = if (competitorData.readoutData != null) {
-                ResultJsonAdapter().toJson(competitorData)
+                ResultJsonAdapter(raceId, false).toJson(competitorData)
             } else null
         )
     }
@@ -42,7 +42,7 @@ class CompetitorJsonAdapter {
     fun fromJson(competitorJson: CompetitorJson): CompetitorData {
         val competitor = Competitor(
             id = UUID.randomUUID(),
-            raceId = UUID.randomUUID(),
+            raceId = raceId,
             categoryId = null,
             firstName = competitorJson.first_name,
             lastName = competitorJson.last_name,
@@ -58,7 +58,8 @@ class CompetitorJsonAdapter {
             } else null
         )
         if (competitorJson.result != null) {
-            val resultData = ResultJsonAdapter().fromJson(competitorJson.result)
+            val resultData = ResultJsonAdapter(raceId, false).fromJson(competitorJson.result)
+            resultData.result.competitorID = competitor.id
             val readoutData = ReadoutData(resultData.result, resultData.punches)
             return CompetitorData(CompetitorCategory(competitor, null), readoutData)
         }

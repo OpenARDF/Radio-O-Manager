@@ -53,7 +53,8 @@ object JsonProcessor : FormatProcessor {
             DataType.COMPETITORS -> TODO()
             DataType.RESULTS -> exportResults(
                 outStream,
-                ResultsProcessor.getCompetitorDataByRace(raceId, dataProcessor)
+                ResultsProcessor.getCompetitorDataByRace(raceId, dataProcessor),
+                raceId
             )
 
             else -> TODO()
@@ -99,11 +100,12 @@ object JsonProcessor : FormatProcessor {
 
     suspend fun exportResults(
         outStream: OutputStream,
-        results: List<CompetitorData>
+        results: List<CompetitorData>,
+        raceId: UUID
     ) {
         withContext(Dispatchers.IO) {
             val moshi: Moshi = Moshi.Builder()
-                .add(ResultJsonAdapter())
+                .add(ResultJsonAdapter(raceId, true))
                 .add(KotlinJsonAdapterFactory())
                 .build()
 
@@ -112,7 +114,7 @@ object JsonProcessor : FormatProcessor {
             val adapter = moshi.adapter<List<ResultCompetitorJson>>(type)
 
             val exportList = results.mapNotNull { rd ->
-                val compCat = rd.competitorCategory ?: return@mapNotNull null
+                val compCat = rd.competitorCategory
                 val competitor = compCat.competitor
                 val category = compCat.category ?: return@mapNotNull null
 
@@ -122,7 +124,7 @@ object JsonProcessor : FormatProcessor {
                     last_name = competitor.lastName,
                     first_name = competitor.firstName,
                     category_name = category.name,
-                    result = ResultJsonAdapter().toJson(rd)
+                    result = ResultJsonAdapter(raceId, true).toJson(rd)
                 )
             }
 

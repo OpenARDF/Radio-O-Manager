@@ -9,5 +9,5 @@ data class RaceData(
     val categories: List<CategoryData>,
     val aliases: List<Alias>,
     val competitorData: List<CompetitorData>,
-    val unknowReadoutData: List<ReadoutData>
+    val unmatchedReadoutData: List<ReadoutData>
 ) {}

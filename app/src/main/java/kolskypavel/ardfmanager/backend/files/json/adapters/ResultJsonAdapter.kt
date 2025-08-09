@@ -1,49 +1,49 @@
-
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
 import kolskypavel.ardfmanager.backend.DataProcessor
+import kolskypavel.ardfmanager.backend.files.json.adapters.PunchJsonAdapter
+import kolskypavel.ardfmanager.backend.files.json.adapters.SITimeJsonAdapter
 import kolskypavel.ardfmanager.backend.files.json.temps.ResultJson
-import kolskypavel.ardfmanager.backend.files.json.temps.ResultPunchJson
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
-import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
-import kolskypavel.ardfmanager.backend.sportident.SITime
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.UUID
 
-class ResultJsonAdapter {
+class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
+    val siTimeJsonAdapter = SITimeJsonAdapter()
+    val punchJsonAdapter = PunchJsonAdapter(raceId)
+
     @ToJson
     fun toJson(resultData: CompetitorData): ResultJson {
         val result = resultData.readoutData?.result!!
+        var punches = resultData.readoutData!!.punches
+
+        if (filterStart) {
+            punches = punches.filter { it.punch.punchType != SIRecordType.START }
+        }
+
         return ResultJson(
+            check_time = result.checkTime?.let { siTimeJsonAdapter.toJson(it) },
+            start_time = result.startTime?.let { siTimeJsonAdapter.toJson(it) },
+            finish_time = result.finishTime?.let { siTimeJsonAdapter.toJson(it) },
+            modified = result.modified,
             run_time = TimeProcessor.durationToMinuteString(result.runTime),
             place = result.place,
             controls_num = result.points,
             result_status = DataProcessor.get()
                 .resultStatusToShortString(result.resultStatus),
-            punches = resultData.readoutData!!.punches
-                .filter { ap -> ap.punch.punchType.name != "START" }
+            punches = punches
                 .map { ap ->
-                    val controlType = ap.punch.punchType.name
                     val rawCode = ap.alias?.name ?: ap.punch.siCode.toString()
-                    val code = if (controlType == "FINISH" && rawCode == "0") "F" else rawCode
+                    val code =
+                        if (ap.punch.punchType == SIRecordType.FINISH && rawCode == "0") "F" else rawCode
+                    punchJsonAdapter.toJson(ap).also { it.code = code }
 
-                    ResultPunchJson(
-                        code = code,
-                        control_type = ap.punch.punchType.name,
-                        punch_status = DataProcessor.get()
-                            .punchStatusToShortString(ap.punch.punchStatus),
-                        real_time = ap.punch.siTime.getTimeString(),
-                        week = ap.punch.siTime.getWeek(),
-                        day_of_week = ap.punch.siTime.getDayOfWeek(),
-                        split_time = TimeProcessor.durationToMinuteString(ap.punch.split)
-                    )
                 }
         )
     }
@@ -52,7 +52,7 @@ class ResultJsonAdapter {
     fun fromJson(json: ResultJson): ReadoutData {
         val result = Result(
             id = UUID.randomUUID(),
-            raceId = UUID.randomUUID(), // replace with real value later
+            raceId = raceId, // replace with real value later
             competitorID = null, // will be assigned elsewhere
             categoryId = null,
             siNumber = null, // Not in ResultJson
@@ -74,33 +74,16 @@ class ResultJsonAdapter {
 
 
         val punches = ArrayList<AliasPunch>()
+        val punchJsonAdapter = PunchJsonAdapter(raceId)
         json.punches.forEachIndexed { index, punchJson ->
 
+            val punchType = SIRecordType.valueOf(punchJson.control_type)
+            val punch = punchJsonAdapter.fromJson(punchJson)
+            punch.order = index
+            punch.resultId = result.id
+
             punches.add(
-                AliasPunch(
-                    Punch(
-                        id = UUID.randomUUID(),
-                        raceId = UUID.randomUUID(),
-                        resultId = result.id,
-                        cardNumber = result.siNumber,
-                        siCode = punchJson.code.toInt(),
-                        siTime = SITime(
-                            LocalTime.parse(punchJson.real_time),
-                            punchJson.day_of_week,
-                            punchJson.week
-                        ),
-                        origSiTime = SITime(
-                            LocalTime.parse(punchJson.real_time),
-                            punchJson.day_of_week,
-                            punchJson.week
-                        ),
-                        punchType = SIRecordType.valueOf(punchJson.control_type),
-                        order = index,
-                        punchStatus = DataProcessor.get()
-                            .shortStringToPunchStatus(punchJson.punch_status),
-                        split = TimeProcessor.minuteStringToDuration(punchJson.split_time),
-                    ), null
-                )
+                AliasPunch(punch, null)
             )
         }
 

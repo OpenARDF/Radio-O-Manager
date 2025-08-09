@@ -88,7 +88,7 @@ object ResultServiceWorker {
         }
 
         val outStream = ByteArrayOutputStream()
-        JsonProcessor.exportResults(outStream, filteredResults)
+        JsonProcessor.exportResults(outStream, filteredResults, resultService.raceId)
         val resultString = outStream.toString("UTF-8")
         Log.i(RESULTS_LOG_TAG, "Export JSON payload:\n$resultString")
         val body: RequestBody = resultString.toRequestBody(JSON)

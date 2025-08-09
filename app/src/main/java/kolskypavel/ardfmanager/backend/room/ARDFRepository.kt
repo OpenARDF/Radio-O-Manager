@@ -220,7 +220,7 @@ class ARDFRepository private constructor(context: Context) {
                         cd.readoutData!!.punches.map { ap -> ap.punch })
                 }
             }
-            raceData.unknowReadoutData.forEach { rd ->
+            raceData.unmatchedReadoutData.forEach { rd ->
                 saveResultPunches(rd.result, rd.punches.map { it -> it.punch })
             }
         }

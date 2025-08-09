@@ -9,6 +9,6 @@ data class RobisResultJson(
 ) {}
 
 data class RobisResponseJson(
-    val created_entries: List<RobisResultJson>,
-    val invalid_data: List<RobisResultJson>,
+    var created_entries: List<RobisResultJson>,
+    var invalid_data: List<RobisResultJson>,
 ) {}

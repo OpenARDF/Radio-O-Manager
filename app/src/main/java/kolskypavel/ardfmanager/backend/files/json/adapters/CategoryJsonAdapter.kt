@@ -12,7 +12,7 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CategoryData
 import kolskypavel.ardfmanager.backend.room.enums.ControlPointType
 import java.util.UUID
 
-class CategoryJsonAdapter {
+class CategoryJsonAdapter(val raceId: UUID) {
     @ToJson
     fun toJson(categoryData: CategoryData): CategoryJson {
         val category = categoryData.category
@@ -49,7 +49,7 @@ class CategoryJsonAdapter {
 
         val category = Category(
             id = catId,
-            raceId = UUID.randomUUID(),
+            raceId = raceId,
             name = categoryJson.category_name,
             isMan = categoryJson.category_gender,
             maxAge = categoryJson.category_max_age,
@@ -59,7 +59,7 @@ class CategoryJsonAdapter {
             differentProperties = categoryJson.category_different_properties,
             raceType = categoryJson.category_race_type,
             categoryBand = categoryJson.category_band,
-            timeLimit = if (categoryJson.category_time_limit.isNotBlank()) {
+            timeLimit = if (categoryJson.category_time_limit?.isNotBlank() == true) {
                 TimeProcessor.minuteStringToDuration(categoryJson.category_time_limit)
             } else null,
             controlPointsString = ControlPointsHelper.getStringFromControlPoints(controlPoints)
