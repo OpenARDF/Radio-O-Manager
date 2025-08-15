@@ -90,7 +90,7 @@ class ReadoutDetailFragment : Fragment() {
             competitorNameView.text = resultData.competitorCategory!!.competitor.getFullName()
             pointsView.text = resultData.result.points.toString()
         } else {
-            competitorNameView.text = getText(R.string.unknown_competitor)
+            competitorNameView.text = getText(R.string.readout_unknown_competitor)
             pointsView.text = getText(R.string.unknown)
             clubView.text = getText(R.string.unknown)
             indexView.text = getText(R.string.unknown)

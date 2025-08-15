@@ -178,7 +178,6 @@ object ResultsProcessor {
                     UUID.randomUUID(),
                     race.id,
                     competitor?.id,
-                    category?.id,
                     cardData.siNumber,
                     cardData.cardType,
                     cardData.checkTime,
@@ -260,17 +259,22 @@ object ResultsProcessor {
     ): Boolean {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
         val preference =
-            sharedPref.getString(context.getString(R.string.key_prints_automatic_printout), "")
+            sharedPref.getString(
+                context.getString(R.string.key_prints_automatic_printout),
+                context.getString(R.string.print_automatic_manually)
+            )
 
         when (preference) {
-            context.getString(R.string.print_automatic_always) -> return true
-            context.getString(R.string.print_automatic_competitor_matched) -> {
+            context.getString(R.string.print_automatic_manually_entry) -> return true
+            context.getString(R.string.print_automatic_competitor_matched_entry) -> {
                 return competitor != null
             }
 
-            context.getString(R.string.print_automatic_category_matched) -> {
+            context.getString(R.string.print_automatic_category_matched_entry) -> {
                 return competitor != null && category != null
             }
+
+            else -> {}
         }
         return false
     }

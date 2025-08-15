@@ -154,9 +154,6 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun getReadoutsByCompetitor(competitorId: UUID): Result? =
         eventDatabase.resultDao().getResultByCompetitor(competitorId)
 
-    suspend fun getResultsByCategory(categoryId: UUID) =
-        eventDatabase.resultDao().getResultByCategory(categoryId)
-
     suspend fun getResultByCompetitor(competitorId: UUID) =
         eventDatabase.resultDao().getResultByCompetitor(competitorId)
 

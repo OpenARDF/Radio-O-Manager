@@ -54,7 +54,6 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
             id = UUID.randomUUID(),
             raceId = raceId, // replace with real value later
             competitorID = null, // will be assigned elsewhere
-            categoryId = null,
             siNumber = null, // Not in ResultJson
             cardType = 0, // default/fallback
             checkTime = null,

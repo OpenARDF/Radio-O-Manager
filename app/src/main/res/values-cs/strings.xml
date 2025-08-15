@@ -124,7 +124,7 @@
     <string name="readout_detail_status">Status</string>
     <string name="readout_si_exists">Čip už byl vyčtený!</string>
     <string name="readout_competitor_exists">Tento závodník si už vyčetl!</string>
-    <string name="unknown_competitor">Neznámý závodník</string>
+    <string name="readout_unknown_competitor">Neznámý závodník</string>
     <string name="general_points">Body</string>
     <string name="general_place">Umístění</string>
     <string name="readout_edit_readout">Upravit vyčítání</string>
@@ -159,8 +159,8 @@
     <string name="preferences_general">Obecné</string>
     <string name="preferences_prints">Tisk</string>
     <string name="preferences_help">Nápověda</string>
-    <string name="preferences_replace">Nahradit</string>
-    <string name="preferences_keep_original">Ponechat originál</string>
+    <string name="preferences_readout_replace">Nahradit</string>
+    <string name="preferences_readout_keep_original">Ponechat originál</string>
     <string name="preferences_general_keep_screen_open">Zabránit systému v zamykání obrazovky</string>
     <string name="preferences_general_keep_screen_open_hint">Obrazovka se nevypne automaticky po vypršení časového limitu.</string>
     <string name="preferences_general_show_log">Zobrazit log</string>
@@ -208,7 +208,7 @@
     <string name="preferences_results_service">Výsledková služba</string>
     <string name="preferences_results_service_hint">Vyberte, kdy odesílat výsledky pomocí výsledkové služby\n[%1$s]</string>
     <string name="preferences_result_service_matched">Při nalezení závodníka</string>
-    <string name="preferences_result_service_no_match">I bez nalezení závodníka</string>
+    <string name="preferences_result_service_always">Vždy</string>
     <string name="preferences_files_invalid_stops_import">Zastavit import při nevalidním záznamu</string>
     <string name="preferences_file_import_skip_hint">Pokud je zvoleno, neplatný řádek nebo záznam zastaví import.</string>
     <string name="preferences_file_prefer_app_start_time_hint">Při importu startovních časů nebude čas v aplikaci přepsán tím ze souboru.</string>
@@ -244,14 +244,18 @@
     <string name="data_import_competitor_duplicate_si_race">Číslo SI už existuje v závodě: %1$d</string>
     <string name="data_import_competitor_duplicate_start_number_file">Duplicitní startovní číslo v souboru: %1$d</string>
     <string name="data_import_competitor_duplicate_start_number_race">Startovní číslo už existuje v závodě: %1$d</string>
+    <string name="race_export_success">Závod úspěšně exportován</string>
+    <string name="race_import_success">Závod úspěšně importován</string>
+    <string name="race_import_failure">Chyba při importu závodu</string>
     <string name="results_generated_with">Výsledky vygenerovány v %1$s pomocí</string>
     <string name="results_splits">Výsledky s mezičasy</string>
     <string name="result_service_enable">Zapnout výsledkovou službu</string>
+    <string name="result_service_invalid_result">Nevalidní výsledek: %1$s, SI: %2$d, Index: %3$s, Důvod: %4$s</string>
     <string name="result_service_send_again">Odeslat výsledky znovu</string>
     <string name="result_service_api_key_missing">API klíč musí být nastaven v závodě pro ROBis</string>
     <string name="prints_bluetooth_disabled">Bluetooth musí být zapnutý pro tisk!</string>
     <string name="prints_error">Chyba při tisku!</string>
-    <string name="preferences_readout_duplicate_hint">Zvolte akci pro dvojité vyčtení stejného čipu. [%1$s]</string>
+    <string name="preferences_readout_duplicate_hint">Zvolte akci pro dvojité vyčtení stejného čipu.\n[%1$s]</string>
     <string name="about_app_version">Verze %1$s</string>
     <string name="about_app_description">ARDF Manager je open-source nástroj pro organizaci soutěží v radiovém (ARDF) orientačním běhu a orientačním běhu.</string>
 

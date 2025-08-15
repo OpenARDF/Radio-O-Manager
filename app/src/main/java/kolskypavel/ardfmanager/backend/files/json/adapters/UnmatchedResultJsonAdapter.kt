@@ -34,8 +34,7 @@ class UnmatchedResultJsonAdapter(val raceId: UUID) {
         val result = Result(
             id = UUID.randomUUID(),
             raceId = raceId,
-            competitorID = null, // will be assigned latter
-            categoryId = null,
+            competitorID = null,
             siNumber = json.si_number,
             cardType = 0,
             checkTime = json.check_time?.let { siTimeJsonAdapter.fromJson(it) },

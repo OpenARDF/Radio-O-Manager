@@ -23,7 +23,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
     }
 
-
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
         prefs = PreferenceManager.getDefaultSharedPreferences(requireContext())
@@ -67,7 +66,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         val currReadoutPref = prefs.getString(
             requireContext().getString(R.string.key_readout_duplicate),
-            requireContext().getString(R.string.preferences_keep_original)
+            requireContext().getString(R.string.preferences_readout_keep_original)
         )
 
         duplReadoutPref?.summary = requireContext().getString(

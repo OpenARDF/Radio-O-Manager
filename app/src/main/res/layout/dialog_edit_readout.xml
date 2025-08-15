@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -27,21 +28,23 @@
                 android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
+
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/readout_dialog_si_number_layout"
-            style="@style/dialog_textView"
+            android:id="@+id/readout_dialog_category_layout"
+            style="@style/dialog_dropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/general_si_number">
+            android:layout_marginTop="4dp"
+            android:hint="@string/category"
+            android:inputType="none">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/readout_dialog_si_number"
+            <AutoCompleteTextView
+                android:id="@+id/readout_dialog_category"
                 style="@style/dialog_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="10" />
+
+                android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -49,7 +52,7 @@
             style="@style/dialog_dropdown"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:hint="@string/readout_detail_status"
             android:inputType="none"
             android:textColor="@color/black">
@@ -62,6 +65,12 @@
                 android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:id="@+id/readout_dialog_si_number"
+            style="@style/readout_edit_dialog_si_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/readout_dialog_punch_recycler_view"

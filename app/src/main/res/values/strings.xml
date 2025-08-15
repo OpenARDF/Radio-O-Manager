@@ -176,9 +176,11 @@
     <string name="readout_detail_real_time">Real time</string>
     <string name="readout_detail_split">Split</string>
     <string name="readout_detail_status">Status</string>
+    <string name="readout_si_number">SI: %1$s</string>
     <string name="readout_si_exists">Readout with this SI number already exists!</string>
     <string name="readout_competitor_exists">Readout for this competitor already exists!</string>
-    <string name="unknown_competitor">Unknown competitor</string>
+    <string name="readout_unknown_category">Unknown category</string>
+    <string name="readout_unknown_competitor">Unknown competitor</string>
     <string name="readout_time">Readout time</string>
     <string name="readout_create_readout">Create readout</string>
     <string name="readout_edit_readout">Edit readout</string>
@@ -248,14 +250,12 @@
     <string name="prints_error">Error when printing!</string>
     <string name="prints_error_init">Error with printer init!</string>
 
-    <!--    Preferences    -->
+    <!-- =============================================== PREFERENCES ===============================================-->
     <string name="global_settings">Global settings</string>
 
     <string name="preferences_general">General</string>
     <string name="preferences_prints">Prints</string>
     <string name="preferences_help">Help</string>
-    <string name="preferences_replace">Replace</string>
-    <string name="preferences_keep_original">Keep original</string>
 
     <!--Preferences:general-->
     <string name="preferences_general_keep_screen_open">Prevent system from locking screen</string>
@@ -264,16 +264,36 @@
     <string name="preferences_general_language">Language</string>
     <string name="preferences_general_language_hint">Manually select a language of the app. The app needs to be restarted after.\n[%1$s]</string>
 
-    <!--Preferences:categories-->
+    <string name="lang_en" translatable="false">English</string>
+    <string name="lang_cz" translatable="false">Čeština</string>
 
+    <array name="language_names">
+        <item>@string/lang_en</item>
+        <item>@string/lang_cz</item>
+    </array>
+
+    <array name="language_codes">
+        <item>en</item>
+        <item>cs</item>
+    </array>
 
     <!--Preferences:readouts-->
     <string name="preferences_readout_duplicate">Action for duplicate readouts</string>
     <string name="preferences_readout_duplicate_hint">Select an action for duplicate readout of the same card.\n[%1$s]</string>
+    <string name="preferences_readout_replace">Replace</string>
+    <string name="preferences_readout_keep_original">Keep original</string>
+
+    <string name="preferences_readout_replace_entry" translatable="false">replace</string>
+    <string name="preferences_readout_keep_original_entry" translatable="false">keep_original</string>
 
     <string-array name="preferences_readout_duplicate_options">
-        <item>@string/preferences_keep_original</item>
-        <item>@string/preferences_replace</item>
+        <item>@string/preferences_readout_keep_original</item>
+        <item>@string/preferences_readout_replace</item>
+    </string-array>
+
+    <string-array name="preferences_readout_duplicate_entries">
+        <item>@string/preferences_readout_keep_original_entry</item>
+        <item>@string/preferences_readout_replace_entry</item>
     </string-array>
 
     <!--Preferences:sounds-->
@@ -292,14 +312,18 @@
     <!--Preferences:results-->
     <string name="preferences_results_time_format">Time format</string>
     <string name="preferences_results_time_format_hint">Time format used in results display. Either mm:ss or hh:mm:ss\n[%1$s]</string>
-    <string name="preferences_results_time_format_minutes">mm:ss</string>
-    <string name="preferences_results_time_format_hours">hh:mm:ss</string>
+    <string name="preferences_results_time_format_minutes" translatable="false">mm:ss</string>
+    <string name="preferences_results_time_format_hours" translatable="false">hh:mm:ss</string>
     <string name="preferences_results_use_aliases">Use aliases</string>
     <string name="preferences_results_use_aliases_hint">Use defined aliases for control points instead of SI codes</string>
     <string name="preferences_results_service">Result service sending</string>
     <string name="preferences_results_service_hint">Select when to send the results with the result service\n[%1$s]</string>
+
     <string name="preferences_result_service_matched">When competitor matched</string>
-    <string name="preferences_result_service_no_match">Even without match</string>
+    <string name="preferences_result_service_always">Always</string>
+
+    <string name="preferences_result_service_matched_entry" translatable="false">competitor_matched</string>
+    <string name="preferences_result_service_always_entry" translatable="false">always</string>
 
     <string-array name="preferences_results_time_format_options">
         <item>@string/preferences_results_time_format_hours</item>
@@ -308,9 +332,13 @@
 
     <string-array name="preferences_result_service_options">
         <item>@string/preferences_result_service_matched</item>
-        <item>@string/preferences_result_service_no_match</item>
+        <item>@string/preferences_result_service_always</item>
     </string-array>
 
+    <string-array name="preferences_result_service_entries">
+        <item>@string/preferences_result_service_matched_entry</item>
+        <item>@string/preferences_result_service_always_entry</item>
+    </string-array>
 
     <!--Preferences:files-->
     <string name="preferences_files_invalid_stops_import">Stop import on invalid record</string>
@@ -327,6 +355,31 @@
     <string name="preferences_prints_automatic_hint">Select when to print the tickets automatically.\n[%1$s] </string>
     <string name="preferences_prints_remove_diacritics">Remove diacritics from printing </string>
     <string name="preferences_prints_remove_diacritics_hint">Use this option if you face issues when printing tickets.</string>
+    <string name="print_bluetooth_not_supported">Unfortunately, your device does not support Bluetooth.</string>
+
+    <string name="print_automatic_manually">Print manually</string>
+    <string name="print_automatic_category_matched">Print when competitor and his category are matched to the readout</string>
+    <string name="print_automatic_competitor_matched">Print when competitor is matched to the readout</string>
+    <string name="print_automatic_always">Always print automatic</string>
+
+    <string name="print_automatic_manually_entry" translatable="false">manually</string>
+    <string name="print_automatic_category_matched_entry" translatable="false">category_matched</string>
+    <string name="print_automatic_competitor_matched_entry" translatable="false">competitor_matched</string>
+    <string name="print_automatic_always_entry" translatable="false">allways</string>
+
+    <array name="preferences_automatic_prints">
+        <item>@string/print_automatic_manually</item>
+        <item>@string/print_automatic_category_matched</item>
+        <item>@string/print_automatic_competitor_matched</item>
+        <item>@string/print_automatic_always</item>
+    </array>
+
+    <array name="preferences_automatic_prints_entries">
+        <item>@string/print_automatic_manually_entry</item>
+        <item>@string/print_automatic_category_matched_entry</item>
+        <item>@string/print_automatic_competitor_matched_entry</item>
+        <item>@string/print_automatic_always_entry</item>
+    </array>
 
     <!--Preferences: about the app-->
     <string name="preferences_changelog">Changelog</string>
@@ -335,35 +388,7 @@
     <string name="about_app_description">ARDF Manager is an open-source tool for organizing Amateur Radio Direction Finding (ARDF) and orienteering competitions. </string>
     <string name="about_app_link" translatable="false">GitHub: https://github.com/kolskypavel/ARDF-Manager </string>
 
-    <!--Preference values -->
-    <string name="lang_en" translatable="false">English</string>
-    <string name="lang_cz" translatable="false">Čeština</string>
-
-    <array name="language_names">
-        <item>@string/lang_en</item>
-        <item>@string/lang_cz</item>
-    </array>
-
-    <array name="language_codes">
-        <item>en</item>
-        <item>cs</item>
-    </array>
-
-    <string name="print_automatic_manually">Print manually</string>
-    <string name="print_automatic_category_matched">Print when competitor and his category are matched to the readout</string>
-    <string name="print_automatic_competitor_matched">Print when competitor is matched to the readout</string>
-    <string name="print_automatic_always">Always print automatic</string>
-    <string name="print_bluetooth_not_supported">Unfortunately, your device does not support Bluetooth.</string>
-
-    <array name="automatic_prints">
-        <item>@string/print_automatic_manually</item>
-        <item>@string/print_automatic_category_matched</item>
-        <item>@string/print_automatic_competitor_matched</item>
-        <item>@string/print_automatic_always</item>
-    </array>
-
-    <!--    DATA ARRAYS-->
-
+    <!-- =============================================== DATA ARRAYS ===============================================-->
     <string name="race_type_classic">Classic</string>
     <string name="race_type_sprint" translatable="false">Sprint</string>
     <string name="race_type_foxoring" translatable="false">Foxoring</string>

@@ -24,12 +24,6 @@ import java.util.UUID
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("competitor_id"),
             onDelete = ForeignKey.SET_NULL
-        ),
-        ForeignKey(
-            entity = Category::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("category_id"),
-            onDelete = ForeignKey.SET_NULL
         )
     ]
 )
@@ -37,7 +31,6 @@ data class Result(
     @PrimaryKey var id: UUID,
     @ColumnInfo(name = "race_id") var raceId: UUID,
     @ColumnInfo(name = "competitor_id") var competitorID: UUID? = null,
-    @ColumnInfo(name = "category_id") var categoryId: UUID? = null,
     @ColumnInfo(name = "si_number") var siNumber: Int?,
     @ColumnInfo(name = "card_type") var cardType: Byte,
     @ColumnInfo(name = "check_time") var checkTime: SITime?,

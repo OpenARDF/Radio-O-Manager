@@ -23,7 +23,7 @@
         <ListPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:defaultValue="en"
+            android:defaultValue="@string/lang_en"
             android:entries="@array/language_names"
             android:entryValues="@array/language_codes"
             android:key="@string/key_app_language"
@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:title="@string/general_categories"
         app:iconSpaceReserved="false"
-        app:isPreferenceVisible="false"></PreferenceCategory>
+        app:isPreferenceVisible="false" />
 
     <PreferenceCategory
         android:layout_width="match_parent"
@@ -49,18 +49,17 @@
         <ListPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:defaultValue="@string/preferences_readout_keep_original_entry"
             android:entries="@array/preferences_readout_duplicate_options"
-            android:entryValues="@array/preferences_readout_duplicate_options"
+            android:entryValues="@array/preferences_readout_duplicate_entries"
             android:key="@string/key_readout_duplicate"
             android:summary="@string/preferences_readout_duplicate_hint"
             android:title="@string/preferences_readout_duplicate"
-            app:defaultValue="@string/preferences_keep_original"
             app:iconSpaceReserved="false" />
 
         <Preference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:defaultValue="1"
             android:enabled="false"
             android:key="@string/key_readout_sounds"
             android:summary="@string/preferences_readout_sounds_hint"
@@ -97,14 +96,13 @@
         <ListPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:defaultValue="@string/preferences_results_time_format_minutes"
+            android:defaultValue="@string/preferences_result_service_matched_entry"
             android:entries="@array/preferences_result_service_options"
-            android:entryValues="@array/preferences_result_service_options"
+            android:entryValues="@array/preferences_result_service_entries"
             android:key="@string/key_result_service"
             android:summary="@string/preferences_results_service_hint"
             android:title="@string/preferences_results_service"
             app:iconSpaceReserved="false" />
-
 
     </PreferenceCategory>
 
@@ -127,7 +125,6 @@
         <CheckBoxPreference
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:defaultValue="0"
             android:enabled="false"
             android:key="@string/key_files_prefer_app_start_time"
             android:summary=""
@@ -146,7 +143,6 @@
     <Preference
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:defaultValue="1"
         android:key="@string/key_prints"
         android:summary="@string/preferences_prints_hint"
         android:title="@string/preferences_prints"
