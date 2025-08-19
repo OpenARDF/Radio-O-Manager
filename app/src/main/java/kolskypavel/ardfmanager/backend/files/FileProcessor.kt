@@ -94,10 +94,11 @@ class FileProcessor(appContext: WeakReference<Context>) {
                 dataProcessor,
                 raceId
             )
-        }
-        throw IOException(dataProcessor.getContext().getString(R.string.data_import_file_error))
-    }
 
+        } else {
+            throw IOException(dataProcessor.getContext().getString(R.string.data_import_file_error))
+        }
+    }
 
     // Race data
     suspend fun importRaceData(uri: Uri): RaceData? {

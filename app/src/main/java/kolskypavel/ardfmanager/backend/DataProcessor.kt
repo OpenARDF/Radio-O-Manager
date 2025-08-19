@@ -409,6 +409,15 @@ class DataProcessor private constructor(context: Context) {
     suspend fun createOrUpdateResultService(resultService: ResultService) =
         ardfRepository.createOrUpdateResultService(resultService)
 
+    suspend fun setResultServiceDisabledByRaceId(raceId: UUID) {
+        val service = getResultServiceByRaceId(raceId)
+        if (service != null) {
+            service.enabled = false
+            service.status = ResultServiceStatus.DISABLED
+            service.errorText = ""
+            ardfRepository.createOrUpdateResultService(service)
+        }
+    }
 
     fun setResultServiceJob(job: Job) {
         currentState.postValue(currentState.value?.let {

@@ -124,7 +124,7 @@ object ResultServiceWorker {
                             dataProcessor.getContext()
                         )
                         updateSentResults(dataProcessor, filteredResults)
-                        resultService.status = ResultServiceStatus.OK
+                        resultService.status = ResultServiceStatus.RUNNING
                         resultService.sent += filteredResults.size
                     }
 

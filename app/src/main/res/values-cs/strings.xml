@@ -229,8 +229,9 @@
     <string name="preferences_sounds_unknown_category_hint">Závodník byl nalezen podle SI čísla, ale nebyl zařazen do kategorie\n[%1$s]</string>
     <string name="preferences_sounds_unknown_competitor">Neznámý závodník</string>
     <string name="preferences_sounds_unknown_competitor_hint">Závodník nebyl nalezen podle SI čísla\n[%1$s]</string>
+
+    <string name="result_service_status_disabled">Vypnuta</string>
     <string name="result_service_status_running">Běží</string>
-    <string name="result_service_status_ok">OK</string>
     <string name="result_service_status_no_network">Bez sítě</string>
     <string name="result_service_status_unauthorized">Neautorizováno</string>
     <string name="result_service_status_error">Chyba</string>

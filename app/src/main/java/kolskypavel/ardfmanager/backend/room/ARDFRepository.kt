@@ -126,7 +126,7 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun getCompetitorsByRace(raceId: UUID) =
         eventDatabase.competitorDao().getCompetitorsByRace(raceId)
 
-    suspend fun createCompetitor(competitor: Competitor) =
+    fun createCompetitor(competitor: Competitor) =
         eventDatabase.competitorDao().createCompetitor(competitor)
 
     suspend fun deleteCompetitor(id: UUID) = eventDatabase.competitorDao().deleteCompetitor(id)
@@ -150,9 +150,6 @@ class ARDFRepository private constructor(context: Context) {
 
     suspend fun getResultBySINumber(siNumber: Int, raceId: UUID) =
         eventDatabase.resultDao().getResultForSINumber(siNumber, raceId)
-
-    suspend fun getReadoutsByCompetitor(competitorId: UUID): Result? =
-        eventDatabase.resultDao().getResultByCompetitor(competitorId)
 
     suspend fun getResultByCompetitor(competitorId: UUID) =
         eventDatabase.resultDao().getResultByCompetitor(competitorId)

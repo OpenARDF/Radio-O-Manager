@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
@@ -124,7 +125,12 @@ class ResultServiceDialogFragment : DialogFragment() {
     }
 
     private fun setButtons() {
-        typePicker.onItemSelectedListener
+        // Turn off the result service after changing type
+        typePicker.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
+                selectedRaceViewModel.disableResultService()
+                enableSwitch.isChecked = false
+            }
 
         enableSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (!isChecked) {

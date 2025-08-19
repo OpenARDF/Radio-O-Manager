@@ -115,15 +115,10 @@ class ResultsFragmentRecyclerViewAdapter(
                 if (singleResult.readoutData?.result?.modified == true) {
                     compName += " *"
                 }
+                competitorName.text = compName
 
                 // Cancel previous timer job if exists
                 holder.timerJob?.cancel()
-
-                competitorName.text = compName
-                competitorClub.text =
-                    singleResult.competitorCategory.competitor.club.ifEmpty {
-                        "-"
-                    }
 
                 // Set the competitor time
                 val competitor = singleResult.competitorCategory.competitor
@@ -240,7 +235,6 @@ class ResultsFragmentRecyclerViewAdapter(
     class CompetitorViewHolder(row: View) : RecyclerView.ViewHolder(row) {
         val competitorPlace: TextView = row.findViewById(R.id.result_competitor_place)
         val competitorName: TextView = row.findViewById(R.id.result_competitor_name)
-        val competitorClub: TextView = row.findViewById(R.id.result_competitor_club)
         val competitorTime: TextView = row.findViewById(R.id.result_competitor_time)
         val competitorPoints: TextView = row.findViewById(R.id.result_competitor_points)
 

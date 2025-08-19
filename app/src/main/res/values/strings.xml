@@ -416,8 +416,8 @@
     <string name="result_service_type_robis" translatable="false">ROBis</string>
     <string name="result_service_type_robis_test" translatable="false">ROBis test</string>
 
+    <string name="result_service_status_disabled">Disabled</string>
     <string name="result_service_status_running">Running</string>
-    <string name="result_service_status_ok">OK</string>
     <string name="result_service_status_no_network">No network</string>
     <string name="result_service_status_unauthorized">Unauthorized</string>
     <string name="result_service_status_error">Error</string>
@@ -540,8 +540,8 @@
     </string-array>
 
     <string-array name="result_service_status">
+        <item>@string/result_service_status_disabled</item>
         <item>@string/result_service_status_running</item>
-        <item>@string/result_service_status_ok</item>
         <item>@string/result_service_status_no_network</item>
         <item>@string/result_service_status_unauthorized</item>
         <item>@string/result_service_status_error</item>

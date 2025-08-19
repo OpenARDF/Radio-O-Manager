@@ -102,18 +102,9 @@ class SelectedRaceViewModel : ViewModel() {
         }
 
         // Start result service again
+        CoroutineScope(Dispatchers.IO).launch { dataProcessor.setResultServiceDisabledByRaceId(id) }
         resultService = dataProcessor.getResultServiceLiveDataWithCountByRaceId(id)
 
-        // TODO: finish
-//        if (resultService.value != null && resultService.value!!.resultService?.enabled == true) {
-//            dataProcessor.setResultServiceJob(
-//                ResultServiceWorker.resultServiceJob(
-//                    getCurrentRace().id,
-//                    dataProcessor,
-//                    dataProcessor.getContext()
-//                )
-//            )
-//        }
     }
 
     fun updateRace(race: Race) {
@@ -287,12 +278,8 @@ class SelectedRaceViewModel : ViewModel() {
 
     fun disableResultService() {
         CoroutineScope(Dispatchers.IO).launch {
-            if (resultService.value?.resultService != null) {
-                val rs = resultService.value!!.resultService!!
-                dataProcessor.removeResultServiceJob()
-                rs.enabled = false
-                dataProcessor.createOrUpdateResultService(rs)
-            }
+            dataProcessor.removeResultServiceJob()
+            race.value?.let { dataProcessor.setResultServiceDisabledByRaceId(it.id) }
         }
     }
 

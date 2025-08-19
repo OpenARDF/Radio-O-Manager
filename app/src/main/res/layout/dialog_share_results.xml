@@ -46,7 +46,6 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-
     <Button
         android:id="@+id/results_file_export_button"
         android:layout_width="wrap_content"
@@ -70,10 +69,10 @@
 
     <TextView
         android:id="@+id/results_error_view"
-        style="@style/dialog_text"
+        style="@style/error_text"
+        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/results_data_format_layout" />
 
