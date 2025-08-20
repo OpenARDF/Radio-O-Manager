@@ -25,6 +25,14 @@
         app:startDestination="@id/navigation_categories">
 
         <dialog
+            android:id="@+id/assignControlPointsDialogFragment3"
+            android:name="kolskypavel.ardfmanager.ui.readouts.AssignControlPointsDialogFragment"
+            android:label="AssignControlPointsDialogFragment" >
+            <argument
+                android:name="controlPointsString"
+                app:argType="string" />
+        </dialog>
+        <dialog
             android:id="@+id/resultServiceDialogFragment"
             android:name="kolskypavel.ardfmanager.ui.services.ResultServiceDialogFragment"
             android:label="ResultServiceDialogFragment" />
@@ -186,6 +194,9 @@
             <action
                 android:id="@+id/createCategoryFromReadout"
                 app:destination="@id/categoryEditDialogFragment" />
+            <action
+                android:id="@+id/assignControlPoints"
+                app:destination="@id/assignControlPointsDialogFragment3" />
         </fragment>
 
         <action

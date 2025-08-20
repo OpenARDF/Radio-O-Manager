@@ -247,7 +247,7 @@ class CategoryEditDialogFragment : DialogFragment() {
             try {
                 ControlPointsHelper.getControlPointsFromString(
                     text,
-                    category.raceId,
+                    category.id,
                     category.raceType ?: selectedRaceViewModel.getCurrentRace().raceType,
                     requireContext()
                 )
@@ -342,7 +342,6 @@ class CategoryEditDialogFragment : DialogFragment() {
                     requireContext()
                 )
                 selectedRaceViewModel.createOrUpdateCategory(category, controlPoints)
-                category.controlPointsString = controlPointsString
 
                 setFragmentResult(
                     REQUEST_CATEGORY_MODIFICATION, bundleOf(

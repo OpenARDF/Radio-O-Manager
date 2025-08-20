@@ -188,6 +188,8 @@
     <string name="readout_delete_all">Delete all readouts</string>
     <string name="readout_delete_all_confirmation">Do you really want to delete all readouts? This action CAN\'T be undone!</string>
     <string name="readout_create_category_from_readout">Create a category from this readout</string>
+    <string name="readout_assign_control_points">Assign controls to a category</string>
+    <string name="readout_no_category_exists">No category exists in this race!</string>
     <string name="readout_delete_readout_confirmation">Do you really want to delete readout for SI card %1$d?</string>
 
     <string name="punch_status_valid" translatable="false">✓</string>

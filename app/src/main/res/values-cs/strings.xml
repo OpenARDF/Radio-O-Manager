@@ -125,6 +125,8 @@
     <string name="readout_si_exists">Čip už byl vyčtený!</string>
     <string name="readout_competitor_exists">Tento závodník si už vyčetl!</string>
     <string name="readout_unknown_competitor">Neznámý závodník</string>
+    <string name="readout_assign_control_points">Přiřadit kontroly kategorii</string>
+    <string name="readout_no_category_exists">Závod nemá žádné kategorie!</string>
     <string name="general_points">Body</string>
     <string name="general_place">Umístění</string>
     <string name="readout_edit_readout">Upravit vyčítání</string>

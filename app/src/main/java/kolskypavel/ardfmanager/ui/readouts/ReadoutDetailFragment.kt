@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -166,6 +167,27 @@ class ReadoutDetailFragment : Fragment() {
                     )
                     true
                 }
+
+                R.id.readout_detail_menu_assign_controls -> {
+                    if (selectedRaceViewModel.getCategories().isNotEmpty()) {
+                        findNavController().navigate(
+                            ReadoutDetailFragmentDirections.assignControlPoints(
+                                ControlPointsHelper.getStringFromPunches(
+                                    resultData.getPunchList()
+                                )
+                            )
+                        )
+                    } else {
+                        Toast.makeText(
+                            context,
+                            requireContext().getText(R.string.readout_no_category_exists),
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
+                    }
+                    true
+                }
+
 
                 R.id.readout_detail_menu_delete_readout -> {
                     confirmReadoutDeletion(resultData)

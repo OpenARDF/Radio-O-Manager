@@ -11,6 +11,7 @@ import kolskypavel.ardfmanager.backend.files.FileProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
 import kolskypavel.ardfmanager.backend.files.wrappers.DataImportWrapper
+import kolskypavel.ardfmanager.backend.helpers.ControlPointsHelper
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.prints.PrintProcessor
 import kolskypavel.ardfmanager.backend.results.ResultsProcessor
@@ -176,8 +177,12 @@ class DataProcessor private constructor(context: Context) {
         ardfRepository.getCategoryByMaxAge(maxAge, raceId)
 
     suspend fun createOrUpdateCategory(category: Category, controlPoints: List<ControlPoint>?) {
+        // Update the control points string
+        controlPoints?.let {
+            category.controlPointsString = ControlPointsHelper.getStringFromControlPoints(it)
+        }
         ardfRepository.createOrUpdateCategory(category, controlPoints)
-        ResultsProcessor.updateResultsForCategory(category.id, false, this)
+        updateResultsForCategory(category.id, false, this)
     }
 
     /**
