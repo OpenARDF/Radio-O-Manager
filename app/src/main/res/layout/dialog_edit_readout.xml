@@ -72,12 +72,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp" />
 
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/readout_dialog_edit_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:textColor="@color/black"
+            android:text="@string/readout_edit_readout" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/readout_dialog_punch_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:theme="@style/punch_record_recycler"
+            android:visibility="gone"
             app:layoutManager="LinearLayoutManager" />
 
         <LinearLayout

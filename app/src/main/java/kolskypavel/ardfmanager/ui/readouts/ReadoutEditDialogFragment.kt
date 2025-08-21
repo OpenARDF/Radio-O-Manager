@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
 import kolskypavel.ardfmanager.R
@@ -43,6 +44,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
     private lateinit var result: Result
     private var origResult: Result? = null
+    private var modified = false    // If the readout was modified or not
 
     private lateinit var competitors: List<Competitor>
     private lateinit var categories: List<Category>
@@ -58,6 +60,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
     private lateinit var categoryPickerLayout: TextInputLayout
     private lateinit var raceStatusPicker: MaterialAutoCompleteTextView
     private val statusArr = ArrayList<String>()
+    private lateinit var editSwitch: SwitchMaterial
     private lateinit var punchEditRecyclerView: RecyclerView
     private lateinit var okButton: Button
     private lateinit var cancelButton: Button
@@ -94,6 +97,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
         categoryPicker = view.findViewById(R.id.readout_dialog_category)
         categoryPickerLayout = view.findViewById(R.id.readout_dialog_category_layout)
         raceStatusPicker = view.findViewById(R.id.readout_dialog_status)
+        editSwitch = view.findViewById(R.id.readout_dialog_edit_switch)
         punchEditRecyclerView = view.findViewById(R.id.readout_dialog_punch_recycler_view)
         okButton = view.findViewById(R.id.readout_dialog_ok)
         cancelButton = view.findViewById(R.id.readout_dialog_cancel)
@@ -130,6 +134,9 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
             raceStatusPicker.setText(getString(R.string.general_automatic), false)
             competitorPicker.setText(getString(R.string.readout_unknown_competitor), false)
+            editSwitch.visibility = View.GONE
+            punchEditRecyclerView.visibility = View.VISIBLE
+            modified = true     // Manually created readout is always modified
 
         } else {
             dialog?.setTitle(R.string.readout_edit_readout)
@@ -194,22 +201,6 @@ class ReadoutEditDialogFragment : DialogFragment() {
             )
 
         competitorPicker.setAdapter(competitorAdapter)
-
-        //Competitor picker
-        competitorPicker.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, view, position, id ->
-                competitorPickerLayout.error = ""
-                competitor = getCompetitorFromPicker()
-                result.competitorID = competitor?.id
-
-                setCategoryPicker()
-            }
-
-        categoryPicker.onItemClickListener =
-            AdapterView.OnItemClickListener { parent, view, position, id ->
-                competitor?.categoryId = getCategoryFromPicker()
-
-            }
 
         // Punches setup
         var punchWrappers = ArrayList<PunchEditItemWrapper>()
@@ -292,6 +283,31 @@ class ReadoutEditDialogFragment : DialogFragment() {
     }
 
     private fun setButtons() {
+
+        //Competitor picker
+        competitorPicker.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
+                competitorPickerLayout.error = ""
+                competitor = getCompetitorFromPicker()
+                result.competitorID = competitor?.id
+
+                setCategoryPicker()
+            }
+
+        categoryPicker.onItemClickListener =
+            AdapterView.OnItemClickListener { parent, view, position, id ->
+                competitor?.categoryId = getCategoryFromPicker()
+
+            }
+
+        editSwitch.setOnCheckedChangeListener { p0, checked ->
+            if (checked) {
+                modified = true
+                editSwitch.visibility = View.GONE
+                punchEditRecyclerView.visibility = View.VISIBLE
+            }
+        }
+
         okButton.setOnClickListener {
             if (validateFields()) {
 
@@ -311,7 +327,8 @@ class ReadoutEditDialogFragment : DialogFragment() {
                     selectedRaceViewModel.processManualPunchData(
                         result,
                         punches,
-                        getRaceStatusFromPicker()
+                        getRaceStatusFromPicker(),
+                        modified
                     )
                 }
 

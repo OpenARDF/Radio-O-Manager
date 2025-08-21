@@ -283,7 +283,8 @@ object ResultsProcessor {
         result: Result,
         punches: ArrayList<Punch>,
         manualStatus: ResultStatus?,
-        dataProcessor: DataProcessor
+        dataProcessor: DataProcessor,
+        modified: Boolean
     ) {
         var competitor: Competitor? = null
 
@@ -304,7 +305,9 @@ object ResultsProcessor {
         }
 
         //  Mark the result punches were modified and need to be sent again
-        result.modified = true
+        if (modified) {
+            result.modified = true
+        }
         result.sent = false
 
         punches.forEachIndexed { order, punch ->

@@ -241,9 +241,15 @@ class SelectedRaceViewModel : ViewModel() {
     fun getLastReadCard() = dataProcessor.getLastReadCard()
 
     suspend fun processManualPunchData(
-        result: Result, punches: ArrayList<Punch>, manualStatus: ResultStatus?
+        result: Result, punches: ArrayList<Punch>, manualStatus: ResultStatus?, modified: Boolean
     ) {
-        ResultsProcessor.processManualPunchData(result, punches, manualStatus, DataProcessor.get())
+        ResultsProcessor.processManualPunchData(
+            result,
+            punches,
+            manualStatus,
+            DataProcessor.get(),
+            modified
+        )
     }
 
     fun getResultData(id: UUID): ResultData {
