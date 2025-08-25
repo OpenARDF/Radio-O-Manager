@@ -52,6 +52,10 @@ object SIConstants {
     const val SI_MIN_CODE = 1
     const val SI_MAX_CODE = 255
 
+    // Notification ID
+    const val NOTIFICATION_CHANNEL_ID = "si_reader_channel"
+    const val NOTIFICATION_CHANNEL_NAME = "SI Reader"
+
     fun isSINumberValid(siNumber: Int): Boolean {
         return (siNumber in SI_MIN_NUMBER..SI_MAX_NUMBER)
     }

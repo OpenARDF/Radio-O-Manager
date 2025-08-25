@@ -393,6 +393,7 @@ object ResultsProcessor {
         if (result.startTime != null && result.finishTime != null) {
             result.runTime = SITime.split(result.startTime!!, result.finishTime!!)
         }
+        // TODO: solve situation when start or finish is missing
 
         // Set the result status based on user preference
         if (manualStatus != null) {

@@ -32,7 +32,6 @@ import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.Race
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
-import kolskypavel.ardfmanager.backend.room.enums.CompetitorTableDisplayType
 import kolskypavel.ardfmanager.databinding.FragmentCompetitorsBinding
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kolskypavel.ardfmanager.ui.races.RaceEditDialogFragment
@@ -348,8 +347,8 @@ class CompetitorFragment : Fragment() {
 
     private fun confirmAutomaticCategories() {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle(getString(R.string.competitor_add_categories_automatically))
-        builder.setMessage(R.string.competitor_add_categories_automatically_confirmation)
+        builder.setTitle(getString(R.string.competitor_assign_categories_automatically))
+        builder.setMessage(R.string.competitor_assign_categories_automatically_confirmation)
 
         builder.setPositiveButton(R.string.general_ok) { dialog, _ ->
             selectedRaceViewModel.addCategoriesAutomatically()
@@ -357,7 +356,7 @@ class CompetitorFragment : Fragment() {
 
             Toast.makeText(
                 requireContext(),
-                requireContext().getText(R.string.competitor_add_categories_toast),
+                requireContext().getText(R.string.competitor_assign_categories_toast),
                 Toast.LENGTH_LONG
             )
                 .show()
@@ -422,6 +421,7 @@ class CompetitorFragment : Fragment() {
                     Race::class.java
                 )!!
             } else {
+                @Suppress("DEPRECATION")
                 bundle.getSerializable(RaceEditDialogFragment.BUNDLE_KEY_RACE) as Race
             }
             selectedRaceViewModel.updateRace(race)
@@ -431,5 +431,16 @@ class CompetitorFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+}
+
+enum class CompetitorTableDisplayType(var value: Int) {
+    OVERVIEW(0),
+    START_LIST(1),
+    FINISH_REACHED(2),
+    ON_THE_WAY(3);
+
+    companion object {
+        fun getByValue(value: Int) = entries.firstOrNull { it.value == value } ?: OVERVIEW
     }
 }

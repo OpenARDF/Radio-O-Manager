@@ -10,7 +10,6 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
-import kolskypavel.ardfmanager.backend.room.enums.CompetitorTableDisplayType
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
