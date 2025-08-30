@@ -1,9 +1,7 @@
-# ARDF-Manager-kotlin
-Mobile app for managing ARDF events, written in Kotlin.
-Originally a school project for MSOE - CSC 4911.
+# ARDF-Manager
+Mobile app for managing radioorienteering (ARDF) and orienteering events, written in Kotlin.
 
 ## Basic app information
-This app enables event management for the sport of ARDF and orienteering. 
 Currently availabe functions:
  - Creating and importing races with categories, aliases, and competitors
  - Readout of SportIdent cards (SI5 - SIAC)
@@ -15,6 +13,9 @@ Currently availabe functions:
 - SportIdent BSM 7 / BSM 8 reader
 - USB to OTG adaper
 - Bluetooth printer for ticket printout
+
+## Installation and tutorial
+A detailed tutorial with images on how to install and use the app is available in the [wiki](https://github.com/kolskypavel/ARDF-Manager/wiki).
 
 ## Support
 ### Competition formats
@@ -31,6 +32,13 @@ Please refer to the wiki section [Developement](https://github.com/kolskypavel/A
 
 ## Third party libraries and resources
  - **Logo** - using SportIdent by Gonzo from <a href="https://thenounproject.com/browse/icons/term/sportident/" target="_blank" title="SportIdent Icons">Noun Project</a> (CC BY 3.0)
+- [SortableTableView](https://github.com/ISchwarz23/SortableTableView)
+- [kotlin-csv](https://github.com/doyaaaaaken/kotlin-csv)
+- [UsbSerial](https://github.com/felHR85/UsbSerial)
+- [ESCPOS-ThermalPrinter-Android](https://github.com/DantSu/ESCPOS-ThermalPrinter-Android)
+- [Moshi](https://github.com/square/moshi)
+- [OkHttp](https://github.com/square/okhttp)
+- [Markwon](https://github.com/noties/Markwon)
 
 ## Developement team
 - Pavel Kolský (head developer)
