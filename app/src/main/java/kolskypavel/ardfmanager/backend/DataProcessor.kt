@@ -112,8 +112,6 @@ class DataProcessor private constructor(context: Context) {
         return race
     }
 
-    fun getCurrentRace() = currentState.value?.currentRace!!
-
     fun removeCurrentRace() {
         currentState.postValue(currentState.value?.let { AppState(null, it.siReaderState, null) })
     }

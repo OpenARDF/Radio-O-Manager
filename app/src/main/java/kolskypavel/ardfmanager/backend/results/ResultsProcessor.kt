@@ -55,7 +55,7 @@ object ResultsProcessor {
     /**
      * Adjust the times for the SI_CARD5, because it operates on 12h mode instead of 24h
      */
-    fun card5TimeAdjust(result: Result, punches: List<Punch>, zeroTimeBase: LocalTime) {
+    private fun card5TimeAdjust(result: Result, punches: List<Punch>, zeroTimeBase: LocalTime) {
         //Solve start and check
         if (result.startTime != null) {
             result.startTime = adjustTime(SITime(zeroTimeBase), result.origStartTime!!)
@@ -312,7 +312,7 @@ object ResultsProcessor {
     }
 
     // Main method for calculation
-    private suspend fun calculateResult(
+    suspend fun calculateResult(
         result: Result,
         category: Category?,
         punches: ArrayList<Punch>,
@@ -323,7 +323,7 @@ object ResultsProcessor {
         // If no start time is found in the SI card, try to get it from the competitor
         if (result.competitorId != null && result.origStartTime == null) {
             dataProcessor.getCompetitor(result.competitorId!!)?.drawnRelativeStartTime?.let { relativeStartTime ->
-                val raceStart = dataProcessor.getCurrentRace().startDateTime
+                val raceStart = dataProcessor.getRace(result.raceId).startDateTime
                 val startTime =
                     TimeProcessor.getAbsoluteDateTimeFromRelativeTime(raceStart, relativeStartTime)
                 result.startTime =
@@ -411,7 +411,7 @@ object ResultsProcessor {
         val raceType = if (category.differentProperties) {
             category.raceType!!
         } else {
-            dataProcessor.getCurrentRace().raceType
+            dataProcessor.getRace(category.raceId).raceType
         }
         when (raceType) {
             RaceType.CLASSIC, RaceType.FOXORING -> evaluateClassics(

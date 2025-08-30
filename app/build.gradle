@@ -69,7 +69,7 @@ dependencies {
     implementation('com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.4.0')
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
     implementation('com.squareup.okhttp3:okhttp:5.1.0')
-    implementation ('io.noties.markwon:core:4.6.2')
+    implementation('io.noties.markwon:core:4.6.2')
 
     //Testing libraries
     testImplementation("junit:junit:4.13.2")
@@ -77,4 +77,6 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     testImplementation("org.mockito:mockito-core:5.7.0")
     testImplementation('org.mockito.kotlin:mockito-kotlin:6.0.0')
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+
 }
