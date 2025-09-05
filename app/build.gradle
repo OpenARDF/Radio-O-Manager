@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("androidx.navigation.safeargs")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -61,6 +62,10 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation('androidx.navigation:navigation-fragment-ktx:2.7.6')
     implementation('androidx.navigation:navigation-ui-ktx:2.7.6')
+
+    //Firebase
+    implementation platform('com.google.firebase:firebase-bom:34.2.0')
+    implementation 'com.google.firebase:firebase-analytics'
 
     //External libraries
     implementation 'com.github.ISchwarz23:SortableTableView:2.8.1'
