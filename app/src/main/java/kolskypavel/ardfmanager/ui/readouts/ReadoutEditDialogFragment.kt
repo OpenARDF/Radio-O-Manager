@@ -112,7 +112,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
             result =
                 Result(
                     UUID.randomUUID(),
-                    selectedRaceViewModel.getCurrentRace().id,
+                    args.raceId,
                     siNumber = null,
                     cardType = 0,
                     checkTime = null,
@@ -206,7 +206,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
                 PunchEditItemWrapper(
                     Punch(
                         UUID.randomUUID(),
-                        selectedRaceViewModel.getCurrentRace().id,
+                        args.raceId,
                         null,
                         null,
                         0,
@@ -223,7 +223,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
                 PunchEditItemWrapper(
                     Punch(
                         UUID.randomUUID(),
-                        selectedRaceViewModel.getCurrentRace().id,
+                        args.raceId,
                         null,
                         null,
                         0,

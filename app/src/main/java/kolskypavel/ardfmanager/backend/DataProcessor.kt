@@ -173,8 +173,8 @@ class DataProcessor private constructor(context: Context) {
     suspend fun getHighestCategoryOrder(raceId: UUID) =
         ardfRepository.getHighestCategoryOrder(raceId)
 
-    suspend fun getCategoryByMaxAge(maxAge: Int, raceId: UUID) =
-        ardfRepository.getCategoryByMaxAge(maxAge, raceId)
+    suspend fun getCategoryByMaxAge(maxAge: Int, isMan: Boolean, raceId: UUID) =
+        ardfRepository.getCategoryByMaxAge(maxAge, isMan, raceId)
 
     suspend fun createOrUpdateCategory(category: Category, controlPoints: List<ControlPoint>?) {
         // Update the control points string
