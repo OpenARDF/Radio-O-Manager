@@ -207,7 +207,7 @@
     <string name="preferences_results_time_format_minutes">mm:ss</string>
     <string name="preferences_results_time_format_hours">hh:mm:ss</string>
     <string name="preferences_results_use_aliases">Použít aliasy</string>
-    <string name="preferences_results_use_aliases_hint">Použít aliasy pro kontrolní body místo SI kódů</string>
+    <string name="preferences_results_use_aliases_hint">Použít aliasy pro kontroly místo SI kódů</string>
     <string name="preferences_results_service">Výsledková služba</string>
     <string name="preferences_results_service_hint">Vyberte, kdy odesílat výsledky pomocí výsledkové služby\n[%1$s]</string>
     <string name="preferences_result_service_matched">Při nalezení závodníka</string>
