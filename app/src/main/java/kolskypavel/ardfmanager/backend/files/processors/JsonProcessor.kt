@@ -114,6 +114,8 @@ object JsonProcessor : FormatProcessor {
             val adapter = moshi.adapter<List<ResultCompetitorJson>>(type)
 
             val exportList = results.mapNotNull { rd ->
+                val result = rd.readoutData ?: return@mapNotNull null
+
                 val compCat = rd.competitorCategory
                 val competitor = compCat.competitor
                 val category = compCat.category ?: return@mapNotNull null

@@ -160,7 +160,7 @@
     <string name="readout_delete_all_confirmation">Opravdu chcete smazat všechna vyčítání? Tuto akci NELZE vrátit.</string>
     <string name="results_share">Sdílet výsledky</string>
     <string name="results_service">Výsledková služba</string>
-    <string name="results_export_error">Chyba při exportování dat!</string>
+    <string name="results_export_error">Chyba při exportování dat! %1$s</string>
     <string name="preferences_general">Obecné</string>
     <string name="preferences_prints">Tisk</string>
     <string name="preferences_help">Nápověda</string>
