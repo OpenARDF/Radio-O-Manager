@@ -93,11 +93,12 @@ object TimeProcessor {
     // Calculates the duration from competitor's start till now
     fun runDurationFromStart(
         startDateTime: LocalDateTime,
-        relativeStartTime: Duration
+        relativeStartTime: Duration,
+        curTime: LocalDateTime
     ): Duration? {
         //Check if the competitor started
-        if (hasStarted(startDateTime, relativeStartTime, LocalDateTime.now())) {
-            return Duration.between(startDateTime, LocalDateTime.now())
+        if (hasStarted(startDateTime, relativeStartTime, curTime)) {
+            return Duration.between(startDateTime + relativeStartTime, curTime)
         }
         return null
     }
@@ -106,14 +107,15 @@ object TimeProcessor {
     fun runDurationFromStartString(
         startDateTime: LocalDateTime,
         relativeStartTime: Duration,
-        dataProcessor: DataProcessor
+        dataProcessor: DataProcessor,
+        curTime: LocalDateTime
     ): String {
         //Check if the competitor started
-        if (hasStarted(startDateTime, relativeStartTime, LocalDateTime.now())) {
+        if (hasStarted(startDateTime, relativeStartTime, curTime)) {
             return durationToFormattedString(
                 Duration.between(
                     startDateTime + relativeStartTime,
-                    LocalDateTime.now()
+                    curTime
                 ), dataProcessor.useMinuteTimeFormat()
             )
         }
@@ -129,7 +131,7 @@ object TimeProcessor {
         timeLimit: Duration,
         curTime: LocalDateTime
     ): Boolean {
-        return if (hasStarted(startDateTime, relativeStartTime, LocalDateTime.now())) {
+        return if (hasStarted(startDateTime, relativeStartTime, curTime)) {
             curTime.isBefore(startDateTime.plusSeconds(timeLimit.seconds))
         } else true
     }
@@ -144,7 +146,7 @@ object TimeProcessor {
         if (hasStarted(startDateTime, relativeStartTime, curTime)) {
             return Duration.between(
                 curTime,
-                startDateTime.plusSeconds(timeLimit.seconds)
+                (startDateTime + relativeStartTime).plusSeconds(timeLimit.seconds)
             )
         }
         return null

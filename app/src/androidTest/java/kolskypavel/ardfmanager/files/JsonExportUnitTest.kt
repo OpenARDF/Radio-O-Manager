@@ -56,7 +56,6 @@ class JsonExportUnitTest {
             id = UUID.randomUUID(),
             raceId = raceIdRandom,
             competitorId = competitorId,
-            categoryId = categoryId,
             siNumber = 12345,
             cardType = 0,
             checkTime = null,
@@ -102,7 +101,7 @@ class JsonExportUnitTest {
         )
 
         val outputStream = ByteArrayOutputStream()
-        JsonProcessor.exportResults(outputStream, listOf(compData))
+        JsonProcessor.exportResults(outputStream, listOf(compData), raceIdRandom)
 
         val json = outputStream.toString(Charsets.UTF_8.name())
         println(json)

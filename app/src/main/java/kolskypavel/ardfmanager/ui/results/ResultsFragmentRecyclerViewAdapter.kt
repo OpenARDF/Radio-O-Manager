@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class ResultsFragmentRecyclerViewAdapter(
     var values: ArrayList<ResultWrapper>,
@@ -137,7 +138,7 @@ class ResultsFragmentRecyclerViewAdapter(
                                     TimeProcessor.runDurationFromStartString(
                                         it.startDateTime,
                                         drawnStartTime,
-                                        dataProcessor
+                                        dataProcessor, LocalDateTime.now()
                                     )
                             }
                             delay(1000)
