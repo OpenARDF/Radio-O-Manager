@@ -21,6 +21,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kolskypavel.ardfmanager.BottomNavDirections
 import kolskypavel.ardfmanager.R
@@ -45,6 +46,7 @@ class ReadoutFragment : Fragment() {
 
     private var statsJob: Job? = null
 
+    private lateinit var readoutSwipeLayout: SwipeRefreshLayout
     private lateinit var readoutToolbar: Toolbar
     private lateinit var startedTextView: TextView
     private lateinit var limitTextView: TextView
@@ -80,6 +82,7 @@ class ReadoutFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        readoutSwipeLayout = view.findViewById(R.id.readouts_swipe_layout)
         readoutToolbar = view.findViewById(R.id.readouts_toolbar)
         readoutRecyclerView = view.findViewById(R.id.readout_recycler_view)
 
@@ -99,6 +102,12 @@ class ReadoutFragment : Fragment() {
         selectedRaceViewModel.race.observe(viewLifecycleOwner) { race ->
             readoutToolbar.title = race.name
             readoutToolbar.subtitle = dataProcessor.raceTypeToString(race.raceType)
+        }
+
+        readoutSwipeLayout.setOnRefreshListener {
+            selectedRaceViewModel.getCurrentRace()
+                ?.let { race -> selectedRaceViewModel.updateResultsByRace(race.id) }
+            readoutSwipeLayout.isRefreshing = false
         }
 
         readoutAddFab.setOnClickListener {

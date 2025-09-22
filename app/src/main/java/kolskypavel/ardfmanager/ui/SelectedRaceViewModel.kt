@@ -263,6 +263,10 @@ class SelectedRaceViewModel : ViewModel() {
         return@runBlocking dataProcessor.getResultByCompetitor(competitorId)
     }
 
+    fun updateResultsByRace(raceId: UUID) = CoroutineScope(Dispatchers.IO).launch {
+        dataProcessor.updateResultsByRace(raceId)
+    }
+
     fun deleteResult(id: UUID) {
         CoroutineScope(Dispatchers.IO).launch {
             dataProcessor.deleteResult(id)
@@ -308,7 +312,7 @@ class SelectedRaceViewModel : ViewModel() {
     }
 
     fun exportData(
-        uri: Uri, dataType: DataType, dataFormat: DataFormat,raceId: UUID
+        uri: Uri, dataType: DataType, dataFormat: DataFormat, raceId: UUID
     ) = runBlocking {
         dataProcessor.exportData(
             uri, dataType, dataFormat, raceId

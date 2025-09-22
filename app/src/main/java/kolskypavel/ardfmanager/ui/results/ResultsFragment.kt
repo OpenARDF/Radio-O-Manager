@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kolskypavel.ardfmanager.BottomNavDirections
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
@@ -39,6 +40,8 @@ class ResultsFragment : Fragment() {
 
     private val selectedRaceViewModel: SelectedRaceViewModel by activityViewModels()
     private val dataProcessor = DataProcessor.get()
+
+    private lateinit var resultsSwipeLayout: SwipeRefreshLayout
     private lateinit var resultsToolbar: Toolbar
     private lateinit var resultsRecyclerView: RecyclerView
     private lateinit var resultsServiceMenuItem: MenuItem
@@ -63,6 +66,7 @@ class ResultsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        resultsSwipeLayout = view.findViewById(R.id.results_swipe_layout)
         resultsToolbar = view.findViewById(R.id.results_toolbar)
         resultsRecyclerView = view.findViewById(R.id.results_recycler_view)
         resultsToolbar.inflateMenu(R.menu.fragment_menu_result)
@@ -75,6 +79,12 @@ class ResultsFragment : Fragment() {
         selectedRaceViewModel.race.observe(viewLifecycleOwner) { race ->
             resultsToolbar.title = race.name
             resultsToolbar.subtitle = dataProcessor.raceTypeToString(race.raceType)
+        }
+
+        resultsSwipeLayout.setOnRefreshListener {
+            selectedRaceViewModel.getCurrentRace()
+                ?.let { race -> selectedRaceViewModel.updateResultsByRace(race.id) }
+            resultsSwipeLayout.isRefreshing = false
         }
 
         // Set results service icon

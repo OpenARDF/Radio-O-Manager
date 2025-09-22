@@ -125,7 +125,7 @@ class DataProcessor private constructor(context: Context) {
 
     suspend fun updateRace(race: Race) {
         ardfRepository.updateRace(race)
-        updateResults(race.id)
+        updateResultsByRace(race.id)
     }
 
     suspend fun deleteRace(id: UUID) {
@@ -367,7 +367,7 @@ class DataProcessor private constructor(context: Context) {
      *     Recalculates all results in a race
      *     Since race edit could mean a change in start time 00, results for each competitor need to be recalculated
      */
-    private suspend fun updateResults(raceId: UUID) {
+    suspend fun updateResultsByRace(raceId: UUID) {
         getCategoriesForRace(raceId).forEach { category ->
             updateResultsForCategory(category.id, false, this)
         }
