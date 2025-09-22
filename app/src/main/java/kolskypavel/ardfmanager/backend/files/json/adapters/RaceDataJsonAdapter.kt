@@ -55,7 +55,7 @@ class RaceDataJsonAdapter {
             categoryAdapter.fromJson(catJson).also { it.category.raceId = race.id }
         }
 
-        val aliases = raceJson.aliases.map { aliasJson ->
+        val aliases = raceJson.aliases?.map { aliasJson ->
             Alias(
                 UUID.randomUUID(),
                 race.id,
@@ -66,25 +66,26 @@ class RaceDataJsonAdapter {
 
         val competitorData = ArrayList<CompetitorData>()
 
-        for (compJson in raceJson.competitors) {
-            val cd = competitorAdapter.fromJson(compJson)
+        for (compJson in raceJson.competitors.withIndex()) {
+            val cd = competitorAdapter.fromJson(compJson.value)
                 .also { it.competitorCategory.competitor.raceId = race.id }
 
-            if (compJson.competitor_category.isNotBlank()) {
+            if (compJson.value.competitor_category.isNotBlank()) {
                 cd.competitorCategory.competitor.categoryId =
-                    categories.find { compJson.competitor_category == it.category.name }?.category?.id
+                    categories.find { compJson.value.competitor_category == it.category.name }?.category?.id
             }
+            cd.competitorCategory.competitor.startNumber = compJson.index
             competitorData.add(cd)
         }
         val unmatchedData =
-            raceJson.unmatched_results.map { json -> unmatchedAdapter.fromJson(json) }
+            raceJson.unmatched_results?.map { json -> unmatchedAdapter.fromJson(json) }
 
         return RaceData(
             race = race,
             categories = categories,
-            aliases = aliases,
+            aliases = aliases ?: emptyList(),
             competitorData = competitorData,
-            unmatchedReadoutData = unmatchedData.toList()
+            unmatchedReadoutData = unmatchedData?.toList() ?: emptyList()
         )
     }
 }

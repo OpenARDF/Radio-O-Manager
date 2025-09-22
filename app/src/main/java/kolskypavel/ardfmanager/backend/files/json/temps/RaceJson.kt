@@ -14,17 +14,17 @@ data class RaceJson(
     val race_level: RaceLevel,
     val race_time_limit: String,
     val categories: List<CategoryJson>,
-    val aliases: List<AliasJson>,
+    val aliases: List<AliasJson>?,
     val competitors: List<CompetitorJson>,
-    val unmatched_results: List<UnmatchedResultJson>
+    val unmatched_results: List<UnmatchedResultJson>?
 )
 
 data class CategoryJson(
     val category_name: String,
     val category_gender: Boolean,
     val category_max_age: Int?,
-    val category_length: Float,
-    val category_climb: Float,
+    val category_length: Float?,
+    val category_climb: Float?,
     val category_control_points: List<ControlPointJson>,
     val category_different_properties: Boolean,
     val category_race_type: RaceType?,
