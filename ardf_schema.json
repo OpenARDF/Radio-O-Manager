@@ -65,6 +65,7 @@
               "SPRINT",
               "FOXORING",
               "LONG",
+              "SHORT",
               "RELAY",
               "ORIENTEERING"
             ],
@@ -95,9 +96,9 @@
             "description": "Level of the race"
           },
           "race_time_limit": {
-            "type": "string",
-            "pattern": "^\\d{1,3}:[0-5]\\d$",
-            "description": "Time limit in mm:ss"
+            "type": "integer",
+            "minimum": 0,
+            "description": "Time limit in minutes"
           },
           "categories": {
             "type": "array",
@@ -175,9 +176,9 @@
                   "description": "Category - different race type"
                 },
                 "category_time_limit": {
-                  "type": "string",
-                  "pattern": "^$|^(?:[0-5]\\d):[0-5]\\d$",
-                  "description": "Category - different time limit in mm:ss"
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Category - different time limit in minutes"
                 },
                 "category_band": {
                   "type": "string",
