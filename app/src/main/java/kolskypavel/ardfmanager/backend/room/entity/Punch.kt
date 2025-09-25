@@ -50,4 +50,18 @@ data class Punch(
         punchStatus = PunchStatus.UNKNOWN,
         split = Duration.ZERO
     )
+
+    constructor(siCode: Int, siTime: SITime, punchType: SIRecordType, order: Int) : this(
+        id = UUID.randomUUID(),
+        raceId = UUID.randomUUID(),
+        resultId = null,
+        cardNumber = null,
+        siCode = siCode,
+        siTime = siTime,
+        origSiTime = siTime,
+        punchType = punchType,
+        order = order,
+        punchStatus = PunchStatus.UNKNOWN,
+        split = Duration.ZERO
+    )
 }

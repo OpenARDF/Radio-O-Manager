@@ -13,18 +13,18 @@ import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import java.time.LocalDateTime
 import java.util.UUID
 
-class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
+class ResultJsonAdapter(
+    val raceId: UUID,
+    val dataProcessor: DataProcessor
+) {
     val siTimeJsonAdapter = SITimeJsonAdapter()
-    val punchJsonAdapter = PunchJsonAdapter(raceId)
+    val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
 
     @ToJson
     fun toJson(resultData: CompetitorData): ResultJson {
         val result = resultData.readoutData?.result!!
-        var punches = resultData.readoutData!!.punches
-
-        if (filterStart) {
-            punches = punches.filter { it.punch.punchType != SIRecordType.START }
-        }
+        val punches =
+            resultData.readoutData!!.punches.filter { it.punch.punchType != SIRecordType.START }
 
         return ResultJson(
             check_time = result.checkTime?.let { siTimeJsonAdapter.toJson(it) },
@@ -34,7 +34,7 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
             run_time = TimeProcessor.durationToFormattedString(result.runTime, true),
             place = result.place,
             controls_num = result.points,
-            result_status = DataProcessor.get()
+            result_status = dataProcessor
                 .resultStatusToShortString(result.resultStatus),
             punches = punches
                 .map { ap ->
@@ -63,7 +63,7 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
             finishTime = null,
             origFinishTime = null,
             automaticStatus = false,
-            resultStatus = DataProcessor.get().resultStatusStringToEnum(json.result_status),
+            resultStatus = dataProcessor.resultStatusStringToEnum(json.result_status),
             runTime = TimeProcessor.minuteStringToDuration(json.run_time), // must match enum exactly
             modified = false,
             sent = false,
@@ -72,10 +72,9 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
 
 
         val punches = ArrayList<AliasPunch>()
-        val punchJsonAdapter = PunchJsonAdapter(raceId)
+        val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
         json.punches.forEachIndexed { index, punchJson ->
 
-            val punchType = SIRecordType.valueOf(punchJson.control_type)
             val punch = punchJsonAdapter.fromJson(punchJson)
             punch.order = index
             punch.resultId = result.id

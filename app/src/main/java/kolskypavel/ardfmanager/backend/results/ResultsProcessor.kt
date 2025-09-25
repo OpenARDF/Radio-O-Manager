@@ -147,7 +147,7 @@ object ResultsProcessor {
         return punches
     }
 
-    private fun calculateSplits(punches: ArrayList<Punch>) {
+    fun calculateSplits(punches: ArrayList<Punch>) {
         //Calculate splits
         punches.forEachIndexed { index, punch ->
             if (index != 0) {

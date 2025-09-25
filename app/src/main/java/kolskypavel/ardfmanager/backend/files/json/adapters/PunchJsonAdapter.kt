@@ -10,7 +10,7 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import java.util.UUID
 
-class PunchJsonAdapter(val raceId: UUID) {
+class PunchJsonAdapter(val raceId: UUID, val dataProcessor: DataProcessor) {
     val siTimeJsonAdapter = SITimeJsonAdapter()
 
     @ToJson
@@ -19,7 +19,7 @@ class PunchJsonAdapter(val raceId: UUID) {
         return PunchJson(
             code = aliasPunch.alias?.name ?: punch.siCode.toString(),
             control_type = punch.punchType.name,
-            punch_status = DataProcessor.get().punchStatusToShortString(punch.punchStatus),
+            punch_status = dataProcessor.punchStatusToShortString(punch.punchStatus),
             si_time = siTimeJsonAdapter.toJson(punch.siTime),
             split_time = TimeProcessor.durationToFormattedString(punch.split, true)
         )
@@ -40,7 +40,7 @@ class PunchJsonAdapter(val raceId: UUID) {
             origSiTime = siTimeJsonAdapter.fromJson(punchJson.si_time),
             punchType = punchType,
             order = 0,
-            punchStatus = DataProcessor.get()
+            punchStatus = dataProcessor
                 .shortStringToPunchStatus(punchJson.punch_status),
             split = TimeProcessor.minuteStringToDuration(punchJson.split_time),
         )

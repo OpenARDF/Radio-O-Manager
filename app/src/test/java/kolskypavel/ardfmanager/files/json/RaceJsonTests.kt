@@ -1,6 +1,7 @@
 package kolskypavel.ardfmanager.files.json
 
 import com.squareup.moshi.JsonDataException
+import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.processors.JsonProcessor
 import kolskypavel.ardfmanager.backend.room.enums.RaceBand
 import kolskypavel.ardfmanager.backend.room.enums.RaceLevel
@@ -8,9 +9,11 @@ import kolskypavel.ardfmanager.backend.room.enums.RaceType
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Test
+import org.mockito.Mockito.mock
 import java.time.LocalDateTime
 
-class RaceJsonImportTest {
+class RaceJsonTests {
+    val dataProcessor: DataProcessor = mock()
 
 //    @Test
 //    fun testToJson() {
@@ -27,8 +30,10 @@ class RaceJsonImportTest {
 
     @Test
     fun testValidFromJson() {
+
+
         val stream = this::class.java.classLoader.getResourceAsStream("valid_race_import.ardfjs")
-        val raceData = JsonProcessor.importRaceData(stream)
+        val raceData = JsonProcessor.importRaceData(stream, dataProcessor)
 
         assertEquals("EXAMPLE", raceData.race.name)
         assertEquals(LocalDateTime.of(2025, 11, 28, 13, 0, 0), raceData.race.startDateTime)
@@ -51,7 +56,12 @@ class RaceJsonImportTest {
     @Test
     fun testInvalidFromJson() {
         val stream = this::class.java.classLoader.getResourceAsStream("invalid_race_import.ardfjs")
-        assertThrows(JsonDataException::class.java) { JsonProcessor.importRaceData(stream) }
+        assertThrows(JsonDataException::class.java) {
+            JsonProcessor.importRaceData(
+                stream,
+                dataProcessor
+            )
+        }
 
     }
 }

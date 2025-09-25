@@ -24,7 +24,7 @@ import org.mockito.kotlin.anyVararg
 import java.util.UUID
 
 // Test class for DataImportValidator
-class DataImportValidatorTest {
+class DataImportValidatorTests {
 
     private lateinit var context: Context
     private lateinit var dataProcessor: DataProcessor

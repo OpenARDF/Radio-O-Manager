@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter
 class LocalDateTimeAdapter : JsonAdapter<LocalDateTime>() {
     private val legacyFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     private val isoFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val isoFormatterSeconds = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
     @FromJson
     override fun fromJson(reader: JsonReader): LocalDateTime? {
@@ -33,6 +34,6 @@ class LocalDateTimeAdapter : JsonAdapter<LocalDateTime>() {
 
     @ToJson
     override fun toJson(writer: JsonWriter, value: LocalDateTime?) {
-        writer.value(value?.format(isoFormatter))
+        writer.value(value?.format(isoFormatterSeconds))
     }
 }
