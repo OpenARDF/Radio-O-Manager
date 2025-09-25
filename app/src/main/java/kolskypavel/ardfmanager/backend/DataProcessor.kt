@@ -183,7 +183,7 @@ class DataProcessor private constructor(context: Context) {
             category.controlPointsString = ControlPointsHelper.getStringFromControlPoints(it)
         }
         ardfRepository.createOrUpdateCategory(category, controlPoints)
-        updateResultsForCategory(category.id, false, this)
+        updateResultsForCategory(category.id, this)
     }
 
     /**
