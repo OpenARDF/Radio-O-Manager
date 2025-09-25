@@ -110,7 +110,7 @@ class ResultsFragmentRecyclerViewAdapter(
                     competitorPlace.text = "-"
                 }
 
-                var compName = singleResult.competitorCategory.competitor.getFullName()
+                var compName = singleResult.competitorCategory.competitor.getFullName().take(40)
 
                 // Inform that the readout was modified
                 if (singleResult.readoutData?.result?.modified == true) {

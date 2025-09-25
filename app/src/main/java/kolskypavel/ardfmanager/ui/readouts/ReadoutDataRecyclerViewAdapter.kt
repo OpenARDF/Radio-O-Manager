@@ -35,13 +35,13 @@ class ReadoutDataRecyclerViewAdapter(
         val item = values[position]
 
         if (item.competitorCategory?.competitor != null) {
-            holder.competitorView.text = item.competitorCategory!!.competitor.getFullName()
+            holder.competitorView.text = item.competitorCategory!!.competitor.getFullName().take(30)
         } else {
             holder.competitorView.setText(R.string.unknown)
         }
 
         if (item.competitorCategory?.category != null) {
-            holder.categoryView.text = item.competitorCategory!!.category!!.name
+            holder.categoryView.text = item.competitorCategory!!.category!!.name.take(10)
         } else {
             holder.categoryView.text = context.getString(R.string.no_category)
         }
