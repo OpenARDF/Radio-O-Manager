@@ -174,7 +174,7 @@ object TextProcessor : FormatProcessor {
         params[FileConstants.KEY_COMP_RUN_TIME] =
             TimeProcessor.durationToFormattedString(
                 result.runTime,
-                false
+                dataProcessor.useMinuteTimeFormat()
             )
         params[FileConstants.KEY_COMP_POINTS] =
             result.points.toString()
@@ -199,13 +199,16 @@ object TextProcessor : FormatProcessor {
         var out = ""
 
         for (aliasPunch in punches.withIndex()) {
-            out += TimeProcessor.durationToFormattedString(
-                aliasPunch.value.punch.split,
-                dataProcessor.useMinuteTimeFormat()
-            )
+            if (aliasPunch.value.punch.punchType != SIRecordType.START) {
 
-            if (aliasPunch.index < punches.size - 1) {
-                out += " "
+                out += TimeProcessor.durationToFormattedString(
+                    aliasPunch.value.punch.split,
+                    dataProcessor.useMinuteTimeFormat()
+                )
+
+                if (aliasPunch.index < punches.size - 1) {
+                    out += " "
+                }
             }
         }
         return out
