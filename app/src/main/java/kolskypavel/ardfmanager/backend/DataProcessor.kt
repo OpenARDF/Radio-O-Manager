@@ -106,11 +106,13 @@ class DataProcessor private constructor(context: Context) {
         }
     }
 
-    suspend fun setCurrentRace(raceId: UUID): Race {
+    suspend fun setCurrentRace(raceId: UUID): Race? {
         val race = getRace(raceId)
-        currentState.postValue(currentState.value?.let { AppState(race, it.siReaderState) })
-
-        return race
+        race?.let { race ->
+            currentState.postValue(currentState.value?.let { AppState(race, it.siReaderState) })
+            return race
+        }
+        return null
     }
 
     fun removeCurrentRace() {
@@ -120,7 +122,7 @@ class DataProcessor private constructor(context: Context) {
     //METHODS TO HANDLE RACES
     fun getRaces(): Flow<List<Race>> = ardfRepository.getRaces()
 
-    suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
+    suspend fun getRace(id: UUID) = ardfRepository.getRace(id)
 
     suspend fun createRace(race: Race) = ardfRepository.createRace(race)
 
@@ -183,7 +185,7 @@ class DataProcessor private constructor(context: Context) {
             category.controlPointsString = ControlPointsHelper.getStringFromControlPoints(it)
         }
         ardfRepository.createOrUpdateCategory(category, controlPoints)
-        updateResultsForCategory(category.id, this)
+        getRace(category.raceId)?.let { race -> updateResultsForCategory(category.id, race, this) }
     }
 
     /**
@@ -206,18 +208,21 @@ class DataProcessor private constructor(context: Context) {
     }
 
     suspend fun createStandardCategories(type: StandardCategoryType, raceId: UUID) {
-        val categories = fileProcessor?.importStandardCategories(type, getRace(raceId))
-        if (categories != null) {
-            for (cat in categories) {
-                ardfRepository.createCategory(cat)
+        val race = getRace(raceId)
+        race?.let { race ->
+            val categories = fileProcessor?.importStandardCategories(type, race)
+            if (categories != null) {
+                for (cat in categories) {
+                    ardfRepository.createCategory(cat)
+                }
             }
         }
     }
 
-    suspend fun deleteCategory(id: UUID, raceId: UUID) {
-        ardfRepository.deleteCategory(id)
-        ardfRepository.deleteControlPointsByCategory(id)
-        updateResultsForCategory(id, this)
+    suspend fun deleteCategory(categoryId: UUID, raceId: UUID) {
+        ardfRepository.deleteCategory(categoryId)
+        ardfRepository.deleteControlPointsByCategory(categoryId)
+        getRace(raceId)?.let { race -> updateResultsForCategory(categoryId, race, this) }
         updateCategoryOrder(raceId)
     }
 
@@ -270,24 +275,27 @@ class DataProcessor private constructor(context: Context) {
 
             if (cd.readoutData == null) {
                 if (competitor.drawnRelativeStartTime != null) {
-                    //Count started
-                    if (TimeProcessor.hasStarted(
-                            race.startDateTime,
-                            competitor.drawnRelativeStartTime!!,
-                            LocalDateTime.now()
-                        )
-                    ) {
-                        statistics.startedCompetitors++
-                    }
 
-                    val limit = category?.timeLimit ?: race.timeLimit
-                    if (TimeProcessor.isInLimit(
-                            race.startDateTime,
-                            competitor.drawnRelativeStartTime!!,
-                            limit, LocalDateTime.now()
-                        )
-                    ) {
-                        statistics.inLimitCompetitors++
+                    race?.let { race ->
+                        //Count started
+                        if (TimeProcessor.hasStarted(
+                                race.startDateTime,
+                                competitor.drawnRelativeStartTime!!,
+                                LocalDateTime.now()
+                            )
+                        ) {
+                            statistics.startedCompetitors++
+                        }
+
+                        val limit = category?.timeLimit ?: race.timeLimit
+                        if (TimeProcessor.isInLimit(
+                                race.startDateTime,
+                                competitor.drawnRelativeStartTime!!,
+                                limit, LocalDateTime.now()
+                            )
+                        ) {
+                            statistics.inLimitCompetitors++
+                        }
                     }
                 }
             } else {
@@ -318,7 +326,9 @@ class DataProcessor private constructor(context: Context) {
         competitor: Competitor,
     ) {
         ardfRepository.createCompetitor(competitor)
-        ResultsProcessor.updateResultsForCompetitor(competitor.id, this)
+        getRace(competitor.raceId)?.let { race ->
+            ResultsProcessor.updateResultsForCompetitor(competitor.id, race, this)
+        }
     }
 
     suspend fun deleteCompetitor(id: UUID, deleteResult: Boolean) {
@@ -369,11 +379,14 @@ class DataProcessor private constructor(context: Context) {
      *     Since race edit could mean a change in start time 00, results for each competitor need to be recalculated
      */
     suspend fun updateResultsByRace(raceId: UUID) {
-        getCategoriesForRace(raceId).forEach { category ->
-            updateResultsForCategory(category.id, this)
+        getRace(raceId)?.let { race ->
+            getCategoriesForRace(raceId).forEach { category ->
+                updateResultsForCategory(category.id, race, this)
+
+            }
+            ardfRepository.getUnmatchedCompetitorsByRace(raceId)
+                .forEach { comp -> updateResultsForCompetitor(comp.id, race, this) }
         }
-        ardfRepository.getUnmatchedCompetitorsByRace(raceId)
-            .forEach { comp -> updateResultsForCompetitor(comp.id, this) }
     }
 
     suspend fun deleteResult(id: UUID) = ardfRepository.deleteResult(id)
@@ -459,11 +472,16 @@ class DataProcessor private constructor(context: Context) {
         dataFormat: DataFormat,
         raceId: UUID
     ): DataImportWrapper {
-        val data =
-            fileProcessor?.importData(uri, dataType, dataFormat, getRace(raceId), getContext())
+        val race = getRace(raceId)
 
-        DataImportValidator.validateDataImport(data!!, raceId, dataType, this, getContext())
-        return data
+        race?.let { race ->
+            val data =
+                fileProcessor?.importData(uri, dataType, dataFormat, race, getContext())
+
+            DataImportValidator.validateDataImport(data!!, raceId, dataType, this, getContext())
+            return data
+        }
+        return DataImportWrapper(emptyList(), emptyList(), arrayListOf())
     }
 
 
@@ -492,7 +510,8 @@ class DataProcessor private constructor(context: Context) {
             getResultDataFlowByRace(raceId).first().filter { it.competitorCategory == null }
                 .map { fil -> ReadoutData(fil.result, fil.punches) }
 
-        return RaceData(race, categories, aliases, competitorData, unknownReadoutData)
+        return race?.let { RaceData(it, categories, aliases, competitorData, unknownReadoutData) }
+            ?: RaceData(Race(), categories, aliases, competitorData, unknownReadoutData)
     }
 
     @Throws(Exception::class)

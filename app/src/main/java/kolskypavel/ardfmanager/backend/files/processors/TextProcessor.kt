@@ -62,15 +62,17 @@ object TextProcessor : FormatProcessor {
         val results = ResultsProcessor.getResultWrapperFlowByRace(raceId, dataProcessor).first()
         val params = HashMap<String, String>()
 
-        // Init all the parameters for the template
-        initParams(
-            dataProcessor,
-            dataProcessor.getContext(),
-            params,
-            results,
-            dataProcessor.getRace(raceId),
-            format
-        )
+        dataProcessor.getRace(raceId)?.let { race ->
+            // Init all the parameters for the template
+            initParams(
+                dataProcessor,
+                dataProcessor.getContext(),
+                params,
+                results,
+                race,
+                format
+            )
+        }
 
         var templateType =
             if (format == DataFormat.TXT) {

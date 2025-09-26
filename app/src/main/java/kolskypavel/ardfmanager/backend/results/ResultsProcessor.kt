@@ -205,16 +205,19 @@ object ResultsProcessor {
                 category,
                 punches,
                 null,
+                race,
                 dataProcessor
             )
 
             // Add printing based on option
             if (isToPrintFinishTicket(competitor, category, context)) {
-                CoroutineScope(Dispatchers.IO).launch {
-                    dataProcessor.printFinishTicket(
-                        dataProcessor.getResultData(result.id),
-                        dataProcessor.getRace(result.raceId)
-                    )
+                dataProcessor.getRace(result.raceId)?.let { race ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        dataProcessor.printFinishTicket(
+                            dataProcessor.getResultData(result.id),
+                            race
+                        )
+                    }
                 }
             }
             return true
@@ -267,6 +270,7 @@ object ResultsProcessor {
         result: Result,
         punches: ArrayList<Punch>,
         manualStatus: ResultStatus?,
+        race: Race,
         dataProcessor: DataProcessor,
         modified: Boolean
     ) {
@@ -307,6 +311,7 @@ object ResultsProcessor {
             category,
             punches,
             manualStatus,
+            race,
             dataProcessor
         )
     }
@@ -317,9 +322,9 @@ object ResultsProcessor {
         category: Category?,
         punches: ArrayList<Punch>,
         manualStatus: ResultStatus?,
+        race: Race,
         dataProcessor: DataProcessor
     ) {
-        val race = dataProcessor.getRace(result.raceId)
 
         // If no start time is found in the SI card, try to get it from the competitor
         if (result.competitorId != null && result.startTime == null) {
@@ -333,7 +338,7 @@ object ResultsProcessor {
         }
 
         if (category != null) {
-            evaluatePunches(punches, category, result, dataProcessor)
+            evaluatePunches(punches, category, result, race, dataProcessor)
         }
 
         // Add back start and finish
@@ -410,6 +415,7 @@ object ResultsProcessor {
     private suspend fun evaluatePunches(
         punches: ArrayList<Punch>,
         category: Category, result: Result,
+        race: Race,
         dataProcessor: DataProcessor
     ) {
 
@@ -424,7 +430,7 @@ object ResultsProcessor {
         val raceType = if (category.differentProperties) {
             category.raceType!!
         } else {
-            dataProcessor.getRace(category.raceId).raceType
+            race.raceType
         }
         when (raceType) {
             RaceType.CLASSIC, RaceType.FOXORING -> evaluateClassics(
@@ -452,16 +458,21 @@ object ResultsProcessor {
      */
     suspend fun updateResultsForCategory(
         categoryId: UUID,
+        race: Race,
         dataProcessor: DataProcessor
     ) {
         val competitors = dataProcessor.getCompetitorsByCategory(categoryId)
 
         competitors.forEach { competitor ->
-            updateResultsForCompetitor(competitor.id, dataProcessor)
+            updateResultsForCompetitor(competitor.id, race, dataProcessor)
         }
     }
 
-    suspend fun updateResultsForCompetitor(competitorId: UUID, dataProcessor: DataProcessor) {
+    suspend fun updateResultsForCompetitor(
+        competitorId: UUID,
+        race: Race,
+        dataProcessor: DataProcessor
+    ) {
         var result = dataProcessor.getResultByCompetitor(competitorId)
         val competitor = dataProcessor.getCompetitor(competitorId)
 
@@ -489,7 +500,7 @@ object ResultsProcessor {
                 result,
                 punches
             )  // Remove start and finish punches before calculation
-            calculateResult(result, category, punches, null, dataProcessor)
+            calculateResult(result, category, punches, null, race, dataProcessor)
         }
     }
 

@@ -69,31 +69,36 @@ class SelectedRaceViewModel : ViewModel() {
 
     /**
      * Updates the current selected race and corresponding data
+     * Return indicates if the race was correctly set and retrieved from DB
      */
     fun setRace(id: UUID) {
+
         CoroutineScope(Dispatchers.IO).launch {
             val race = dataProcessor.setCurrentRace(id)
-            _race.postValue(race)
 
-            launch {
-                dataProcessor.getCategoryDataFlowForRace(id).collect {
-                    _categories.value = it
-                }
-            }
-            launch {
-                dataProcessor.getCompetitorDataFlowByRace(id).collect {
-                    _competitorData.value = it
-                }
-            }
-            launch {
-                dataProcessor.getResultDataFlowByRace(id).collect {
-                    _readoutData.value = it
-                }
-            }
+            if (race != null) {
+                _race.postValue(race)
 
-            launch {
-                ResultsProcessor.getResultWrapperFlowByRace(id, dataProcessor).collect {
-                    _resultWrappers.value = it
+                launch {
+                    dataProcessor.getCategoryDataFlowForRace(id).collect {
+                        _categories.value = it
+                    }
+                }
+                launch {
+                    dataProcessor.getCompetitorDataFlowByRace(id).collect {
+                        _competitorData.value = it
+                    }
+                }
+                launch {
+                    dataProcessor.getResultDataFlowByRace(id).collect {
+                        _readoutData.value = it
+                    }
+                }
+
+                launch {
+                    ResultsProcessor.getResultWrapperFlowByRace(id, dataProcessor).collect {
+                        _resultWrappers.value = it
+                    }
                 }
             }
         }
@@ -240,13 +245,15 @@ class SelectedRaceViewModel : ViewModel() {
     suspend fun processManualPunchData(
         result: Result, punches: ArrayList<Punch>, manualStatus: ResultStatus?, modified: Boolean
     ) {
-        ResultsProcessor.processManualPunchData(
-            result,
-            punches,
-            manualStatus,
-            DataProcessor.get(),
-            modified
-        )
+        getCurrentRace()?.let { race ->
+            ResultsProcessor.processManualPunchData(
+                result,
+                punches,
+                manualStatus, race,
+                DataProcessor.get(),
+                modified
+            )
+        }
     }
 
     fun getResultData(id: UUID): ResultData {
