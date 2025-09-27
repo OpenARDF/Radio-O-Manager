@@ -27,4 +27,13 @@ data class Alias(
     @ColumnInfo(name = "race_id") var raceId: UUID,
     @ColumnInfo(name = "si_code") var siCode: Int,
     @ColumnInfo(name = "name") var name: String
-) : Serializable
+) : Serializable {
+
+    // For testing purposes
+    constructor(code: Int, name: String) : this(
+        id = UUID.randomUUID(),
+        raceId = UUID.randomUUID(),
+        siCode = code,
+        name = name
+    )
+}

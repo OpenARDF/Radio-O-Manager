@@ -27,6 +27,7 @@ data class ResultJson(
 
 data class PunchJson(
     var code: String,
+    var si_code: Int?,
     val control_type: String,
     val punch_status: String,
     val si_time: SITimeJson,

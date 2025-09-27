@@ -9,6 +9,7 @@ import kolskypavel.ardfmanager.backend.files.json.adapters.LocalDateTimeAdapter
 import kolskypavel.ardfmanager.backend.files.json.adapters.RaceDataJsonAdapter
 import kolskypavel.ardfmanager.backend.files.json.temps.ResultJson
 import kolskypavel.ardfmanager.backend.results.ResultsProcessor
+import kolskypavel.ardfmanager.backend.room.entity.Alias
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
 import kolskypavel.ardfmanager.backend.room.entity.Punch
@@ -55,7 +56,13 @@ class ResultJsonTests {
             Punch(34, SITime(LocalTime.of(14, 10, 22)), SIRecordType.CONTROL, 1),
         )
         ResultsProcessor.calculateSplits(punches)
-        val ap = punches.map { AliasPunch(it) }
+
+        val ap = punches.mapIndexed { index, punch ->
+            AliasPunch(
+                punch,
+                Alias(punch.siCode, index.toString())
+            )
+        }
         val readoutData = ReadoutData(result, ap)
 
         val compData = CompetitorData(

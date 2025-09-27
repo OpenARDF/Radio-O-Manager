@@ -22,7 +22,8 @@
   "result_status": "OK",
   "punches": [
     {
-      "code": "31",
+      "code": "1",
+      "si_code": 31,
       "control_type": "CONTROL",
       "punch_status": "OK",
       "si_time": {
@@ -33,7 +34,8 @@
       "split_time": "35:00"
     },
     {
-      "code": "32",
+      "code": "2",
+      "si_code": 32,
       "control_type": "CONTROL",
       "punch_status": "OK",
       "si_time": {
@@ -44,7 +46,8 @@
       "split_time": "08:11"
     },
     {
-      "code": "33",
+      "code": "3",
+      "si_code": 33,
       "control_type": "CONTROL",
       "punch_status": "OK",
       "si_time": {
@@ -55,7 +58,8 @@
       "split_time": "22:39"
     },
     {
-      "code": "34",
+      "code": "4",
+      "si_code": 34,
       "control_type": "CONTROL",
       "punch_status": "OK",
       "si_time": {
