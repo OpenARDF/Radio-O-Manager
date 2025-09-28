@@ -572,109 +572,112 @@ class DataProcessor private constructor(context: Context) {
     fun printResults(results: List<ResultWrapper>, race: Race) =
         printProcessor.printResults(results, race)
 
-//GENERAL HELPER METHODS
+    //============================= GENERAL HELPER METHODS =========================================
 
     //Enums manipulation
     fun raceTypeToString(raceType: RaceType): String {
-        val raceTypeStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_types_array)!!
-        return raceTypeStrings[raceType.value]!!
+        val raceTypeStrings = appContext.get()?.resources?.getStringArray(R.array.race_types_array)
+        return raceTypeStrings?.getOrNull(raceType.value) ?: ""
     }
 
     fun raceTypeStringToEnum(string: String): RaceType {
-        val raceTypeStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_types_array)!!
-        return RaceType.getByValue(raceTypeStrings.indexOf(string))
+        val raceTypeStrings = appContext.get()?.resources?.getStringArray(R.array.race_types_array)
+        val idx = raceTypeStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceType.getByValue(idx) else RaceType.entries.first()
     }
 
     fun raceLevelToString(raceLevel: RaceLevel): String {
         val raceLevelStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)!!
-        return raceLevelStrings[raceLevel.value]
+            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)
+        return raceLevelStrings?.getOrNull(raceLevel.value) ?: ""
     }
 
     fun raceLevelStringToEnum(string: String): RaceLevel {
         val raceLevelStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)!!
-        return RaceLevel.getByValue(raceLevelStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)
+        val idx = raceLevelStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceLevel.getByValue(idx) else RaceLevel.entries.first()
     }
 
     fun raceBandToString(raceBand: RaceBand): String {
-        val raceBandStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_bands_array)!!
-        return raceBandStrings[raceBand.value]
+        val raceBandStrings = appContext.get()?.resources?.getStringArray(R.array.race_bands_array)
+        return raceBandStrings?.getOrNull(raceBand.value) ?: ""
     }
 
     fun raceBandStringToEnum(string: String): RaceBand {
-        val raceBandStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_bands_array)!!
-        return RaceBand.getByValue(raceBandStrings.indexOf(string))
+        val raceBandStrings = appContext.get()?.resources?.getStringArray(R.array.race_bands_array)
+        val idx = raceBandStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceBand.getByValue(idx) else RaceBand.entries.first()
     }
 
     fun resultStatusToString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return raceStatusStrings[resultStatus.value]
+            appContext.get()?.resources?.getStringArray(R.array.race_status_array)
+        return raceStatusStrings?.getOrNull(resultStatus.value) ?: ""
     }
 
     fun resultStatusStringToEnum(string: String): ResultStatus {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return ResultStatus.getByValue(raceStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.race_status_array)
+        val idx = raceStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) ResultStatus.getByValue(idx) else ResultStatus.entries.first()
     }
 
     fun resultStatusToShortString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array_short)!!
-        return raceStatusStrings[resultStatus.value]
+            appContext.get()?.resources?.getStringArray(R.array.race_status_array_short)
+        return raceStatusStrings?.getOrNull(resultStatus.value) ?: ""
     }
 
     fun genderToString(isMan: Boolean?): String {
+        val ctx = appContext.get()
         return when (isMan) {
-            false -> appContext.get()!!.resources.getString(R.string.general_gender_woman)
-            else -> appContext.get()!!.resources.getString(R.string.general_gender_man)
+            false -> ctx?.resources?.getString(R.string.general_gender_woman) ?: "Woman"
+            true -> ctx?.resources?.getString(R.string.general_gender_man) ?: "Man"
+            null -> "Man"
         }
     }
 
     fun resultServiceTypeFromString(string: String): ResultServiceType {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
-        return ResultServiceType.getByValue(raceStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)
+        val idx = raceStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) ResultServiceType.getByValue(idx) else ResultServiceType.entries.first()
     }
 
     fun resultServiceTypeToString(resultServiceType: ResultServiceType): String {
         val resultServiceTypes =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
-        return resultServiceTypes[resultServiceType.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)
+        return resultServiceTypes?.getOrNull(resultServiceType.value) ?: ""
     }
 
-    fun resultServiceStatusToString(status: ResultServiceStatus): CharSequence? {
+    fun resultServiceStatusToString(status: ResultServiceStatus): CharSequence {
         val resultServiceStatus =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_status)!!
-        return resultServiceStatus[status.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_service_status)
+        return resultServiceStatus?.getOrNull(status.value) ?: ""
     }
 
     fun punchStatusToShortString(punchStatus: PunchStatus): String {
-        val arr = getContext().resources.getStringArray(R.array.punch_status_array_short)
-        return arr[punchStatus.ordinal]
+        val arr = getContext().resources?.getStringArray(R.array.punch_status_array_short)
+        return arr?.getOrNull(punchStatus.ordinal) ?: ""
     }
 
     fun shortStringToPunchStatus(string: String): PunchStatus {
         val punchStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.punch_status_array_short)!!
-        return PunchStatus.getByValue(punchStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.punch_status_array_short)
+        val idx = punchStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) PunchStatus.getByValue(idx) else PunchStatus.entries.first()
     }
 
     /**
      * @return false for woman, true for man
      */
     fun genderFromString(string: String): Boolean {
-        val genderStrings =
-            appContext.get()?.resources?.getStringArray(R.array.genders)!!
-        return when (genderStrings.indexOf(string)) {
+        val genderStrings = appContext.get()?.resources?.getStringArray(R.array.genders)
+        return when (genderStrings?.indexOf(string)) {
             0 -> false
             1 -> true
-            else -> false
+            else -> true
         }
     }
 
