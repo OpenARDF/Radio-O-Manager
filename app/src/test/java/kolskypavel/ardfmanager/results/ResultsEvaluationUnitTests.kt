@@ -113,7 +113,7 @@ class ResultsEvaluationUnitTests {
                         UUID.randomUUID(),
                         null,
                         null,
-                        30 + i,
+                        randCode,
                         SITime(),
                         SITime(),
                         SIRecordType.CONTROL, i, PunchStatus.UNKNOWN, Duration.ZERO
