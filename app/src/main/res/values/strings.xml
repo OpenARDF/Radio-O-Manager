@@ -271,7 +271,7 @@
     <string name="preferences_general_keep_screen_open_hint">When selected, the screen won\'t automatically turn off.</string>
     <string name="preferences_general_show_log" tools:ignore="UnusedResources">Show log</string>
     <string name="preferences_general_language">Language</string>
-    <string name="preferences_general_language_hint">Manually select a language of the app. The app needs to be restarted after.\n[%1$s]</string>
+    <string name="preferences_general_language_hint">Manually select a language of the app. The app needs to be restarted after.</string>
 
     <string name="lang_en" translatable="false">English</string>
     <string name="lang_cz" translatable="false">Čeština</string>
@@ -308,7 +308,7 @@
     <string name="preferences_results_use_aliases">Use aliases</string>
     <string name="preferences_results_use_aliases_hint">Use defined aliases for control points instead of SI codes</string>
     <string name="preferences_results_service">Result service sending</string>
-    <string name="preferences_results_service_hint">Select when to send the results with the result service\n[%1$s]</string>
+    <string name="preferences_results_service_hint">Select when to send the results with the result service.</string>
 
     <string name="preferences_result_service_matched">When competitor matched</string>
     <string name="preferences_result_service_always">Always</string>

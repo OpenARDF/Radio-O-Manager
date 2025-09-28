@@ -52,11 +52,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 code.toString()
             )
             editor.apply()
-
-            langPref.summary = requireContext().getString(
-                R.string.preferences_general_language_hint,
-                code
-            )
             true
         }
 
@@ -116,27 +111,12 @@ class SettingsFragment : PreferenceFragmentCompat() {
         val resultServicePref =
             findPreference<ListPreference>(requireContext().getString(R.string.key_result_service))
 
-        val currServicePref = prefs.getString(
-            requireContext().getString(R.string.key_result_service),
-            requireContext().getString(R.string.preferences_result_service_matched)
-        )
-
-        resultServicePref?.summary = requireContext().getString(
-            R.string.preferences_results_service_hint,
-            currServicePref
-        )
-
         resultServicePref?.setOnPreferenceChangeListener { _, service ->
             editor.putString(
                 requireContext().getString(R.string.key_result_service),
                 service.toString()
             )
             editor.apply()
-
-            resultServicePref.summary = requireContext().getString(
-                R.string.preferences_results_service_hint,
-                service
-            )
             true
         }
 
