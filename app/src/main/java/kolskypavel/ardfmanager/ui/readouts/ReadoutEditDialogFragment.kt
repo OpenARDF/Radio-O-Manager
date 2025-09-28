@@ -29,7 +29,9 @@ import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import kolskypavel.ardfmanager.backend.wrappers.PunchEditItemWrapper
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.runBlocking
+import java.text.Collator
 import java.time.Duration
+import java.util.Locale
 import java.util.UUID
 
 class ReadoutEditDialogFragment : DialogFragment() {
@@ -76,6 +78,13 @@ class ReadoutEditDialogFragment : DialogFragment() {
         dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
+    private fun sortCompetitorsLocaleSafe(competitors: List<Competitor>): List<Competitor> {
+        val collator = Collator.getInstance(Locale.getDefault())
+        return competitors.sortedWith { a, b ->
+            collator.compare(a.lastName, b.lastName)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.add_dialog)
@@ -83,7 +92,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
         val sl: SelectedRaceViewModel by activityViewModels()
         selectedRaceViewModel = sl
-        competitors = selectedRaceViewModel.getCompetitors().sortedBy { com -> com.lastName }
+        competitors = sortCompetitorsLocaleSafe(selectedRaceViewModel.getCompetitors())
         categories = selectedRaceViewModel.getCategories()
 
         competitorPicker = view.findViewById(R.id.readout_dialog_competitor)
