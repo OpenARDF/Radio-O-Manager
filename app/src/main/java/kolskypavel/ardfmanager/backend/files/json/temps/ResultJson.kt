@@ -1,5 +1,7 @@
 package kolskypavel.ardfmanager.backend.files.json.temps
 
+import java.time.LocalDateTime
+
 
 data class ResultCompetitorJson(
     val competitor_index: String?,
@@ -16,14 +18,17 @@ data class ResultJson(
     val finish_time: SITimeJson?,
     val run_time: String,
     val place: Int,
+    val readoutTime: LocalDateTime?,
     val modified: Boolean,
     val controls_num: Int,
     val result_status: String,
+    val automatic_status: Boolean?,
     val punches: List<PunchJson>
 )
 
 data class PunchJson(
     var code: String,
+    var si_code: Int?,
     val control_type: String,
     val punch_status: String,
     val si_time: SITimeJson,

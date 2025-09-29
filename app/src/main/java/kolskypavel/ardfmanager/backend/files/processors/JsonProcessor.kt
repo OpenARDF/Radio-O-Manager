@@ -54,7 +54,8 @@ object JsonProcessor : FormatProcessor {
             DataType.RESULTS -> exportResults(
                 outStream,
                 ResultsProcessor.getCompetitorDataByRace(raceId, dataProcessor),
-                raceId
+                raceId,
+                dataProcessor
             )
 
             else -> TODO()
@@ -77,11 +78,11 @@ object JsonProcessor : FormatProcessor {
 
     }
 
-    suspend fun importRaceData(inStream: InputStream): RaceData {
+    fun importRaceData(inStream: InputStream, dataProcessor: DataProcessor): RaceData {
         val jsonString = inStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
 
         val moshi: Moshi = Moshi.Builder()
-            .add(RaceDataJsonAdapter())
+            .add(RaceDataJsonAdapter(dataProcessor))
             .add(LocalDateTimeAdapter())
             .add(KotlinJsonAdapterFactory())
             .build()
@@ -101,11 +102,13 @@ object JsonProcessor : FormatProcessor {
     suspend fun exportResults(
         outStream: OutputStream,
         results: List<CompetitorData>,
-        raceId: UUID
+        raceId: UUID,
+        dataProcessor: DataProcessor
     ) {
         withContext(Dispatchers.IO) {
             val moshi: Moshi = Moshi.Builder()
-                .add(ResultJsonAdapter(raceId, true))
+                .add(ResultJsonAdapter(raceId, dataProcessor))
+                .add(LocalDateTimeAdapter())
                 .add(KotlinJsonAdapterFactory())
                 .build()
 
@@ -114,6 +117,8 @@ object JsonProcessor : FormatProcessor {
             val adapter = moshi.adapter<List<ResultCompetitorJson>>(type)
 
             val exportList = results.mapNotNull { rd ->
+                val result = rd.readoutData ?: return@mapNotNull null
+
                 val compCat = rd.competitorCategory
                 val competitor = compCat.competitor
                 val category = compCat.category ?: return@mapNotNull null
@@ -124,7 +129,7 @@ object JsonProcessor : FormatProcessor {
                     last_name = competitor.lastName,
                     first_name = competitor.firstName,
                     category_name = category.name,
-                    result = ResultJsonAdapter(raceId, true).toJson(rd)
+                    result = ResultJsonAdapter(raceId, dataProcessor).toJson(rd)
                 )
             }
 
@@ -142,7 +147,7 @@ object JsonProcessor : FormatProcessor {
     ) {
         withContext(Dispatchers.IO) {
             val moshi: Moshi = Moshi.Builder()
-                .add(RaceDataJsonAdapter())
+                .add(RaceDataJsonAdapter(dataProcessor))
                 .add(LocalDateTimeAdapter())
                 .add(KotlinJsonAdapterFactory())
                 .build()

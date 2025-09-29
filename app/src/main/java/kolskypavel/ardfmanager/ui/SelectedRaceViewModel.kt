@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
@@ -29,6 +30,7 @@ import kolskypavel.ardfmanager.backend.wrappers.ResultWrapper
 import kolskypavel.ardfmanager.backend.wrappers.StatisticsWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,9 +44,9 @@ import java.util.UUID
  */
 class SelectedRaceViewModel : ViewModel() {
     private val dataProcessor = DataProcessor.get()
-    private val _race = MutableLiveData<Race>()
+    private val _race = MutableLiveData<Race?>()
 
-    val race: LiveData<Race> get() = _race
+    val race: LiveData<Race?> get() = _race
     private val _categories: MutableStateFlow<List<CategoryData>> = MutableStateFlow(emptyList())
     val categories: StateFlow<List<CategoryData>> get() = _categories.asStateFlow()
 
@@ -62,6 +64,12 @@ class SelectedRaceViewModel : ViewModel() {
 
     var resultService: LiveData<ResultServiceData> = MutableLiveData(null)
 
+    // Jobs for running collectors - stored so we can cancel them when switching races
+    private var categoryJob: Job? = null
+    private var competitorJob: Job? = null
+    private var readoutJob: Job? = null
+    private var resultWrapperJob: Job? = null
+
     @Throws(IllegalStateException::class)
     fun getCurrentRace(): Race? {
         return race.value
@@ -69,56 +77,91 @@ class SelectedRaceViewModel : ViewModel() {
 
     /**
      * Updates the current selected race and corresponding data
+     * Return indicates if the race was correctly set and retrieved from DB
      */
     fun setRace(id: UUID) {
-        CoroutineScope(Dispatchers.IO).launch {
+
+        // Cancel any previous collectors to avoid collecting old race data
+        categoryJob?.cancel()
+        competitorJob?.cancel()
+        readoutJob?.cancel()
+        resultWrapperJob?.cancel()
+
+        // Clear previously shown data immediately so UI doesn't show stale values
+        _categories.value = emptyList()
+        _competitorData.value = emptyList()
+        _readoutData.value = emptyList()
+        _resultWrappers.value = emptyList()
+        _race.postValue(null)
+
+        // Use viewModelScope so the collectors are lifecycle-aware and can be cancelled when VM is cleared
+        viewModelScope.launch(Dispatchers.IO) {
             val race = dataProcessor.setCurrentRace(id)
-            _race.postValue(race)
 
-            launch {
-                dataProcessor.getCategoryDataFlowForRace(id).collect {
-                    _categories.value = it
-                }
-            }
-            launch {
-                dataProcessor.getCompetitorDataFlowByRace(id).collect {
-                    _competitorData.value = it
-                }
-            }
-            launch {
-                dataProcessor.getResultDataFlowByRace(id).collect {
-                    _readoutData.value = it
-                }
-            }
+            if (race != null) {
+                _race.postValue(race)
 
-            launch {
-                ResultsProcessor.getResultWrapperFlowByRace(id, dataProcessor).collect {
-                    _resultWrappers.value = it
+                // start collectors and keep job references so they can be cancelled on next setRace
+                categoryJob = launch {
+                    dataProcessor.getCategoryDataFlowForRace(id).collect {
+                        _categories.value = it
+                    }
+                }
+                competitorJob = launch {
+                    dataProcessor.getCompetitorDataFlowByRace(id).collect {
+                        _competitorData.value = it
+                    }
+                }
+                readoutJob = launch {
+                    dataProcessor.getResultDataFlowByRace(id).collect {
+                        _readoutData.value = it
+                    }
+                }
+
+                resultWrapperJob = launch {
+                    ResultsProcessor.getResultWrapperFlowByRace(id, dataProcessor).collect {
+                        _resultWrappers.value = it
+                    }
                 }
             }
         }
 
-        // Start result service again
-        CoroutineScope(Dispatchers.IO).launch { dataProcessor.setResultServiceDisabledByRaceId(id) }
+        // Start result service again (fire-and-forget)
+        viewModelScope.launch(Dispatchers.IO) { dataProcessor.setResultServiceDisabledByRaceId(id) }
         resultService = dataProcessor.getResultServiceLiveDataWithCountByRaceId(id)
 
     }
 
     fun updateRace(race: Race) {
-        CoroutineScope(Dispatchers.IO).launch {
+        viewModelScope.launch(Dispatchers.IO) {
             dataProcessor.updateRace(race)
             _race.postValue(race)
         }
     }
 
-    fun removeReaderRace() = dataProcessor.removeCurrentRace()
+    fun removeReaderRace() {
+        // Cancel collectors and clear state to ensure no stale data remains
+        categoryJob?.cancel()
+        competitorJob?.cancel()
+        readoutJob?.cancel()
+        resultWrapperJob?.cancel()
+
+        _categories.value = emptyList()
+        _competitorData.value = emptyList()
+        _readoutData.value = emptyList()
+        _resultWrappers.value = emptyList()
+        _race.postValue(null)
+
+        dataProcessor.removeCurrentRace()
+    }
 
     // get current locale
     fun getCurrentLocale(context: Context): Locale {
         val sharedPref = PreferenceManager.getDefaultSharedPreferences(context)
-        val preference = sharedPref.getString(context.getString(R.string.key_app_language), "en")
+        val preference = sharedPref.getString(context.getString(R.string.key_app_language), "en") ?: "en"
 
-        return Locale(preference)
+        // Use forLanguageTag to avoid deprecated Locale constructor and handle nullability
+        return Locale.forLanguageTag(preference)
     }
 
     //Category
@@ -240,13 +283,15 @@ class SelectedRaceViewModel : ViewModel() {
     suspend fun processManualPunchData(
         result: Result, punches: ArrayList<Punch>, manualStatus: ResultStatus?, modified: Boolean
     ) {
-        ResultsProcessor.processManualPunchData(
-            result,
-            punches,
-            manualStatus,
-            DataProcessor.get(),
-            modified
-        )
+        getCurrentRace()?.let { race ->
+            ResultsProcessor.processManualPunchData(
+                result,
+                punches,
+                manualStatus, race,
+                DataProcessor.get(),
+                modified
+            )
+        }
     }
 
     fun getResultData(id: UUID): ResultData {
@@ -261,6 +306,10 @@ class SelectedRaceViewModel : ViewModel() {
 
     fun getResultByCompetitor(competitorId: UUID) = runBlocking {
         return@runBlocking dataProcessor.getResultByCompetitor(competitorId)
+    }
+
+    fun updateResultsByRace(raceId: UUID) = CoroutineScope(Dispatchers.IO).launch {
+        dataProcessor.updateResultsByRace(raceId)
     }
 
     fun deleteResult(id: UUID) {
@@ -308,7 +357,7 @@ class SelectedRaceViewModel : ViewModel() {
     }
 
     fun exportData(
-        uri: Uri, dataType: DataType, dataFormat: DataFormat,raceId: UUID
+        uri: Uri, dataType: DataType, dataFormat: DataFormat, raceId: UUID
     ) = runBlocking {
         dataProcessor.exportData(
             uri, dataType, dataFormat, raceId

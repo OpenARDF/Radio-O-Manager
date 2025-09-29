@@ -3,6 +3,7 @@ package kolskypavel.ardfmanager.backend.files.json.adapters
 import ResultJsonAdapter
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
+import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.json.temps.CompetitorJson
 import kolskypavel.ardfmanager.backend.helpers.TimeProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
@@ -11,7 +12,7 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
 import java.util.UUID
 
-class CompetitorJsonAdapter(val raceId: UUID) {
+class CompetitorJsonAdapter(val raceId: UUID, val dataProcessor: DataProcessor) {
     @ToJson
     fun toJson(competitorData: CompetitorData): CompetitorJson {
         val competitor = competitorData.competitorCategory.competitor
@@ -33,7 +34,7 @@ class CompetitorJsonAdapter(val raceId: UUID) {
                 )
             } ?: "",
             result = if (competitorData.readoutData != null) {
-                ResultJsonAdapter(raceId, false).toJson(competitorData)
+                ResultJsonAdapter(raceId, dataProcessor).toJson(competitorData)
             } else null
         )
     }
@@ -58,7 +59,10 @@ class CompetitorJsonAdapter(val raceId: UUID) {
             } else null
         )
         if (competitorJson.result != null) {
-            val resultData = ResultJsonAdapter(raceId, false).fromJson(competitorJson.result)
+            val resultData = ResultJsonAdapter(
+                raceId,
+                dataProcessor
+            ).fromJson(competitorJson.result)
             resultData.result.competitorId = competitor.id
             resultData.result.siNumber = competitor.siNumber
             val readoutData = ReadoutData(resultData.result, resultData.punches)

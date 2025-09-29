@@ -13,8 +13,8 @@ interface RaceDao {
     @Query("SELECT * FROM race")
     fun getRaces(): Flow<List<Race>>
 
-    @Query("SELECT * FROM race WHERE id=(:id) LIMIT 1")
-    suspend fun getRace(id: UUID): Race
+    @Query("SELECT * FROM race WHERE id=(:id)")
+    suspend fun getRace(id: UUID): Race?
 
     @Insert
     suspend fun createRace(race: Race)

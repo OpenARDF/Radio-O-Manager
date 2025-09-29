@@ -29,7 +29,7 @@ class ARDFRepository private constructor(context: Context) {
 
     //-------------------Races-------------------
     fun getRaces(): Flow<List<Race>> = eventDatabase.raceDao().getRaces()
-    suspend fun getRace(id: UUID): Race = eventDatabase.raceDao().getRace(id)
+    suspend fun getRace(id: UUID) = eventDatabase.raceDao().getRace(id)
     suspend fun createRace(race: Race) = eventDatabase.raceDao().createRace(race)
     suspend fun updateRace(race: Race) = eventDatabase.raceDao().updateRace(race)
     suspend fun deleteRace(id: UUID) = eventDatabase.raceDao().deleteRace(id)
@@ -129,7 +129,7 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun getUnmatchedCompetitorsByRace(raceId: UUID) =
         eventDatabase.competitorDao().getUnmatchedCompetitorsByRace(raceId)
 
-    fun createCompetitor(competitor: Competitor) =
+    suspend fun createCompetitor(competitor: Competitor) =
         eventDatabase.competitorDao().createCompetitor(competitor)
 
     suspend fun deleteCompetitor(id: UUID) = eventDatabase.competitorDao().deleteCompetitor(id)

@@ -15,9 +15,15 @@ data class AliasPunch(
     )
     var alias: Alias?,
 ) : Serializable {
-    // No args constructor()
+
+    // For debugging
     constructor() : this(
         Punch(),
         null
+    )
+
+    constructor(punch: Punch) : this(
+        punch = punch,
+        alias = null
     )
 }

@@ -41,8 +41,8 @@ interface CompetitorDao {
     @Query("SELECT COUNT(*) FROM competitor WHERE start_number=(:startNumber) AND race_id =(:raceId)  LIMIT 1")
     suspend fun checkIfStartNumberExists(startNumber: Int, raceId: UUID): Int
 
-    @Upsert(entity = Competitor::class)
-    fun createCompetitor(competitor: Competitor)
+    @Upsert
+    suspend fun createCompetitor(competitor: Competitor)
 
     @Query("DELETE FROM competitor WHERE id =(:id)")
     suspend fun deleteCompetitor(id: UUID)

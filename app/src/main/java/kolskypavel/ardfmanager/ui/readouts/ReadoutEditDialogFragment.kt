@@ -23,17 +23,15 @@ import kolskypavel.ardfmanager.R
 import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.room.entity.Category
 import kolskypavel.ardfmanager.backend.room.entity.Competitor
-import kolskypavel.ardfmanager.backend.room.entity.Punch
 import kolskypavel.ardfmanager.backend.room.entity.Result
-import kolskypavel.ardfmanager.backend.room.enums.PunchStatus
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
-import kolskypavel.ardfmanager.backend.sportident.SITime
 import kolskypavel.ardfmanager.backend.wrappers.PunchEditItemWrapper
 import kolskypavel.ardfmanager.ui.SelectedRaceViewModel
 import kotlinx.coroutines.runBlocking
+import java.text.Collator
 import java.time.Duration
-import java.time.LocalTime
+import java.util.Locale
 import java.util.UUID
 
 class ReadoutEditDialogFragment : DialogFragment() {
@@ -80,6 +78,13 @@ class ReadoutEditDialogFragment : DialogFragment() {
         dialog?.window?.setLayout(percentWidth.toInt(), ViewGroup.LayoutParams.WRAP_CONTENT)
     }
 
+    private fun sortCompetitorsLocaleSafe(competitors: List<Competitor>): List<Competitor> {
+        val collator = Collator.getInstance(Locale.getDefault())
+        return competitors.sortedWith { a, b ->
+            collator.compare(a.lastName, b.lastName)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setStyle(STYLE_NORMAL, R.style.add_dialog)
@@ -87,7 +92,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
 
         val sl: SelectedRaceViewModel by activityViewModels()
         selectedRaceViewModel = sl
-        competitors = selectedRaceViewModel.getCompetitors().sortedBy { com -> com.lastName }
+        competitors = sortCompetitorsLocaleSafe(selectedRaceViewModel.getCompetitors())
         categories = selectedRaceViewModel.getCategories()
 
         competitorPicker = view.findViewById(R.id.readout_dialog_competitor)
@@ -199,47 +204,31 @@ class ReadoutEditDialogFragment : DialogFragment() {
         competitorPicker.setAdapter(competitorAdapter)
 
         // Punches setup
-        var punchWrappers = ArrayList<PunchEditItemWrapper>()
-
-        if (args.create || args.resultData?.punches?.isEmpty() == true) {
-            punchWrappers.add(
-                PunchEditItemWrapper(
-                    Punch(
-                        UUID.randomUUID(),
-                        args.raceId,
-                        null,
-                        null,
-                        0,
-                        SITime(LocalTime.MIN),
-                        SITime(LocalTime.MIN),
-                        SIRecordType.START,
-                        0,
-                        PunchStatus.VALID,
-                        Duration.ZERO
-                    ), true, true, true, true
-                )
-            )
-            punchWrappers.add(
-                PunchEditItemWrapper(
-                    Punch(
-                        UUID.randomUUID(),
-                        args.raceId,
-                        null,
-                        null,
-                        0,
-                        SITime(LocalTime.MIN),
-                        SITime(LocalTime.MIN),
-                        SIRecordType.FINISH,
-                        0,
-                        PunchStatus.VALID,
-                        Duration.ZERO
-                    ), true, true, true, true
-                )
-            )
+        val punchWrappers = if (args.create) {
+            arrayListOf()
         } else {
-            punchWrappers =
-                PunchEditItemWrapper.getWrappers(ArrayList(args.resultData!!.punches))
+            // Filter out controls only
+            val filtered =
+                args.resultData!!.punches.filter { it -> it.punch.punchType == SIRecordType.CONTROL }
+            PunchEditItemWrapper.getWrappers(ArrayList(filtered))
         }
+
+        punchWrappers.add(
+            0,
+            PunchEditItemWrapper.getStartOrFinishWrapper(
+                true,
+                args.resultData?.result,
+                args.raceId
+            )
+        )
+
+        punchWrappers.add(
+            PunchEditItemWrapper.getStartOrFinishWrapper(
+                false,
+                args.resultData?.result,
+                args.raceId
+            )
+        )
 
         punchEditRecyclerView.adapter =
             PunchEditRecyclerViewAdapter(punchWrappers)
@@ -323,7 +312,7 @@ class ReadoutEditDialogFragment : DialogFragment() {
                     selectedRaceViewModel.processManualPunchData(
                         result,
                         punches,
-                        getRaceStatusFromPicker(),
+                        getResultStatusFromPicker(),
                         modified
                     )
                 }
@@ -378,14 +367,14 @@ class ReadoutEditDialogFragment : DialogFragment() {
         } else null
     }
 
-    private fun getRaceStatusFromPicker(): ResultStatus? {
-        val raceStatusString = raceStatusPicker.text.toString()
-        return if (raceStatusString.isNotEmpty()
-            && raceStatusString == requireContext().getString(R.string.general_automatic)
+    private fun getResultStatusFromPicker(): ResultStatus? {
+        val resultStatusString = raceStatusPicker.text.toString()
+        return if (resultStatusString.isNotEmpty()
+            && resultStatusString == requireContext().getString(R.string.general_automatic)
         ) {
             null
         } else {
-            dataProcessor.resultStatusStringToEnum(raceStatusString)
+            dataProcessor.resultStatusStringToEnum(resultStatusString)
         }
     }
 

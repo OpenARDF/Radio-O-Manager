@@ -66,6 +66,7 @@ class SI5Tests {
             cardData,
             UUID.randomUUID(),
             result,
+            true,
             zeroTimeBase
         )
 
@@ -128,6 +129,7 @@ class SI5Tests {
             cardData,
             UUID.randomUUID(),
             result,
+            true,
             zeroTimeBase
         )
 

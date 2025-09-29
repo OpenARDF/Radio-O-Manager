@@ -163,7 +163,11 @@ class ResultsExportDialogFragment : DialogFragment() {
             startActivity(intent)
         } catch (e: Exception) {
             Log.e("File intent opening", e.stackTraceToString())
-            errorText.text = e.message
+            val err = e.message ?: e.toString()
+            errorText.text = requireContext().getString(
+                R.string.results_export_error,
+                err.take(100)
+            )
         }
     }
 

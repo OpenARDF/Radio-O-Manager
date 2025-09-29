@@ -1,0 +1,283 @@
+{
+  "race_id": 324,
+  "race_name": "EXAMPLE",
+  "race_date": "2025-11-28",
+  "race_location": "",
+  "race_start": "2025-11-28T13:00:00",
+  "race_type": "CLASSIC",
+  "race_band": "M80",
+  "race_level": "DISTRICT",
+  "race_time_limit": 100,
+  "categories": [
+    {
+      "category_name": "D19",
+      "category_gender": false,
+      "category_max_age": 19,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    },
+    {
+      "category_name": "D20",
+      "category_gender": false,
+      "category_max_age": 34,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    },
+    {
+      "category_name": "M19",
+      "category_gender": true,
+      "category_max_age": 19,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    },
+    {
+      "category_name": "M20",
+      "category_gender": true,
+      "category_max_age": 39,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    },
+    {
+      "category_name": "RT",
+      "category_gender": true,
+      "category_max_age": 200,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    },
+    {
+      "category_name": "Ostatní",
+      "category_gender": true,
+      "category_max_age": 200,
+      "category_length": null,
+      "category_climb": null,
+      "category_control_points": [],
+      "category_different_properties": false,
+      "category_race_band": null,
+      "category_time_limit": null
+    }
+  ],
+  "competitors": [
+    {
+      "first_name": "Zdeněk",
+      "last_name": "Bednaříkf",
+      "competitor_club": "SK Radiosport z.s.",
+      "competitor_category": "M20",
+      "competitor_index": "GBM9107",
+      "competitor_gender": true,
+      "birth_year": 1922,
+      "si_number": null,
+      "start_number": null,
+      "si_rent": false,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    },
+    {
+      "first_name": "Jakub",
+      "last_name": "Šrom",
+      "competitor_club": "Reprezentace",
+      "competitor_category": "M20",
+      "competitor_index": "RCZ9501",
+      "competitor_gender": true,
+      "birth_year": 1995,
+      "si_number": 2042538,
+      "si_rent": false,
+      "start_number": null,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    },
+    {
+      "first_name": "Ondřej",
+      "last_name": "Šimáček",
+      "competitor_club": "Reprezentace",
+      "competitor_category": "M20",
+      "competitor_index": "RCZ9401",
+      "competitor_gender": true,
+      "birth_year": 1994,
+      "si_number": null,
+      "si_rent": false,
+      "start_number": 40,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    },
+    {
+      "first_name": "Josh",
+      "last_name": "Low",
+      "competitor_club": "SK Radiosport z.s.",
+      "competitor_category": "M19",
+      "competitor_index": "GBM1100",
+      "competitor_gender": true,
+      "birth_year": 2000,
+      "si_number": null,
+      "si_rent": false,
+      "start_number": null,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    },
+    {
+      "first_name": "Pavel",
+      "last_name": "Kolský",
+      "competitor_club": "Reprezentace",
+      "competitor_category": "M20",
+      "competitor_index": "RCZ0201",
+      "competitor_gender": true,
+      "birth_year": 2002,
+      "si_number": 10000,
+      "si_rent": false,
+      "start_number": null,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": {
+        "check_time": {
+          "real_time": "05:17:16",
+          "week": 0,
+          "day_of_week": 0
+        },
+        "start_time": {
+          "real_time": "17:24:57",
+          "week": 0,
+          "day_of_week": 0
+        },
+        "finish_time": {
+          "real_time": "18:27:39",
+          "week": 0,
+          "day_of_week": 0
+        },
+        "run_time": "62:42",
+        "place": 8,
+        "readoutTime": "2025-09-23T18:28:20",
+        "modified": false,
+        "controls_num": 5,
+        "result_status": "MP",
+        "automatic_status": false,
+        "punches": [
+          {
+            "code": "2",
+            "si_code": 42,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "17:36:59",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "12:02"
+          },
+          {
+            "code": "1",
+            "si_code": 41,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "17:51:43",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "14:44"
+          },
+          {
+            "code": "3",
+            "si_code": 43,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "18:03:43",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "12:00"
+          },
+          {
+            "code": "5",
+            "si_code": 45,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "18:15:37",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "11:54"
+          },
+          {
+            "code": "M",
+            "si_code": 99,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "18:27:34",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "11:57"
+          },
+          {
+            "code": "F",
+            "si_code": 0,
+            "control_type": "FINISH",
+            "punch_status": "OK",
+            "si_time": {
+              "real_time": "18:27:39",
+              "week": 0,
+              "day_of_week": 0
+            },
+            "split_time": "00:05"
+          }
+        ]
+      }
+    },
+    {
+      "first_name": "Eva",
+      "last_name": "Bílá",
+      "competitor_club": "SK Radiosport z.s.",
+      "competitor_category": "D19",
+      "competitor_index": "GBM1351",
+      "competitor_gender": false,
+      "birth_year": 2013,
+      "si_number": null,
+      "si_rent": false,
+      "start_number": null,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    },
+    {
+      "first_name": "Jiří",
+      "last_name": "Mareček",
+      "competitor_club": "Reprezentace",
+      "competitor_category": "M20",
+      "competitor_index": "RCZ5901",
+      "competitor_gender": true,
+      "birth_year": 1959,
+      "si_number": null,
+      "si_rent": false,
+      "start_number": null,
+      "start_preference": null,
+      "competitor_start_time": null,
+      "result": null
+    }
+  ]
+}

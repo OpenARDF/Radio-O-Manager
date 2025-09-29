@@ -1,5 +1,6 @@
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.ToJson
+import kolskypavel.ardfmanager.backend.DataProcessor
 import kolskypavel.ardfmanager.backend.files.json.adapters.PunchJsonAdapter
 import kolskypavel.ardfmanager.backend.files.json.adapters.SITimeJsonAdapter
 import kolskypavel.ardfmanager.backend.files.json.temps.UnmatchedResultJson
@@ -10,8 +11,8 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
 import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import java.util.UUID
 
-class UnmatchedResultJsonAdapter(val raceId: UUID) {
-    val punchJsonAdapter = PunchJsonAdapter(raceId)
+class UnmatchedResultJsonAdapter(val raceId: UUID, val dataProcessor: DataProcessor) {
+    val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
     val siTimeJsonAdapter = SITimeJsonAdapter()
 
     @ToJson
@@ -23,7 +24,7 @@ class UnmatchedResultJsonAdapter(val raceId: UUID) {
             start_time = result.startTime?.let { siTimeJsonAdapter.toJson(it) },
             finish_time = result.finishTime?.let { siTimeJsonAdapter.toJson(it) },
             si_number = result.siNumber,
-            run_time = TimeProcessor.durationToFormattedString(result.runTime,true),
+            run_time = TimeProcessor.durationToFormattedString(result.runTime, true),
             punches = readoutData.punches.map { ap -> punchJsonAdapter.toJson(ap) },
         )
     }
@@ -50,7 +51,7 @@ class UnmatchedResultJsonAdapter(val raceId: UUID) {
 
 
         val punches = ArrayList<AliasPunch>()
-        val punchJsonAdapter = PunchJsonAdapter(raceId)
+        val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
         json.punches.forEachIndexed { index, punchJson ->
 
             val punch = punchJsonAdapter.fromJson(punchJson)

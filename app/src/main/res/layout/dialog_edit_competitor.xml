@@ -18,7 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="@string/competitor_first_name">
+            android:hint="@string/competitor_first_name"
+            app:counterEnabled="true"
+            app:counterMaxLength="50">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/competitor_dialog_first_name"
@@ -26,7 +28,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLength="100"
+
+                android:maxLength="50"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -35,7 +38,9 @@
             style="@style/dialog_textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/competitor_last_name">
+            android:hint="@string/competitor_last_name"
+            app:counterEnabled="true"
+            app:counterMaxLength="50">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/competitor_dialog_last_name"
@@ -43,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLength="100"
+                android:maxLength="50"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 

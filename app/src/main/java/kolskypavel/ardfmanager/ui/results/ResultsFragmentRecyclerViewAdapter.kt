@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
 
 class ResultsFragmentRecyclerViewAdapter(
     var values: ArrayList<ResultWrapper>,
@@ -101,7 +102,7 @@ class ResultsFragmentRecyclerViewAdapter(
                     val res = singleResult.readoutData!!.result
                     competitorPlace.text =
                         if (res.resultStatus == ResultStatus.OK) {
-                            res.place.toString()
+                            "${res.place}."
                         } else {
                             dataProcessor.resultStatusToShortString(res.resultStatus)
                         }
@@ -109,7 +110,7 @@ class ResultsFragmentRecyclerViewAdapter(
                     competitorPlace.text = "-"
                 }
 
-                var compName = singleResult.competitorCategory.competitor.getFullName()
+                var compName = singleResult.competitorCategory.competitor.getFullName().take(40)
 
                 // Inform that the readout was modified
                 if (singleResult.readoutData?.result?.modified == true) {
@@ -137,7 +138,7 @@ class ResultsFragmentRecyclerViewAdapter(
                                     TimeProcessor.runDurationFromStartString(
                                         it.startDateTime,
                                         drawnStartTime,
-                                        dataProcessor
+                                        dataProcessor, LocalDateTime.now()
                                     )
                             }
                             delay(1000)

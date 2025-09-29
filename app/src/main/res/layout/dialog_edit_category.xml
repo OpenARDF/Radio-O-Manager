@@ -18,7 +18,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:hint="@string/general_name">
+            android:hint="@string/general_name"
+            app:counterEnabled="true"
+            app:counterMaxLength="20">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/category_dialog_name"
@@ -26,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:maxLength="50"
+                android:maxLength="20"
                 android:maxLines="1" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -201,8 +203,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:digits="0123456789B! "
-                android:inputType="textVisiblePassword"
-                />
+                android:inputType="textVisiblePassword" />
         </com.google.android.material.textfield.TextInputLayout>
 
 

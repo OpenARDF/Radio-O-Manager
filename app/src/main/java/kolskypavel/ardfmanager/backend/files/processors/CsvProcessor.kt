@@ -93,11 +93,13 @@ object CsvProcessor : FormatProcessor {
 
             DataType.COMPETITOR_STARTS_TIME,
             DataType.COMPETITOR_STARTS_CATEGORIES,
-            DataType.COMPETITOR_STARTS_CLUBS -> exportStarts(
-                outStream,
-                dataProcessor.getCompetitorDataFlowByRace(raceId).first(),
-                dataProcessor.getRace(raceId)
-            )
+            DataType.COMPETITOR_STARTS_CLUBS -> dataProcessor.getRace(raceId)?.let { race ->
+                exportStarts(
+                    outStream,
+                    dataProcessor.getCompetitorDataFlowByRace(raceId).first(),
+                    race
+                )
+            }
 
             DataType.RESULTS -> exportResults(
                 outStream,

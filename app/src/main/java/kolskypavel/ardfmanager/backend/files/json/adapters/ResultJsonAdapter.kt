@@ -9,22 +9,22 @@ import kolskypavel.ardfmanager.backend.room.entity.Result
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.CompetitorData
 import kolskypavel.ardfmanager.backend.room.entity.embeddeds.ReadoutData
-import kolskypavel.ardfmanager.backend.room.enums.ResultStatus
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
+import java.time.LocalDateTime
 import java.util.UUID
 
-class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
+class ResultJsonAdapter(
+    val raceId: UUID,
+    val dataProcessor: DataProcessor
+) {
     val siTimeJsonAdapter = SITimeJsonAdapter()
-    val punchJsonAdapter = PunchJsonAdapter(raceId)
+    val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
 
     @ToJson
     fun toJson(resultData: CompetitorData): ResultJson {
         val result = resultData.readoutData?.result!!
-        var punches = resultData.readoutData!!.punches
-
-        if (filterStart) {
-            punches = punches.filter { it.punch.punchType != SIRecordType.START }
-        }
+        val punches =
+            resultData.readoutData!!.punches.filter { it.punch.punchType != SIRecordType.START }
 
         return ResultJson(
             check_time = result.checkTime?.let { siTimeJsonAdapter.toJson(it) },
@@ -34,8 +34,9 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
             run_time = TimeProcessor.durationToFormattedString(result.runTime, true),
             place = result.place,
             controls_num = result.points,
-            result_status = DataProcessor.get()
+            result_status = dataProcessor
                 .resultStatusToShortString(result.resultStatus),
+            automatic_status = result.automaticStatus,
             punches = punches
                 .map { ap ->
                     val rawCode = ap.alias?.name ?: ap.punch.siCode.toString()
@@ -43,36 +44,50 @@ class ResultJsonAdapter(val raceId: UUID, val filterStart: Boolean) {
                         if (ap.punch.punchType == SIRecordType.FINISH && rawCode == "0") "F" else rawCode
                     punchJsonAdapter.toJson(ap).also { it.code = code }
 
-                }
+                },
+            readoutTime = result.readoutTime
         )
     }
 
     @FromJson
-    fun fromJson(json: ResultJson): ReadoutData {
+    fun fromJson(resultJson: ResultJson): ReadoutData {
         val result = Result(
             id = UUID.randomUUID(),
-            raceId = raceId, // replace with real value later
-            siNumber = null, // will be assigned elsewhere
+            raceId = raceId,
+            siNumber = null, // Will be assigned in competitorJson
             cardType = 0, // Not in ResultJson
-            checkTime = null, // default/fallback
-            origCheckTime = null,
-            startTime = null,
-            origStartTime = null,
-            finishTime = null,
-            origFinishTime = null,
-            automaticStatus = false,
-            resultStatus = ResultStatus.valueOf(json.result_status),
-            runTime = TimeProcessor.minuteStringToDuration(json.run_time), // must match enum exactly
-            modified = false,
-            sent = false
+            checkTime = resultJson.check_time?.let { time -> siTimeJsonAdapter.fromJson(resultJson.check_time) },
+            origCheckTime = resultJson.check_time?.let { time ->
+                siTimeJsonAdapter.fromJson(
+                    resultJson.check_time
+                )
+            },
+            points = resultJson.controls_num,
+            startTime = resultJson.start_time?.let { time -> siTimeJsonAdapter.fromJson(resultJson.start_time) },
+            origStartTime = resultJson.start_time?.let { time ->
+                siTimeJsonAdapter.fromJson(
+                    resultJson.start_time
+                )
+            },
+            finishTime = resultJson.finish_time?.let { time -> siTimeJsonAdapter.fromJson(resultJson.finish_time) },
+            origFinishTime = resultJson.finish_time?.let { time ->
+                siTimeJsonAdapter.fromJson(
+                    resultJson.finish_time
+                )
+            },
+            automaticStatus = resultJson.automatic_status ?: true,
+            resultStatus = dataProcessor.resultStatusShortStringToEnum(resultJson.result_status),
+            runTime = TimeProcessor.minuteStringToDuration(resultJson.run_time), // must match enum exactly
+            modified = resultJson.modified,
+            sent = false,
+            readoutTime = resultJson.readoutTime ?: LocalDateTime.now()
         )
 
 
         val punches = ArrayList<AliasPunch>()
-        val punchJsonAdapter = PunchJsonAdapter(raceId)
-        json.punches.forEachIndexed { index, punchJson ->
+        val punchJsonAdapter = PunchJsonAdapter(raceId, dataProcessor)
+        resultJson.punches.forEachIndexed { index, punchJson ->
 
-            val punchType = SIRecordType.valueOf(punchJson.control_type)
             val punch = punchJsonAdapter.fromJson(punchJson)
             punch.order = index
             punch.resultId = result.id

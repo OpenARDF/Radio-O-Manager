@@ -8,6 +8,7 @@ import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.preference.PreferenceManager
 import kolskypavel.ardfmanager.R
+import kolskypavel.ardfmanager.backend.files.DataImportValidator
 import kolskypavel.ardfmanager.backend.files.FileProcessor
 import kolskypavel.ardfmanager.backend.files.constants.DataFormat
 import kolskypavel.ardfmanager.backend.files.constants.DataType
@@ -105,11 +106,13 @@ class DataProcessor private constructor(context: Context) {
         }
     }
 
-    suspend fun setCurrentRace(raceId: UUID): Race {
+    suspend fun setCurrentRace(raceId: UUID): Race? {
         val race = getRace(raceId)
-        currentState.postValue(currentState.value?.let { AppState(race, it.siReaderState) })
-
-        return race
+        race?.let { race ->
+            currentState.postValue(currentState.value?.let { AppState(race, it.siReaderState) })
+            return race
+        }
+        return null
     }
 
     fun removeCurrentRace() {
@@ -119,13 +122,13 @@ class DataProcessor private constructor(context: Context) {
     //METHODS TO HANDLE RACES
     fun getRaces(): Flow<List<Race>> = ardfRepository.getRaces()
 
-    suspend fun getRace(id: UUID): Race = ardfRepository.getRace(id)
+    suspend fun getRace(id: UUID) = ardfRepository.getRace(id)
 
     suspend fun createRace(race: Race) = ardfRepository.createRace(race)
 
     suspend fun updateRace(race: Race) {
         ardfRepository.updateRace(race)
-        updateResults(race.id)
+        updateResultsByRace(race.id)
     }
 
     suspend fun deleteRace(id: UUID) {
@@ -182,7 +185,7 @@ class DataProcessor private constructor(context: Context) {
             category.controlPointsString = ControlPointsHelper.getStringFromControlPoints(it)
         }
         ardfRepository.createOrUpdateCategory(category, controlPoints)
-        updateResultsForCategory(category.id, false, this)
+        getRace(category.raceId)?.let { race -> updateResultsForCategory(category.id, race, this) }
     }
 
     /**
@@ -205,18 +208,21 @@ class DataProcessor private constructor(context: Context) {
     }
 
     suspend fun createStandardCategories(type: StandardCategoryType, raceId: UUID) {
-        val categories = fileProcessor?.importStandardCategories(type, getRace(raceId))
-        if (categories != null) {
-            for (cat in categories) {
-                ardfRepository.createCategory(cat)
+        val race = getRace(raceId)
+        race?.let { race ->
+            val categories = fileProcessor?.importStandardCategories(type, race)
+            if (categories != null) {
+                for (cat in categories) {
+                    ardfRepository.createCategory(cat)
+                }
             }
         }
     }
 
-    suspend fun deleteCategory(id: UUID, raceId: UUID) {
-        ardfRepository.deleteCategory(id)
-        ardfRepository.deleteControlPointsByCategory(id)
-        updateResultsForCategory(id, true, this)
+    suspend fun deleteCategory(categoryId: UUID, raceId: UUID) {
+        ardfRepository.deleteCategory(categoryId)
+        ardfRepository.deleteControlPointsByCategory(categoryId)
+        getRace(raceId)?.let { race -> updateResultsForCategory(categoryId, race, this) }
         updateCategoryOrder(raceId)
     }
 
@@ -269,24 +275,27 @@ class DataProcessor private constructor(context: Context) {
 
             if (cd.readoutData == null) {
                 if (competitor.drawnRelativeStartTime != null) {
-                    //Count started
-                    if (TimeProcessor.hasStarted(
-                            race.startDateTime,
-                            competitor.drawnRelativeStartTime!!,
-                            LocalDateTime.now()
-                        )
-                    ) {
-                        statistics.startedCompetitors++
-                    }
 
-                    val limit = category?.timeLimit ?: race.timeLimit
-                    if (TimeProcessor.isInLimit(
-                            race.startDateTime,
-                            competitor.drawnRelativeStartTime!!,
-                            limit, LocalDateTime.now()
-                        )
-                    ) {
-                        statistics.inLimitCompetitors++
+                    race?.let { race ->
+                        //Count started
+                        if (TimeProcessor.hasStarted(
+                                race.startDateTime,
+                                competitor.drawnRelativeStartTime!!,
+                                LocalDateTime.now()
+                            )
+                        ) {
+                            statistics.startedCompetitors++
+                        }
+
+                        val limit = category?.timeLimit ?: race.timeLimit
+                        if (TimeProcessor.isInLimit(
+                                race.startDateTime,
+                                competitor.drawnRelativeStartTime!!,
+                                limit, LocalDateTime.now()
+                            )
+                        ) {
+                            statistics.inLimitCompetitors++
+                        }
                     }
                 }
             } else {
@@ -317,7 +326,9 @@ class DataProcessor private constructor(context: Context) {
         competitor: Competitor,
     ) {
         ardfRepository.createCompetitor(competitor)
-        ResultsProcessor.updateResultsForCompetitor(competitor.id, this)
+        getRace(competitor.raceId)?.let { race ->
+            ResultsProcessor.updateResultsForCompetitor(competitor.id, race, this)
+        }
     }
 
     suspend fun deleteCompetitor(id: UUID, deleteResult: Boolean) {
@@ -367,12 +378,15 @@ class DataProcessor private constructor(context: Context) {
      *     Recalculates all results in a race
      *     Since race edit could mean a change in start time 00, results for each competitor need to be recalculated
      */
-    private suspend fun updateResults(raceId: UUID) {
-        getCategoriesForRace(raceId).forEach { category ->
-            updateResultsForCategory(category.id, false, this)
+    suspend fun updateResultsByRace(raceId: UUID) {
+        getRace(raceId)?.let { race ->
+            getCategoriesForRace(raceId).forEach { category ->
+                updateResultsForCategory(category.id, race, this)
+
+            }
+            ardfRepository.getUnmatchedCompetitorsByRace(raceId)
+                .forEach { comp -> updateResultsForCompetitor(comp.id, race, this) }
         }
-        ardfRepository.getUnmatchedCompetitorsByRace(raceId)
-            .forEach { comp -> updateResultsForCompetitor(comp.id, this) }
     }
 
     suspend fun deleteResult(id: UUID) = ardfRepository.deleteResult(id)
@@ -458,105 +472,18 @@ class DataProcessor private constructor(context: Context) {
         dataFormat: DataFormat,
         raceId: UUID
     ): DataImportWrapper {
-        val data =
-            fileProcessor?.importData(uri, dataType, dataFormat, getRace(raceId), getContext())
+        val race = getRace(raceId)
 
-        validateDataImport(data!!, raceId, dataType, getContext())
-        return data
-    }
+        race?.let { race ->
+            val data =
+                fileProcessor?.importData(uri, dataType, dataFormat, race, getContext())
 
-    @Throws(IllegalArgumentException::class)
-    private fun validateDataImport(
-        data: DataImportWrapper,
-        raceId: UUID,
-        dataType: DataType,
-        context: Context
-    ) {
-        when (dataType) {
-
-            //Name is required for each category and must be unique, categories can be empty
-            DataType.CATEGORIES -> {
-                val names = data.categories.map { it.category.name }
-
-                val duplicates = names.groupingBy { it }.eachCount().filter { it.value > 1 }.keys
-                if (duplicates.isNotEmpty()) {
-                    throw IllegalArgumentException(
-                        context.getString(
-                            R.string.data_import_category_duplicate,
-                            duplicates.joinToString(", ")
-                        )
-                    )
-                }
-            }
-
-            // SI number and start number must be unique
-            DataType.COMPETITORS -> {
-
-                //TODO: add check for duplicate names
-                val startNumbers = HashSet<Int>()
-                val siNumbers = HashSet<Int>()
-                for (comp in data.competitorCategories) {
-                    val siNumber = comp.competitor.siNumber
-                    val startNumber = comp.competitor.startNumber
-
-                    // Check if SI is duplicated in the list or in the database
-                    if (siNumber != null) {
-                        if (siNumbers.contains(siNumber)
-                        ) {
-                            throw IllegalArgumentException(
-                                context.getString(
-                                    R.string.data_import_competitor_duplicate_si_file,
-                                    siNumber
-                                )
-                            )
-                        }
-                        if (checkIfSINumberExists(siNumber, raceId)) {
-                            throw IllegalArgumentException(
-                                context.getString(
-                                    R.string.data_import_competitor_duplicate_si_race,
-                                    siNumber
-                                )
-                            )
-                        }
-                    }
-
-                    // Start number checks
-                    if (startNumbers.contains(startNumber)
-                    ) {
-                        throw IllegalArgumentException(
-                            context.getString(
-                                R.string.data_import_competitor_duplicate_start_number_file,
-                                startNumber
-                            )
-                        )
-                    }
-
-                    if (checkIfStartNumberExists(startNumber, raceId)) {
-                        throw IllegalArgumentException(
-                            context.getString(
-                                R.string.data_import_competitor_duplicate_start_number_race,
-                                startNumber
-                            )
-                        )
-                    }
-
-                    // Add the numbers to the sets
-                    if (siNumber != null) {
-                        siNumbers.add(siNumber)
-                    }
-                    startNumbers.add(startNumber)
-                }
-            }
-
-            DataType.COMPETITOR_STARTS_TIME -> {
-                // TODO: implement - based on settings
-            }
-
-            else -> {
-                throw IllegalArgumentException(context.getString(R.string.data_import_format_not_supported))
-            }
+            DataImportValidator.validateDataImport(data!!, raceId, dataType, this, getContext())
+            return data
         }
+        return DataImportWrapper(emptyList(), emptyList(), arrayListOf())
     }
+
 
     suspend fun exportData(
         uri: Uri,
@@ -583,12 +510,14 @@ class DataProcessor private constructor(context: Context) {
             getResultDataFlowByRace(raceId).first().filter { it.competitorCategory == null }
                 .map { fil -> ReadoutData(fil.result, fil.punches) }
 
-        return RaceData(race, categories, aliases, competitorData, unknownReadoutData)
+        return race?.let { RaceData(it, categories, aliases, competitorData, unknownReadoutData) }
+            ?: RaceData(Race(), categories, aliases, competitorData, unknownReadoutData)
     }
 
+    @Throws(Exception::class)
     suspend fun importRaceData(uri: Uri) {
-        val raceData = fileProcessor?.importRaceData(uri)
-        if (raceData != null) {
+        fileProcessor?.importRaceData(uri, getContext())?.let { raceData ->
+            DataImportValidator.validateRaceDataImport(raceData, getContext())
             ardfRepository.saveRaceData(raceData)
         }
     }
@@ -643,109 +572,119 @@ class DataProcessor private constructor(context: Context) {
     fun printResults(results: List<ResultWrapper>, race: Race) =
         printProcessor.printResults(results, race)
 
-//GENERAL HELPER METHODS
+    //============================= GENERAL HELPER METHODS =========================================
 
     //Enums manipulation
     fun raceTypeToString(raceType: RaceType): String {
-        val raceTypeStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_types_array)!!
-        return raceTypeStrings[raceType.value]!!
+        val raceTypeStrings = appContext.get()?.resources?.getStringArray(R.array.race_types_array)
+        return raceTypeStrings?.getOrNull(raceType.value) ?: ""
     }
 
     fun raceTypeStringToEnum(string: String): RaceType {
-        val raceTypeStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_types_array)!!
-        return RaceType.getByValue(raceTypeStrings.indexOf(string))
+        val raceTypeStrings = appContext.get()?.resources?.getStringArray(R.array.race_types_array)
+        val idx = raceTypeStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceType.getByValue(idx) else RaceType.entries.first()
     }
 
     fun raceLevelToString(raceLevel: RaceLevel): String {
         val raceLevelStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)!!
-        return raceLevelStrings[raceLevel.value]
+            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)
+        return raceLevelStrings?.getOrNull(raceLevel.value) ?: ""
     }
 
     fun raceLevelStringToEnum(string: String): RaceLevel {
         val raceLevelStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)!!
-        return RaceLevel.getByValue(raceLevelStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.race_levels_array)
+        val idx = raceLevelStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceLevel.getByValue(idx) else RaceLevel.entries.first()
     }
 
     fun raceBandToString(raceBand: RaceBand): String {
-        val raceBandStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_bands_array)!!
-        return raceBandStrings[raceBand.value]
+        val raceBandStrings = appContext.get()?.resources?.getStringArray(R.array.race_bands_array)
+        return raceBandStrings?.getOrNull(raceBand.value) ?: ""
     }
 
     fun raceBandStringToEnum(string: String): RaceBand {
-        val raceBandStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_bands_array)!!
-        return RaceBand.getByValue(raceBandStrings.indexOf(string))
+        val raceBandStrings = appContext.get()?.resources?.getStringArray(R.array.race_bands_array)
+        val idx = raceBandStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) RaceBand.getByValue(idx) else RaceBand.entries.first()
     }
 
     fun resultStatusToString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return raceStatusStrings[resultStatus.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_status_array)
+        return raceStatusStrings?.getOrNull(resultStatus.value) ?: ""
     }
 
     fun resultStatusStringToEnum(string: String): ResultStatus {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array)!!
-        return ResultStatus.getByValue(raceStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.result_status_array)
+        val idx = raceStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) ResultStatus.getByValue(idx) else ResultStatus.entries.first()
     }
 
     fun resultStatusToShortString(resultStatus: ResultStatus): String {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.race_status_array_short)!!
-        return raceStatusStrings[resultStatus.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_status_short_array)
+        return raceStatusStrings?.getOrNull(resultStatus.value) ?: ""
+    }
+
+    fun resultStatusShortStringToEnum(string: String): ResultStatus {
+        val raceStatusStrings =
+            appContext.get()?.resources?.getStringArray(R.array.result_status_short_array)
+        val idx = raceStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) ResultStatus.getByValue(idx) else ResultStatus.entries.first()
     }
 
     fun genderToString(isMan: Boolean?): String {
+        val ctx = appContext.get()
         return when (isMan) {
-            false -> appContext.get()!!.resources.getString(R.string.general_gender_woman)
-            else -> appContext.get()!!.resources.getString(R.string.general_gender_man)
+            false -> ctx?.resources?.getString(R.string.general_gender_woman) ?: "Woman"
+            true -> ctx?.resources?.getString(R.string.general_gender_man) ?: "Man"
+            null -> "Man"
         }
     }
 
     fun resultServiceTypeFromString(string: String): ResultServiceType {
         val raceStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
-        return ResultServiceType.getByValue(raceStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)
+        val idx = raceStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) ResultServiceType.getByValue(idx) else ResultServiceType.entries.first()
     }
 
     fun resultServiceTypeToString(resultServiceType: ResultServiceType): String {
         val resultServiceTypes =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_types)!!
-        return resultServiceTypes[resultServiceType.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_service_types)
+        return resultServiceTypes?.getOrNull(resultServiceType.value) ?: ""
     }
 
-    fun resultServiceStatusToString(status: ResultServiceStatus): CharSequence? {
+    fun resultServiceStatusToString(status: ResultServiceStatus): CharSequence {
         val resultServiceStatus =
-            appContext.get()?.resources?.getStringArray(R.array.result_service_status)!!
-        return resultServiceStatus[status.value]
+            appContext.get()?.resources?.getStringArray(R.array.result_service_status)
+        return resultServiceStatus?.getOrNull(status.value) ?: ""
     }
 
     fun punchStatusToShortString(punchStatus: PunchStatus): String {
-        val arr = getContext().resources.getStringArray(R.array.punch_status_array_short)
-        return arr[punchStatus.ordinal]
+        val arr = getContext().resources?.getStringArray(R.array.punch_status_array_short)
+        return arr?.getOrNull(punchStatus.ordinal) ?: ""
     }
 
     fun shortStringToPunchStatus(string: String): PunchStatus {
         val punchStatusStrings =
-            appContext.get()?.resources?.getStringArray(R.array.punch_status_array_short)!!
-        return PunchStatus.getByValue(punchStatusStrings.indexOf(string))
+            appContext.get()?.resources?.getStringArray(R.array.punch_status_array_short)
+        val idx = punchStatusStrings?.indexOf(string) ?: -1
+        return if (idx >= 0) PunchStatus.getByValue(idx) else PunchStatus.entries.first()
     }
 
     /**
      * @return false for woman, true for man
      */
     fun genderFromString(string: String): Boolean {
-        val genderStrings =
-            appContext.get()?.resources?.getStringArray(R.array.genders)!!
-        return when (genderStrings.indexOf(string)) {
+        val genderStrings = appContext.get()?.resources?.getStringArray(R.array.genders)
+        return when (genderStrings?.indexOf(string)) {
             0 -> false
             1 -> true
-            else -> false
+            else -> true
         }
     }
 

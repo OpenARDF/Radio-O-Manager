@@ -10,7 +10,7 @@ import kolskypavel.ardfmanager.backend.room.entity.embeddeds.AliasPunch
 import kolskypavel.ardfmanager.backend.room.enums.SIRecordType
 import java.util.UUID
 
-class PunchJsonAdapter(val raceId: UUID) {
+class PunchJsonAdapter(val raceId: UUID, val dataProcessor: DataProcessor) {
     val siTimeJsonAdapter = SITimeJsonAdapter()
 
     @ToJson
@@ -18,8 +18,9 @@ class PunchJsonAdapter(val raceId: UUID) {
         val punch = aliasPunch.punch
         return PunchJson(
             code = aliasPunch.alias?.name ?: punch.siCode.toString(),
+            si_code = punch.siCode,
             control_type = punch.punchType.name,
-            punch_status = DataProcessor.get().punchStatusToShortString(punch.punchStatus),
+            punch_status = dataProcessor.punchStatusToShortString(punch.punchStatus),
             si_time = siTimeJsonAdapter.toJson(punch.siTime),
             split_time = TimeProcessor.durationToFormattedString(punch.split, true)
         )
@@ -34,13 +35,16 @@ class PunchJsonAdapter(val raceId: UUID) {
             resultId = UUID.randomUUID(),
             cardNumber = 0,
             siCode = if (punchType == SIRecordType.CONTROL) {
-                punchJson.code.toInt()
-            } else 0,           // TODO: solve situation with alias instead of code
+                if (punchJson.si_code != null) {
+                    punchJson.si_code!!
+                } else punchJson.code.toInt()
+            } else 0,           // For START and FINISH, siCode is set to 0
+
             siTime = siTimeJsonAdapter.fromJson(punchJson.si_time),
             origSiTime = siTimeJsonAdapter.fromJson(punchJson.si_time),
             punchType = punchType,
             order = 0,
-            punchStatus = DataProcessor.get()
+            punchStatus = dataProcessor
                 .shortStringToPunchStatus(punchJson.punch_status),
             split = TimeProcessor.minuteStringToDuration(punchJson.split_time),
         )

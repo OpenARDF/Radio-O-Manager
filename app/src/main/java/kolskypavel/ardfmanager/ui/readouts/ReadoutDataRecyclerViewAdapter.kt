@@ -35,13 +35,13 @@ class ReadoutDataRecyclerViewAdapter(
         val item = values[position]
 
         if (item.competitorCategory?.competitor != null) {
-            holder.competitorView.text = item.competitorCategory!!.competitor.getFullName()
+            holder.competitorView.text = item.competitorCategory!!.competitor.getFullName().take(30)
         } else {
             holder.competitorView.setText(R.string.unknown)
         }
 
         if (item.competitorCategory?.category != null) {
-            holder.categoryView.text = item.competitorCategory!!.category!!.name
+            holder.categoryView.text = item.competitorCategory!!.category!!.name.take(10)
         } else {
             holder.categoryView.text = context.getString(R.string.no_category)
         }
@@ -51,6 +51,12 @@ class ReadoutDataRecyclerViewAdapter(
         } else {
             "-"
         }
+
+        holder.clubView.text =
+            if (item.competitorCategory?.competitor?.club?.isNotEmpty() == true) {
+                item.competitorCategory?.competitor?.club?.take(13)
+            } else "-"
+
         holder.runTimeView.text = "${
             TimeProcessor.durationToFormattedString(
                 item.result.runTime,
@@ -114,6 +120,7 @@ class ReadoutDataRecyclerViewAdapter(
     inner class ReadoutViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var competitorView: TextView = view.findViewById(R.id.readout_item_competitor)
         var siNumberView: TextView = view.findViewById(R.id.readout_item_si_number)
+        var clubView: TextView = view.findViewById(R.id.readout_item_club)
         var runTimeView: TextView = view.findViewById(R.id.readout_item_run_time)
         var startTimeView: TextView = view.findViewById(R.id.readout_item_start_time)
         var finishTimeView: TextView = view.findViewById(R.id.readout_item_finish_time)
