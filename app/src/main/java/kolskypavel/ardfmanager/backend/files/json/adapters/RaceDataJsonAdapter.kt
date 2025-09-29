@@ -52,8 +52,11 @@ class RaceDataJsonAdapter(val dataProcessor: DataProcessor) {
         val competitorAdapter = CompetitorJsonAdapter(race.id, dataProcessor)
         val unmatchedAdapter = UnmatchedResultJsonAdapter(race.id, dataProcessor)
 
-        val categories = raceJson.categories.map { catJson ->
-            categoryAdapter.fromJson(catJson).also { it.category.raceId = race.id }
+        val categories = raceJson.categories.mapIndexed { index, catJson ->
+            categoryAdapter.fromJson(catJson).also {
+                it.category.raceId = race.id
+                it.category.order = index
+            }
         }
 
         val aliases = raceJson.aliases?.map { aliasJson ->
