@@ -130,8 +130,7 @@ class RaceSelectionFragment : Fragment() {
                     RaceEditDialogFragment.RaceEditAcctions::class.java
                 )
                 else {
-                    bundle.getSerializable(RaceEditDialogFragment.BUNDLE_KEY_ACTIONS) as Race
-
+                    bundle.getSerializable(RaceEditDialogFragment.BUNDLE_KEY_ACTIONS) as RaceEditDialogFragment.RaceEditAcctions
                 }
 
             val position = bundle.getInt(RaceEditDialogFragment.BUNDLE_KEY_POSITION)
