@@ -10,20 +10,27 @@ import java.io.Serializable
 data class AliasPunch(
     @Embedded var punch: Punch,
     @Relation(
-        parentColumn = "si_code",
-        entityColumn = "si_code",
+        parentColumn = "race_id",
+        entityColumn = "race_id",
     )
-    var alias: Alias?,
+    var aliases: List<Alias>,
 ) : Serializable {
+    val alias: Alias?
+        get() = aliases.firstOrNull { it.siCode == punch.siCode }
 
     // For debugging
     constructor() : this(
         Punch(),
-        null
+        emptyList()
     )
 
     constructor(punch: Punch) : this(
         punch = punch,
-        alias = null
+        aliases = emptyList()
+    )
+
+    constructor(punch: Punch, alias: Alias?) : this(
+        punch = punch,
+        aliases = listOfNotNull(alias)
     )
 }
