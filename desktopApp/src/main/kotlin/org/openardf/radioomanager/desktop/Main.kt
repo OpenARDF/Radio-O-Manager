@@ -109,6 +109,16 @@ fun main(args: Array<String>) = application {
                         }
                     }
                 })
+                Item("Close Project", enabled = projectFile != null && !hasUnsavedChanges, onClick = {
+                    runCatching {
+                        projectSession.closeProject()
+                        projectFile = projectSession.currentProject
+                        hasUnsavedChanges = projectSession.hasUnsavedChanges
+                        projectStatusText = "No project open."
+                    }.onFailure { error ->
+                        projectStatusText = "Close failed: ${error.message ?: error::class.simpleName}"
+                    }
+                })
             }
         }
 

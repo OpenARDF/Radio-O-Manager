@@ -71,4 +71,13 @@ class DesktopProjectSession(private val store: ProjectFileStore) {
         }
         store.write(path, projectFile)
     }
+
+    /** Clears the active project once there are no pending edits to lose. */
+    fun closeProject() {
+        check(!hasUnsavedChanges) {
+            "Cannot close while there are unsaved changes."
+        }
+        currentProject = null
+        currentPath = null
+    }
 }

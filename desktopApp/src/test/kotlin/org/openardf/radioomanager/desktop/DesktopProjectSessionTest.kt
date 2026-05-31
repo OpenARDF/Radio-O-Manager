@@ -2,6 +2,7 @@ package org.openardf.radioomanager.desktop
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
@@ -133,6 +134,43 @@ class DesktopProjectSessionTest {
 
         assertEquals(editedProject, store.writtenProjects[exportPath])
         assertEquals(source, session.currentPath)
+        assertEquals(true, session.hasUnsavedChanges)
+    }
+
+    @Test
+    fun closesProjectWhenThereAreNoUnsavedChanges() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Closable Race")
+        val session = DesktopProjectSession(InMemoryProjectFileStore(mapOf(path to projectFile)))
+
+        session.open(path)
+        session.closeProject()
+
+        assertNull(session.currentProject)
+        assertNull(session.currentPath)
+        assertEquals(false, session.hasUnsavedChanges)
+    }
+
+    @Test
+    fun rejectsCloseWithUnsavedChanges() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Dirty Race")
+        val session = DesktopProjectSession(InMemoryProjectFileStore(mapOf(path to projectFile)))
+
+        session.open(path)
+        session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Edited Race")
+                )
+            )
+        }
+
+        assertThrows(IllegalStateException::class.java) {
+            session.closeProject()
+        }
+        assertEquals(projectFile.raceData.race.id, session.currentProject?.raceData?.race?.id)
+        assertEquals(path, session.currentPath)
         assertEquals(true, session.hasUnsavedChanges)
     }
 
