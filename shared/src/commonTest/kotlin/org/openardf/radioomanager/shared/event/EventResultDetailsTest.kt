@@ -13,8 +13,11 @@ class EventResultDetailsTest {
         val rows = EventResultDetails.from(raceData())
 
         assertEquals(1, rows.size)
+        assertEquals("result", rows[0].id)
         assertEquals("1", rows[0].placeText)
         assertEquals("RUNNER Alice", rows[0].competitorName)
+        assertEquals(ResultStatus.OK, rows[0].resultStatus)
+        assertEquals(true, rows[0].automaticStatus)
         assertEquals("OK", rows[0].statusLabel)
         assertEquals("3", rows[0].pointsText)
         assertEquals("00:20:00", rows[0].runTimeText)

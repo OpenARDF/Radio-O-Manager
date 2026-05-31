@@ -611,7 +611,10 @@ private fun SectionWorkspace(
             )
         }
         if (section == DesktopSection.Results && projectFile != null) {
-            ResultDetailsPanel(EventResultDetails.from(projectFile.raceData))
+            ResultDetailsPanel(
+                results = EventResultDetails.from(projectFile.raceData),
+                onUpdateReadoutStatus = onUpdateReadoutStatus
+            )
         }
         Box(
             modifier = Modifier
@@ -633,19 +636,46 @@ private fun SectionWorkspace(
 
 /** Shows read-only competitor result rows. */
 @Composable
-private fun ResultDetailsPanel(results: List<EventResultDetails>) {
+private fun ResultDetailsPanel(
+    results: List<EventResultDetails>,
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("Place", "Competitor", "Status", "Points", "Runtime"))
+        DetailHeaderRow(listOf("Place", "Competitor", "Status", "Points", "Runtime", ""))
         results.forEach { result ->
-            DetailGridRow(
-                listOf(
-                    result.placeText,
-                    result.competitorName,
-                    result.statusLabel,
-                    result.pointsText,
-                    result.runTimeText
-                )
-            )
+            ResultDetailRow(result, onUpdateReadoutStatus)
+        }
+    }
+}
+
+/** Shows one ranked result row with explicit manual status editing. */
+@Composable
+private fun ResultDetailRow(
+    result: EventResultDetails,
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit
+) {
+    var selectedStatus by remember(result.id, result.resultStatus) { mutableStateOf(result.resultStatus) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(result.placeText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(result.competitorName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        ResultStatusPicker(
+            selectedStatus = selectedStatus,
+            onStatusSelected = { selectedStatus = it },
+            modifier = Modifier.weight(1f)
+        )
+        Text(result.pointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(result.runTimeText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Button(
+            onClick = { onUpdateReadoutStatus(result.id, selectedStatus) },
+            modifier = Modifier.weight(1f),
+            enabled = selectedStatus != result.resultStatus || result.automaticStatus
+        ) {
+            Text("Status")
         }
     }
 }
