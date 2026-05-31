@@ -18,5 +18,15 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "org.openardf.radioomanager.desktop.MainKt"
+
+        nativeDistributions {
+            packageName = "Radio-O-Manager"
+            description = "Desktop event administration shell for Radio-O-Manager."
+            vendor = "OpenARDF"
+
+            macOS {
+                bundleID = "org.openardf.radioomanager.desktop"
+            }
+        }
     }
 }

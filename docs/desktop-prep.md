@@ -110,9 +110,11 @@ The current desktop packaging smoke checks are:
 
 `checkRuntime` verifies that Compose Desktop can find a usable JDK runtime.
 `createDistributable` currently writes the macOS app image to
-`desktopApp/build/compose/binaries/main/app/desktopApp.app`. The generated app
-name is still the module name; a later packaging slice should set product
-metadata before jDeploy packaging.
+`desktopApp/build/compose/binaries/main/app/Radio-O-Manager.app`. The Compose
+Desktop metadata now sets the app image name, description, vendor, and macOS
+bundle ID. A later packaging slice should define the release-version mapping
+before jDeploy packaging, because macOS `jpackage` app versions must begin with
+a positive integer and the current Android version remains `0.2.0`.
 
 `packageDistributionForCurrentOS` also passes in the current module shape, but
 the app-image output from `createDistributable` is the clearest local smoke
