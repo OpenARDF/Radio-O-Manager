@@ -130,6 +130,17 @@ fun main() = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onUpdateCompetitorNumbers = { competitorId, startNumber, siNumber ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.updateCompetitorNumbers(currentProject, competitorId, startNumber, siNumber)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -160,6 +171,7 @@ fun RadioOManagerDesktopApp(
     onRenameRace: (String) -> Unit = {},
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     MaterialTheme(
@@ -190,6 +202,7 @@ fun RadioOManagerDesktopApp(
                         onRenameRace = onRenameRace,
                         onRenameCategory = onRenameCategory,
                         onRenameCompetitor = onRenameCompetitor,
+                        onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onUpdateAlias = onUpdateAlias
                     )
                 }
@@ -263,6 +276,7 @@ private fun SectionWorkspace(
     onRenameRace: (String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit
 ) {
     Column(
@@ -298,7 +312,8 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Competitors && projectFile != null) {
             CompetitorDetailsPanel(
                 competitors = EventCompetitorDetails.from(projectFile.raceData),
-                onRenameCompetitor = onRenameCompetitor
+                onRenameCompetitor = onRenameCompetitor,
+                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers
             )
         }
         if (section == DesktopSection.Aliases && projectFile != null) {
@@ -373,12 +388,17 @@ private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
 @Composable
 private fun CompetitorDetailsPanel(
     competitors: List<EventCompetitorDetails>,
-    onRenameCompetitor: (String, String, String) -> Unit
+    onRenameCompetitor: (String, String, String) -> Unit,
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", ""))
+        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", ""))
         competitors.forEach { competitor ->
-            CompetitorDetailRow(competitor, onRenameCompetitor)
+            CompetitorDetailRow(
+                competitor = competitor,
+                onRenameCompetitor = onRenameCompetitor,
+                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers
+            )
         }
     }
 }
@@ -387,10 +407,15 @@ private fun CompetitorDetailsPanel(
 @Composable
 private fun CompetitorDetailRow(
     competitor: EventCompetitorDetails,
-    onRenameCompetitor: (String, String, String) -> Unit
+    onRenameCompetitor: (String, String, String) -> Unit,
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit
 ) {
     var firstNameDraft by remember(competitor.id, competitor.firstName) { mutableStateOf(competitor.firstName) }
     var lastNameDraft by remember(competitor.id, competitor.lastName) { mutableStateOf(competitor.lastName) }
+    var startNumberDraft by remember(competitor.id, competitor.startNumberText) {
+        mutableStateOf(competitor.startNumberText)
+    }
+    var siNumberDraft by remember(competitor.id, competitor.siNumberText) { mutableStateOf(competitor.siNumberText) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -410,14 +435,31 @@ private fun CompetitorDetailRow(
             label = { Text("Last") }
         )
         Text(competitor.categoryName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
-        Text(competitor.startNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
-        Text(competitor.siNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        TextField(
+            value = startNumberDraft,
+            onValueChange = { startNumberDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Start") }
+        )
+        TextField(
+            value = siNumberDraft,
+            onValueChange = { siNumberDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("SI") }
+        )
         Button(
             onClick = { onRenameCompetitor(competitor.id, firstNameDraft, lastNameDraft) },
             modifier = Modifier.weight(1f),
             enabled = firstNameDraft != competitor.firstName || lastNameDraft != competitor.lastName
         ) {
-            Text("Apply")
+            Text("Name")
+        }
+        Button(
+            onClick = { onUpdateCompetitorNumbers(competitor.id, startNumberDraft, siNumberDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = startNumberDraft != competitor.startNumberText || siNumberDraft != competitor.siNumberText
+        ) {
+            Text("Nos.")
         }
     }
 }

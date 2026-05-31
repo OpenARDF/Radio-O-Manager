@@ -106,6 +106,48 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun updatesCompetitorNumbersUsingSharedValidationRules() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111),
+                competitorData("comp-2", "Bob", "Racer", startNumber = 2, siNumber = 2222)
+            )
+        )
+
+        val updated = EventProjectEditor.updateCompetitorNumbers(original, "comp-2", " 3 ", " ")
+
+        assertEquals(1, updated.raceData.competitorData[0].competitorCategory.competitor.startNumber)
+        assertEquals(3, updated.raceData.competitorData[1].competitorCategory.competitor.startNumber)
+        assertEquals(null, updated.raceData.competitorData[1].competitorCategory.competitor.siNumber)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorNumberUpdates() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111),
+                competitorData("comp-2", "Bob", "Racer", startNumber = 2, siNumber = 2222)
+            )
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "", "3333")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "1", "3333")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "3", "999")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "3", "1111")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "missing", "3", "3333")
+        }
+    }
+
+    @Test
     fun updatesAliasUsingSharedValidationRules() {
         val original = projectFile(
             aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
@@ -185,7 +227,9 @@ class EventProjectEditorTest {
     private fun competitorData(
         id: String,
         firstName: String,
-        lastName: String
+        lastName: String,
+        startNumber: Int = 1,
+        siNumber: Int? = null
     ): EventCompetitorData =
         EventCompetitorData(
             competitorCategory = EventCompetitorCategory(
@@ -199,9 +243,9 @@ class EventProjectEditorTest {
                     index = "",
                     isMan = true,
                     birthYear = null,
-                    siNumber = null,
+                    siNumber = siNumber,
                     siRent = false,
-                    startNumber = 1,
+                    startNumber = startNumber,
                     drawnStartTimeSeconds = null
                 ),
                 category = null

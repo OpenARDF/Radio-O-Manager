@@ -2,6 +2,7 @@ package org.openardf.radioomanager.shared.event
 
 import org.openardf.radioomanager.shared.alias.AliasRules
 import org.openardf.radioomanager.shared.alias.AliasValidationResult
+import org.openardf.radioomanager.shared.sportident.SportIdentCodes
 
 /** Shared event-project editing helpers used by desktop and future non-Android flows. */
 object EventProjectEditor {
@@ -98,6 +99,73 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with one competitor's validated numbers changed. */
+    fun updateCompetitorNumbers(
+        projectFile: EventProjectFile,
+        competitorId: String,
+        startNumber: String,
+        siNumber: String
+    ): EventProjectFile {
+        val competitorPosition = projectFile.raceData.competitorData.indexOfFirst {
+            it.competitorCategory.competitor.id == competitorId
+        }
+        require(competitorPosition >= 0) {
+            "Competitor was not found: $competitorId"
+        }
+
+        val trimmedStartNumber = startNumber.trim()
+        require(trimmedStartNumber.isNotEmpty()) {
+            "Start number is required."
+        }
+        val startNumberValue = trimmedStartNumber.toIntOrNull()
+            ?: throw IllegalArgumentException("Start number is invalid.")
+        require(
+            projectFile.raceData.competitorData.noneIndexed { index, data ->
+                index != competitorPosition && data.competitorCategory.competitor.startNumber == startNumberValue
+            }
+        ) {
+            "Start number must be unique."
+        }
+
+        val trimmedSiNumber = siNumber.trim()
+        val siNumberValue = if (trimmedSiNumber.isEmpty()) {
+            null
+        } else {
+            trimmedSiNumber.toIntOrNull()
+                ?: throw IllegalArgumentException("SI number is invalid.")
+        }
+        require(siNumberValue == null || SportIdentCodes.isSINumberValid(siNumberValue)) {
+            "SI number is outside the supported SportIdent card range."
+        }
+        require(
+            siNumberValue == null || projectFile.raceData.competitorData.noneIndexed { index, data ->
+                index != competitorPosition && data.competitorCategory.competitor.siNumber == siNumberValue
+            }
+        ) {
+            "SI number must be unique."
+        }
+
+        val competitorData = projectFile.raceData.competitorData.mapIndexed { index, data ->
+            if (index == competitorPosition) {
+                val competitorCategory = data.competitorCategory
+                data.copy(
+                    competitorCategory = competitorCategory.copy(
+                        competitor = competitorCategory.competitor.copy(
+                            startNumber = startNumberValue,
+                            siNumber = siNumberValue
+                        )
+                    )
+                )
+            } else {
+                data
+            }
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(competitorData = competitorData)
+        )
+    }
+
     /** Returns a copy of the project file with one validated alias changed. */
     fun updateAlias(
         projectFile: EventProjectFile,
@@ -134,4 +202,7 @@ object EventProjectEditor {
             raceData = projectFile.raceData.copy(aliases = aliases)
         )
     }
+
+    private inline fun <T> Iterable<T>.noneIndexed(predicate: (index: Int, T) -> Boolean): Boolean =
+        withIndex().none { (index, value) -> predicate(index, value) }
 }
