@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.openardf.radioomanager.shared.event.EventAliasDetails
 import org.openardf.radioomanager.shared.event.EventCategoryDetails
 import org.openardf.radioomanager.shared.event.EventCompetitorDetails
 import org.openardf.radioomanager.shared.event.EventProjectEditor
@@ -128,6 +129,17 @@ fun main() = application {
                 }.onFailure { error ->
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
+            },
+            onUpdateAlias = { aliasId, siCode, name ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.updateAlias(currentProject, aliasId, siCode, name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
             }
         )
     }
@@ -147,7 +159,8 @@ fun RadioOManagerDesktopApp(
     hasUnsavedChanges: Boolean = false,
     onRenameRace: (String) -> Unit = {},
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
-    onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> }
+    onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
+    onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -176,7 +189,8 @@ fun RadioOManagerDesktopApp(
                         projectStatusText = projectStatusText,
                         onRenameRace = onRenameRace,
                         onRenameCategory = onRenameCategory,
-                        onRenameCompetitor = onRenameCompetitor
+                        onRenameCompetitor = onRenameCompetitor,
+                        onUpdateAlias = onUpdateAlias
                     )
                 }
                 StatusStrip(projectStatusText, hasUnsavedChanges)
@@ -248,7 +262,8 @@ private fun SectionWorkspace(
     projectStatusText: String,
     onRenameRace: (String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
-    onRenameCompetitor: (String, String, String) -> Unit
+    onRenameCompetitor: (String, String, String) -> Unit,
+    onUpdateAlias: (String, String, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -284,6 +299,12 @@ private fun SectionWorkspace(
             CompetitorDetailsPanel(
                 competitors = EventCompetitorDetails.from(projectFile.raceData),
                 onRenameCompetitor = onRenameCompetitor
+            )
+        }
+        if (section == DesktopSection.Aliases && projectFile != null) {
+            AliasDetailsPanel(
+                aliases = EventAliasDetails.from(projectFile.raceData),
+                onUpdateAlias = onUpdateAlias
             )
         }
         if (section == DesktopSection.Readouts && projectFile != null) {
@@ -395,6 +416,56 @@ private fun CompetitorDetailRow(
             onClick = { onRenameCompetitor(competitor.id, firstNameDraft, lastNameDraft) },
             modifier = Modifier.weight(1f),
             enabled = firstNameDraft != competitor.firstName || lastNameDraft != competitor.lastName
+        ) {
+            Text("Apply")
+        }
+    }
+}
+
+/** Shows editable alias rows backed by shared alias validation rules. */
+@Composable
+private fun AliasDetailsPanel(
+    aliases: List<EventAliasDetails>,
+    onUpdateAlias: (String, String, String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailHeaderRow(listOf("SI code", "Alias", ""))
+        aliases.forEach { alias ->
+            AliasDetailRow(alias, onUpdateAlias)
+        }
+    }
+}
+
+/** Shows one editable alias row for a SportIdent control code mapping. */
+@Composable
+private fun AliasDetailRow(
+    alias: EventAliasDetails,
+    onUpdateAlias: (String, String, String) -> Unit
+) {
+    var siCodeDraft by remember(alias.id, alias.siCodeText) { mutableStateOf(alias.siCodeText) }
+    var nameDraft by remember(alias.id, alias.name) { mutableStateOf(alias.name) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = siCodeDraft,
+            onValueChange = { siCodeDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("SI code") }
+        )
+        TextField(
+            value = nameDraft,
+            onValueChange = { nameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Alias") }
+        )
+        Button(
+            onClick = { onUpdateAlias(alias.id, siCodeDraft, nameDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = siCodeDraft != alias.siCodeText || nameDraft != alias.name
         ) {
             Text("Apply")
         }
@@ -546,6 +617,7 @@ private fun sectionSummary(section: DesktopSection, projectFile: EventProjectFil
         DesktopSection.Races -> summary?.raceName ?: "No races loaded."
         DesktopSection.Categories -> "${summary?.categoryCount ?: 0} categories loaded."
         DesktopSection.Competitors -> "${summary?.competitorCount ?: 0} competitors loaded."
+        DesktopSection.Aliases -> "${projectFile?.raceData?.aliases?.size ?: 0} aliases loaded."
         DesktopSection.Readouts -> "${summary?.readoutCount ?: 0} SI-card readouts loaded."
         DesktopSection.Results -> "${summary?.resultCount ?: 0} results loaded."
         DesktopSection.Settings -> "Desktop settings."

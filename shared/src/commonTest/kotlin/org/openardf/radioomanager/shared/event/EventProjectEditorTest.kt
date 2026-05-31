@@ -105,10 +105,42 @@ class EventProjectEditorTest {
         }
     }
 
+    @Test
+    fun updatesAliasUsingSharedValidationRules() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        val updated = EventProjectEditor.updateAlias(original, "alias-2", " 33 ", " F3 ")
+
+        assertEquals(31, updated.raceData.aliases[0].siCode)
+        assertEquals("F1", updated.raceData.aliases[0].name)
+        assertEquals(33, updated.raceData.aliases[1].siCode)
+        assertEquals("F3", updated.raceData.aliases[1].name)
+    }
+
+    @Test
+    fun rejectsInvalidAliasUpdates() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "alias-2", "31", "F3")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "alias-2", "33", "TOOLONG")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "missing", "33", "F3")
+        }
+    }
+
     private fun projectFile(
         name: String = "Original Race",
         categories: List<EventCategoryData> = emptyList(),
-        competitors: List<EventCompetitorData> = emptyList()
+        competitors: List<EventCompetitorData> = emptyList(),
+        aliases: List<EventAlias> = emptyList()
     ): EventProjectFile =
         EventProjectFile(
             raceData = EventRaceData(
@@ -123,7 +155,7 @@ class EventProjectEditorTest {
                     timeLimitSeconds = 7_200
                 ),
                 categories = categories,
-                aliases = emptyList(),
+                aliases = aliases,
                 competitorData = competitors,
                 unmatchedReadoutData = emptyList()
             )
@@ -175,5 +207,13 @@ class EventProjectEditorTest {
                 category = null
             ),
             readoutData = null
+        )
+
+    private fun alias(id: String, siCode: Int, name: String): EventAlias =
+        EventAlias(
+            id = id,
+            raceId = "race",
+            siCode = siCode,
+            name = name
         )
 }

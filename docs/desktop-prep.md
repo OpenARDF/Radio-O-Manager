@@ -138,9 +138,10 @@ signal until installer packaging metadata is finalized.
    shared effective race settings and can edit category names through shared
    project-editing rules. The Competitors section now shows competitor rows with
    shared category lookup and display formatting, and can edit competitor first
-   and last names through shared project-editing rules. The Readouts section now
-   shows read-only matched and unmatched SI-card readout rows. The Results
-   section now shows read-only competitor result rows. A sample smoke-test
-   project is available at `samples/desktop-smoke.rom.json`.
+   and last names through shared project-editing rules. The Aliases section can
+   edit existing alias SI codes and names through shared alias validation rules.
+   The Readouts section now shows read-only matched and unmatched SI-card
+   readout rows. The Results section now shows read-only competitor result rows.
+   A sample smoke-test project is available at `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.

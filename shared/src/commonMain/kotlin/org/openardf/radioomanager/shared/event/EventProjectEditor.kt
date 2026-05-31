@@ -1,5 +1,8 @@
 package org.openardf.radioomanager.shared.event
 
+import org.openardf.radioomanager.shared.alias.AliasRules
+import org.openardf.radioomanager.shared.alias.AliasValidationResult
+
 /** Shared event-project editing helpers used by desktop and future non-Android flows. */
 object EventProjectEditor {
     /** Returns a copy of the project file with a validated race name. */
@@ -92,6 +95,43 @@ object EventProjectEditor {
 
         return projectFile.copy(
             raceData = projectFile.raceData.copy(competitorData = competitorData)
+        )
+    }
+
+    /** Returns a copy of the project file with one validated alias changed. */
+    fun updateAlias(
+        projectFile: EventProjectFile,
+        aliasId: String,
+        siCode: String,
+        name: String
+    ): EventProjectFile {
+        val aliasPosition = projectFile.raceData.aliases.indexOfFirst { it.id == aliasId }
+        require(aliasPosition >= 0) {
+            "Alias was not found: $aliasId"
+        }
+
+        val trimmedCode = siCode.trim()
+        val trimmedName = name.trim()
+        val existingCodes = projectFile.raceData.aliases.map { it.siCode }
+        val existingNames = projectFile.raceData.aliases.map { it.name }
+
+        require(AliasRules.validateCode(trimmedCode, existingCodes, aliasPosition) == AliasValidationResult.Valid) {
+            "Alias SI code is invalid or duplicated."
+        }
+        require(AliasRules.validateName(trimmedName, existingNames, aliasPosition) == AliasValidationResult.Valid) {
+            "Alias name is invalid or duplicated."
+        }
+
+        val aliases = projectFile.raceData.aliases.mapIndexed { index, alias ->
+            if (index == aliasPosition) {
+                alias.copy(siCode = trimmedCode.toInt(), name = trimmedName)
+            } else {
+                alias
+            }
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(aliases = aliases)
         )
     }
 }
