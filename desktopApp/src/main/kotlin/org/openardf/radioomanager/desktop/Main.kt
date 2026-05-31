@@ -32,6 +32,7 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import org.openardf.radioomanager.shared.event.EventProjectFile
+import org.openardf.radioomanager.shared.event.EventProjectSummary
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main() = application {
@@ -211,17 +212,13 @@ private fun SectionWorkspace(
 
 /** Provides section-specific content summaries without introducing editing behavior. */
 private fun sectionSummary(section: DesktopSection, projectFile: EventProjectFile?): String {
-    val raceData = projectFile?.raceData
+    val summary = projectFile?.let(EventProjectSummary::from)
     return when (section) {
-        DesktopSection.Races -> raceData?.race?.name ?: "No races loaded."
-        DesktopSection.Categories -> "${raceData?.categories?.size ?: 0} categories loaded."
-        DesktopSection.Competitors -> "${raceData?.competitorData?.size ?: 0} competitors loaded."
-        DesktopSection.Readouts -> {
-            val readoutCount = (raceData?.competitorData?.count { it.readoutData != null } ?: 0) +
-                (raceData?.unmatchedReadoutData?.size ?: 0)
-            "$readoutCount SI-card readouts loaded."
-        }
-        DesktopSection.Results -> "${raceData?.competitorData?.count { it.readoutData != null } ?: 0} results loaded."
+        DesktopSection.Races -> summary?.raceName ?: "No races loaded."
+        DesktopSection.Categories -> "${summary?.categoryCount ?: 0} categories loaded."
+        DesktopSection.Competitors -> "${summary?.competitorCount ?: 0} competitors loaded."
+        DesktopSection.Readouts -> "${summary?.readoutCount ?: 0} SI-card readouts loaded."
+        DesktopSection.Results -> "${summary?.resultCount ?: 0} results loaded."
         DesktopSection.Settings -> "Desktop settings."
     }
 }
