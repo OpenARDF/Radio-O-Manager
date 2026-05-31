@@ -1,0 +1,76 @@
+{
+  "race_name": "Desktop Golden Race",
+  "race_start": "2026-05-31T10:00:00",
+  "race_type": "CLASSIC",
+  "race_band": "M80",
+  "race_level": "PRACTICE",
+  "race_time_limit": "120",
+  "race_api_key": "debug-key",
+  "categories": [
+    {
+      "category_name": "M21",
+      "category_gender": true,
+      "category_max_age": 99,
+      "category_length": 3500,
+      "category_climb": 120,
+      "category_control_points": [
+        {
+          "si_code": 31,
+          "control_type": "CONTROL"
+        }
+      ],
+      "category_different_properties": false,
+      "category_time_limit": ""
+    }
+  ],
+  "aliases": [
+    {
+      "alias_si_code": 31,
+      "alias_name": "Fox 1"
+    }
+  ],
+  "competitors": [
+    {
+      "first_name": "Test",
+      "last_name": "Runner",
+      "competitor_club": "OpenARDF",
+      "competitor_category": "M21",
+      "competitor_index": "TST001",
+      "competitor_gender": true,
+      "birth_year": 1980,
+      "si_number": 123456,
+      "si_rent": false,
+      "start_number": 7,
+      "competitor_start_time": "10:00",
+      "result": {
+        "check_time": "2026-05-31T09:55:00",
+        "start_time": "2026-05-31T10:10:00",
+        "finish_time": "2026-05-31T10:40:00",
+        "run_time": "30:00",
+        "place": 2,
+        "readoutTime": "2026-05-31T10:42:00",
+        "modified": false,
+        "punch_count": 1,
+        "result_status": "OK",
+        "automatic_status": true,
+        "punches": [
+          {
+            "code": "Fox 1",
+            "si_code": 31,
+            "control_type": "CONTROL",
+            "punch_status": "OK",
+            "split_time": "10:00"
+          },
+          {
+            "code": "F",
+            "si_code": 0,
+            "control_type": "FINISH",
+            "punch_status": "OK",
+            "split_time": "20:00"
+          }
+        ]
+      }
+    }
+  ],
+  "unmatched_results": []
+}

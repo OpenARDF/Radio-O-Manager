@@ -84,7 +84,7 @@ preferred release workflow.
 
 ## First Implementation Slices
 
-1. Add shared golden-file coverage for the existing event/project export shape.
+1. Done: add golden-file coverage for the existing full race export shape.
 2. Add a desktop app module with a minimal launch window and no event editing.
 3. Add file-backed open/save for a shared project envelope.
 4. Add the first event-admin screen backed by shared models and services.
