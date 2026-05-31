@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 
@@ -196,6 +197,9 @@ private fun SectionWorkspace(
             color = DesktopPalette.Black,
             fontSize = 14.sp
         )
+        if (section == DesktopSection.Races && projectFile != null) {
+            RaceDetailsPanel(EventRaceDetails.from(projectFile.raceData.race))
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -205,6 +209,37 @@ private fun SectionWorkspace(
         Text(
             text = projectFile?.raceData?.race?.startDateTimeIso ?: projectStatusText,
             color = DesktopPalette.Disconnected,
+            fontSize = 13.sp
+        )
+    }
+}
+
+/** Shows read-only race metadata using shared display values. */
+@Composable
+private fun RaceDetailsPanel(details: EventRaceDetails) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailRow("Start", details.startDateTimeIso)
+        DetailRow("Type", details.raceTypeLabel)
+        DetailRow("Level", details.raceLevelLabel)
+        DetailRow("Band", details.raceBandLabel)
+        DetailRow("Time limit", details.timeLimitText)
+    }
+}
+
+/** Displays a compact label/value pair for read-only desktop event details. */
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = label,
+            modifier = Modifier.width(96.dp),
+            color = DesktopPalette.Disconnected,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = value,
+            color = DesktopPalette.Black,
             fontSize = 13.sp
         )
     }

@@ -92,6 +92,8 @@ preferred release workflow.
    The shared `.rom.json` envelope now has a tested JSON codec; desktop file
    filesystem wiring and current-project session state now live in the desktop
    app module. File menu open/save wiring is present; editing remains next.
-4. Add the first event-admin screen backed by shared models and services.
+4. In progress: add the first event-admin screen backed by shared models and
+   services. The Races section now shows read-only race details from shared
+   display models after a `.rom.json` file is opened.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
