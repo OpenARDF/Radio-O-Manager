@@ -44,6 +44,7 @@
     <string name="race_type_short">Krátká trať</string>
     <string name="race_type_orienteering">Orientační běh</string>
     <string name="general_finish">Cíl</string>
+    <string name="general_check_time">Čas checku</string>
     <string name="general_finish_time">Čas cíle</string>
     <string name="general_run_time">Čas běhu</string>
     <string name="general_required">Požadováno</string>
@@ -263,6 +264,7 @@
     <string name="data_import_alias_code_duplicate">Duplicitní kódy aliasů: %1$s</string>
     <string name="data_import_readout_multiple_start">Více startovních ražení ve vyčítání: %1$s</string>
     <string name="data_import_readout_multiple_finish">Více cílových ražení ve vyčítání: %1$s</string>
+    <string name="race_import_internet">Importovat závod z internetu</string>
     <string name="race_export_success">Závod úspěšně exportován</string>
     <string name="race_import_success">Závod úspěšně importován</string>
     <string name="race_import_failure">Chyba při importu závodu</string>
@@ -278,6 +280,6 @@
     <string name="prints_bluetooth_disabled">Bluetooth musí být zapnutý pro tisk!</string>
     <string name="prints_error">Chyba při tisku! %1$s</string>
     <string name="about_app_version">Verze %1$s</string>
-    <string name="about_app_description">ARDF Manager je open-source nástroj pro organizaci soutěží v radiovém orientačním běhu (ARDF) a orientačním běhu.</string>
+    <string name="about_app_description">Radio-O Manager je open-source nástroj pro organizaci soutěží v radiovém orientačním běhu (ARDF) a orientačním běhu.</string>
 
 </resources>
