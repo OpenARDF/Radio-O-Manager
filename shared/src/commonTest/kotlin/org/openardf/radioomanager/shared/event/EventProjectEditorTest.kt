@@ -68,6 +68,44 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun addsCategoryUsingConservativeDefaults() {
+        val existingCategory = categoryData("cat-1", "M21")
+        val original = projectFile(
+            categories = listOf(existingCategory.copy(category = existingCategory.category.copy(order = 4)))
+        )
+
+        val updated = EventProjectEditor.addCategory(original, "cat-2", " W21 ")
+
+        val category = updated.raceData.categories.last().category
+        assertEquals("cat-2", category.id)
+        assertEquals("race", category.raceId)
+        assertEquals("W21", category.name)
+        assertEquals(5, category.order)
+        assertEquals(false, category.differentProperties)
+        assertEquals("", category.controlPointsString)
+    }
+
+    @Test
+    fun rejectsInvalidCategoryAdds() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "", "W21")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-2", " ")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-1", "W21")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-2", "M21")
+        }
+    }
+
+    @Test
     fun renamesCompetitorWithoutChangingOtherCompetitors() {
         val original = projectFile(
             competitors = listOf(competitorData("comp-1", "Alice", "Runner"), competitorData("comp-2", "Bob", "Racer"))

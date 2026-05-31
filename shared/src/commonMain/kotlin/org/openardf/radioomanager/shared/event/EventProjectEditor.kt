@@ -56,6 +56,54 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with a new category using conservative defaults. */
+    fun addCategory(
+        projectFile: EventProjectFile,
+        categoryId: String,
+        name: String
+    ): EventProjectFile {
+        val trimmedName = name.trim()
+        require(categoryId.isNotBlank()) {
+            "Category ID cannot be blank."
+        }
+        require(trimmedName.isNotEmpty()) {
+            "Category name cannot be blank."
+        }
+        require(projectFile.raceData.categories.none { it.category.id == categoryId }) {
+            "Category ID already exists: $categoryId"
+        }
+        require(projectFile.raceData.categories.none { it.category.name == trimmedName }) {
+            "Category name must be unique."
+        }
+
+        val nextOrder = (projectFile.raceData.categories.maxOfOrNull { it.category.order } ?: 0) + 1
+        val category = EventCategory(
+            id = categoryId,
+            raceId = projectFile.raceData.race.id,
+            name = trimmedName,
+            isMan = true,
+            maxAge = null,
+            lengthMeters = 0,
+            climbMeters = 0,
+            order = nextOrder,
+            differentProperties = false,
+            raceType = null,
+            raceBand = null,
+            timeLimitSeconds = null,
+            controlPointsString = ""
+        )
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                categories = projectFile.raceData.categories + EventCategoryData(
+                    category = category,
+                    controlPoints = emptyList(),
+                    competitors = emptyList()
+                )
+            )
+        )
+    }
+
     /** Returns a copy of the project file with one competitor's validated name changed. */
     fun renameCompetitor(
         projectFile: EventProjectFile,

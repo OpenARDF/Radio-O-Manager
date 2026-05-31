@@ -123,6 +123,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onAddCategory = { name ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.addCategory(currentProject, UUID.randomUUID().toString(), name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onRenameCompetitor = { competitorId, firstName, lastName ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -196,6 +207,7 @@ fun RadioOManagerDesktopApp(
     hasUnsavedChanges: Boolean = false,
     onRenameRace: (String) -> Unit = {},
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
+    onAddCategory: (String) -> Unit = {},
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
@@ -229,6 +241,7 @@ fun RadioOManagerDesktopApp(
                         projectStatusText = projectStatusText,
                         onRenameRace = onRenameRace,
                         onRenameCategory = onRenameCategory,
+                        onAddCategory = onAddCategory,
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onUpdateAlias = onUpdateAlias,
@@ -305,6 +318,7 @@ private fun SectionWorkspace(
     projectStatusText: String,
     onRenameRace: (String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
+    onAddCategory: (String) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
@@ -338,7 +352,8 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Categories && projectFile != null) {
             CategoryDetailsPanel(
                 categories = EventCategoryDetails.from(projectFile.raceData),
-                onRenameCategory = onRenameCategory
+                onRenameCategory = onRenameCategory,
+                onAddCategory = onAddCategory
             )
         }
         if (section == DesktopSection.Competitors && projectFile != null) {
@@ -595,12 +610,40 @@ private fun AliasDetailRow(
 @Composable
 private fun CategoryDetailsPanel(
     categories: List<EventCategoryDetails>,
-    onRenameCategory: (String, String) -> Unit
+    onRenameCategory: (String, String) -> Unit,
+    onAddCategory: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        CategoryAddRow(onAddCategory)
         DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", ""))
         categories.forEach { category ->
             CategoryDetailRow(category, onRenameCategory)
+        }
+    }
+}
+
+/** Shows the new-category entry row above existing category definitions. */
+@Composable
+private fun CategoryAddRow(onAddCategory: (String) -> Unit) {
+    var categoryNameDraft by remember { mutableStateOf("") }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = categoryNameDraft,
+            onValueChange = { categoryNameDraft = it },
+            modifier = Modifier.weight(5f),
+            label = { Text("New category") }
+        )
+        Button(
+            onClick = { onAddCategory(categoryNameDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = categoryNameDraft.isNotBlank()
+        ) {
+            Text("Add")
         }
     }
 }
