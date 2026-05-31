@@ -38,6 +38,7 @@ import org.openardf.radioomanager.shared.event.EventCompetitorDetails
 import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
+import org.openardf.radioomanager.shared.event.EventReadoutDetails
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main() = application {
@@ -211,6 +212,9 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Competitors && projectFile != null) {
             CompetitorDetailsPanel(EventCompetitorDetails.from(projectFile.raceData))
         }
+        if (section == DesktopSection.Readouts && projectFile != null) {
+            ReadoutDetailsPanel(EventReadoutDetails.from(projectFile.raceData))
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -222,6 +226,25 @@ private fun SectionWorkspace(
             color = DesktopPalette.Disconnected,
             fontSize = 13.sp
         )
+    }
+}
+
+/** Shows read-only matched and unmatched SI-card readout rows. */
+@Composable
+private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime"))
+        readouts.forEach { readout ->
+            DetailGridRow(
+                listOf(
+                    readout.siNumberText,
+                    readout.competitorName,
+                    readout.statusLabel,
+                    readout.pointsText,
+                    readout.runTimeText
+                )
+            )
+        }
     }
 }
 

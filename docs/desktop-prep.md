@@ -97,6 +97,7 @@ preferred release workflow.
    display models after a `.rom.json` file is opened. The Categories section
    now shows read-only category rows using shared effective race settings. The
    Competitors section now shows read-only competitor rows with shared category
-   lookup and display formatting.
+   lookup and display formatting. The Readouts section now shows read-only
+   matched and unmatched SI-card readout rows.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
