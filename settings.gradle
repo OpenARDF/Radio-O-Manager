@@ -16,4 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "ARDFManager"
 include(":app")
+include(":desktopApp")
 include(":shared")

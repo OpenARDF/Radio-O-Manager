@@ -27,12 +27,13 @@ Android persistence layer.
 Run this gate before committing roadmap/foundation changes:
 
 ```shell
-./gradlew :shared:check testDebugUnitTest :shared:desktopSmokeRun
+./gradlew :shared:check testDebugUnitTest :shared:desktopSmokeRun :desktopApp:test
 git diff --check
 ```
 
 `desktopSmokeRun` is a shared-module desktop JVM smoke entrypoint. It proves the
-desktop target can execute shared business logic, but it is not a desktop app.
+desktop target can execute shared business logic. The `:desktopApp:test` task
+checks the first launchable desktop UI module without opening a window.
 
 Known Room/KSP warnings about missing indexes and `@Transaction` annotations
 currently predate this roadmap work. Do not treat those warnings as Stage 1
@@ -177,7 +178,7 @@ Reasons:
 - The branch passes:
 
 ```shell
-./gradlew :shared:check testDebugUnitTest :shared:desktopSmokeRun
+./gradlew :shared:check testDebugUnitTest :shared:desktopSmokeRun :desktopApp:test
 git diff --check
 ```
 

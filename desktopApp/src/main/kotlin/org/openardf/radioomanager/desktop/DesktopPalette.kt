@@ -1,0 +1,52 @@
+package org.openardf.radioomanager.desktop
+
+import androidx.compose.ui.graphics.Color
+
+/**
+ * Android-derived colors used by the first desktop UI shell.
+ *
+ * Keep these values aligned with `app/src/main/res/values/colors.xml` until the
+ * two platforms share a generated or common design-token source.
+ */
+object DesktopPalette {
+    const val PRIMARY_ARGB = 0xFF6200EEL
+    const val PRIMARY_VARIANT_ARGB = 0xFF3700B3L
+    const val SECONDARY_ARGB = 0xFF03DAC5L
+    const val SECONDARY_VARIANT_ARGB = 0xFF018786L
+    const val BLACK_ARGB = 0xFF000000L
+    const val WHITE_ARGB = 0xFFFFFFFFL
+    const val ERROR_ARGB = 0xFFC62828L
+    const val DISCONNECTED_ARGB = 0xFF505050L
+    const val READING_ARGB = 0xFFFD8204L
+    const val CONNECTED_ARGB = 0xFF0AE62FL
+    const val WARNING_ARGB = 0xFFFFFF00L
+    const val LIGHT_GREY_ARGB = 0xFFCBC8C8L
+
+    val Primary = Color(PRIMARY_ARGB)
+    val PrimaryVariant = Color(PRIMARY_VARIANT_ARGB)
+    val Secondary = Color(SECONDARY_ARGB)
+    val SecondaryVariant = Color(SECONDARY_VARIANT_ARGB)
+    val Black = Color(BLACK_ARGB)
+    val White = Color(WHITE_ARGB)
+    val Error = Color(ERROR_ARGB)
+    val Disconnected = Color(DISCONNECTED_ARGB)
+    val Reading = Color(READING_ARGB)
+    val Connected = Color(CONNECTED_ARGB)
+    val Warning = Color(WARNING_ARGB)
+    val LightGrey = Color(LIGHT_GREY_ARGB)
+}
+
+/**
+ * Navigation destinations mirrored from the Android bottom navigation.
+ *
+ * The initial desktop app is intentionally a shell, but using the Android
+ * vocabulary now keeps later event-admin screens familiar to existing users.
+ */
+enum class DesktopSection(val label: String) {
+    Races("Races"),
+    Categories("Categories"),
+    Competitors("Competitors"),
+    Readouts("Readouts"),
+    Results("Results"),
+    Settings("Settings")
+}

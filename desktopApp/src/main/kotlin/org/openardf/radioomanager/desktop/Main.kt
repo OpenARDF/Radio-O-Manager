@@ -1,0 +1,199 @@
+package org.openardf.radioomanager.desktop
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+
+/** Starts the first Compose Desktop shell for Radio-O-Manager. */
+fun main() = application {
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Radio-O-Manager Desktop"
+    ) {
+        RadioOManagerDesktopApp()
+    }
+}
+
+/**
+ * Builds the launchable desktop app shell.
+ *
+ * This composable owns only shell state for now. Event data, persistence, and
+ * SI-reader workflows should be introduced through shared services in later
+ * slices instead of being embedded directly in the desktop UI.
+ */
+@Composable
+fun RadioOManagerDesktopApp() {
+    MaterialTheme(
+        colors = MaterialTheme.colors.copy(
+            primary = DesktopPalette.Primary,
+            primaryVariant = DesktopPalette.PrimaryVariant,
+            secondary = DesktopPalette.Secondary,
+            error = DesktopPalette.Error,
+            onPrimary = DesktopPalette.White,
+            onSecondary = DesktopPalette.Black,
+            onError = DesktopPalette.White
+        )
+    ) {
+        var selectedSection by remember { mutableStateOf(DesktopSection.Races) }
+
+        Surface(modifier = Modifier.fillMaxSize(), color = DesktopPalette.White) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                AppTopBar()
+                Row(modifier = Modifier.weight(1f)) {
+                    NavigationRail(
+                        selectedSection = selectedSection,
+                        onSectionSelected = { selectedSection = it }
+                    )
+                    SectionWorkspace(selectedSection)
+                }
+                StatusStrip()
+            }
+        }
+    }
+}
+
+/** Renders the Android-style app bar used at the top of the desktop window. */
+@Composable
+private fun AppTopBar() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(DesktopPalette.Primary)
+            .padding(horizontal = 18.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Radio-O-Manager",
+            color = DesktopPalette.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = "Desktop event-admin preview",
+            color = DesktopPalette.White,
+            fontSize = 14.sp
+        )
+    }
+}
+
+/** Shows the main event-admin sections using the same names as Android. */
+@Composable
+private fun NavigationRail(
+    selectedSection: DesktopSection,
+    onSectionSelected: (DesktopSection) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .width(180.dp)
+            .fillMaxHeight()
+            .background(Color(0xFFF5F5F5))
+            .border(1.dp, DesktopPalette.LightGrey)
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        DesktopSection.entries.forEach { section ->
+            Button(
+                onClick = { onSectionSelected(section) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = section.label,
+                    fontWeight = if (section == selectedSection) FontWeight.Bold else FontWeight.Normal
+                )
+            }
+        }
+    }
+}
+
+/** Displays an Android-style empty state for the selected section. */
+@Composable
+private fun SectionWorkspace(section: DesktopSection) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        Text(
+            text = section.label,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = DesktopPalette.Black
+        )
+        Text(
+            text = emptyStateMessage(section),
+            color = DesktopPalette.Black,
+            fontSize = 14.sp
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(DesktopPalette.LightGrey)
+        )
+        Text(
+            text = "Open a race file to begin.",
+            color = DesktopPalette.Disconnected,
+            fontSize = 13.sp
+        )
+    }
+}
+
+/** Provides section-specific empty-state copy without introducing editing behavior. */
+private fun emptyStateMessage(section: DesktopSection): String =
+    when (section) {
+        DesktopSection.Races -> "No races loaded."
+        DesktopSection.Categories -> "No categories loaded."
+        DesktopSection.Competitors -> "No competitors loaded."
+        DesktopSection.Readouts -> "No SI-card readouts loaded."
+        DesktopSection.Results -> "No results loaded."
+        DesktopSection.Settings -> "No desktop settings loaded."
+    }
+
+/** Shows the current SI-reader connection state at the bottom of the window. */
+@Composable
+private fun StatusStrip() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(32.dp)
+            .background(DesktopPalette.Disconnected)
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "SI station disconnected",
+            color = DesktopPalette.White,
+            fontSize = 13.sp
+        )
+    }
+}
