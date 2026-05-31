@@ -90,8 +90,8 @@ preferred release workflow.
    vocabulary, and a non-editing status strip.
 3. In progress: add file-backed open/save for a shared project envelope.
    The shared `.rom.json` envelope now has a tested JSON codec; desktop file
-   filesystem wiring now lives in the desktop app module. File picker and menu
-   wiring remain next.
+   filesystem wiring and current-project session state now live in the desktop
+   app module. File picker and menu wiring remain next.
 4. Add the first event-admin screen backed by shared models and services.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
