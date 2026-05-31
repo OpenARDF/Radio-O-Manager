@@ -162,4 +162,40 @@ class DesktopSmokeSampleTest {
         assertEquals(true, result.modified)
         assertEquals(false, result.sent)
     }
+
+    @Test
+    fun repositorySmokeSampleManualReadoutCanBeEnteredAndSaved() {
+        val source = Path.of("..", "samples", "desktop-smoke.rom.json")
+        val target = Files.createTempDirectory("rom-desktop-manual-readout-smoke").resolve("edited.rom.json")
+
+        val original = DesktopProjectFiles.read(source)
+        val competitorWithoutReadout = original.raceData.competitorData.first { it.readoutData == null }
+            .competitorCategory.competitor
+        val edited = EventProjectEditor.addManualReadout(
+            projectFile = original,
+            resultId = "manual-result",
+            competitorId = competitorWithoutReadout.id,
+            siNumber = "222222",
+            startSeconds = "660",
+            finishSeconds = "1660",
+            controlCodes = "41 42",
+            resultStatus = ResultStatus.OK,
+            readoutDateTimeIso = "2026-05-31T12:30"
+        ) { index, type ->
+            "manual-punch-$index-${type.name}"
+        }
+
+        DesktopProjectFiles.write(target, edited)
+        val readBack = DesktopProjectFiles.read(target)
+        val readout = readBack.raceData.competitorData
+            .first { it.competitorCategory.competitor.id == competitorWithoutReadout.id }
+            .readoutData!!
+
+        assertEquals("manual-result", readout.result.id)
+        assertEquals(competitorWithoutReadout.id, readout.result.competitorId)
+        assertEquals(222222, readout.result.siNumber)
+        assertEquals(1_000, readout.result.runTimeSeconds)
+        assertEquals(ResultStatus.NO_RANKING, readout.result.resultStatus)
+        assertEquals(listOf(0, 41, 42, 0), readout.punches.map { it.punch.siCode })
+    }
 }

@@ -385,6 +385,29 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onAddManualReadout = { competitorId, siNumber, startSeconds, finishSeconds, controlCodes, resultStatus ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.addManualReadout(
+                            projectFile = currentProject,
+                            resultId = UUID.randomUUID().toString(),
+                            competitorId = competitorId,
+                            siNumber = siNumber,
+                            startSeconds = startSeconds,
+                            finishSeconds = finishSeconds,
+                            controlCodes = controlCodes,
+                            resultStatus = resultStatus,
+                            readoutDateTimeIso = LocalDateTime.now().withNano(0).toString()
+                        ) { index, type ->
+                            "${UUID.randomUUID()}-$index-${type.name}"
+                        }
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -476,6 +499,7 @@ fun RadioOManagerDesktopApp(
     onRemoveCompetitor: (String, Boolean) -> Unit = { _, _ -> },
     onRemoveReadout: (String) -> Unit = {},
     onUpdateReadoutStatus: (String, ResultStatus) -> Unit = { _, _ -> },
+    onAddManualReadout: (String?, String, String, String, String, ResultStatus) -> Unit = { _, _, _, _, _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -518,6 +542,7 @@ fun RadioOManagerDesktopApp(
                         onRemoveCompetitor = onRemoveCompetitor,
                         onRemoveReadout = onRemoveReadout,
                         onUpdateReadoutStatus = onUpdateReadoutStatus,
+                        onAddManualReadout = onAddManualReadout,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -603,6 +628,7 @@ private fun SectionWorkspace(
     onRemoveCompetitor: (String, Boolean) -> Unit,
     onRemoveReadout: (String) -> Unit,
     onUpdateReadoutStatus: (String, ResultStatus) -> Unit,
+    onAddManualReadout: (String?, String, String, String, String, ResultStatus) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -663,8 +689,10 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Readouts && projectFile != null) {
             ReadoutDetailsPanel(
                 readouts = EventReadoutDetails.from(projectFile.raceData),
+                competitors = EventCompetitorDetails.from(projectFile.raceData),
                 onRemoveReadout = onRemoveReadout,
-                onUpdateReadoutStatus = onUpdateReadoutStatus
+                onUpdateReadoutStatus = onUpdateReadoutStatus,
+                onAddManualReadout = onAddManualReadout
             )
         }
         if (section == DesktopSection.Results && projectFile != null) {
@@ -741,13 +769,95 @@ private fun ResultDetailRow(
 @Composable
 private fun ReadoutDetailsPanel(
     readouts: List<EventReadoutDetails>,
+    competitors: List<EventCompetitorDetails>,
     onRemoveReadout: (String) -> Unit,
-    onUpdateReadoutStatus: (String, ResultStatus) -> Unit
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit,
+    onAddManualReadout: (String?, String, String, String, String, ResultStatus) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        ManualReadoutAddRow(
+            competitors = competitors,
+            onAddManualReadout = onAddManualReadout
+        )
         DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", "", ""))
         readouts.forEach { readout ->
             ReadoutDetailRow(readout, onRemoveReadout, onUpdateReadoutStatus)
+        }
+    }
+}
+
+/** Shows a compact manual readout entry row for desktop beta testing. */
+@Composable
+private fun ManualReadoutAddRow(
+    competitors: List<EventCompetitorDetails>,
+    onAddManualReadout: (String?, String, String, String, String, ResultStatus) -> Unit
+) {
+    var selectedCompetitorId by remember { mutableStateOf<String?>(null) }
+    var siNumberDraft by remember { mutableStateOf("") }
+    var startSecondsDraft by remember { mutableStateOf("") }
+    var finishSecondsDraft by remember { mutableStateOf("") }
+    var controlCodesDraft by remember { mutableStateOf("") }
+    var selectedStatus by remember { mutableStateOf(ResultStatus.OK) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        CompetitorPicker(
+            selectedCompetitorId = selectedCompetitorId,
+            competitors = competitors,
+            onCompetitorSelected = { selectedCompetitorId = it },
+            modifier = Modifier.weight(1f)
+        )
+        TextField(
+            value = siNumberDraft,
+            onValueChange = { siNumberDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("SI") }
+        )
+        TextField(
+            value = startSecondsDraft,
+            onValueChange = { startSecondsDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Start s") }
+        )
+        TextField(
+            value = finishSecondsDraft,
+            onValueChange = { finishSecondsDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Finish s") }
+        )
+        TextField(
+            value = controlCodesDraft,
+            onValueChange = { controlCodesDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Controls") }
+        )
+        ResultStatusPicker(
+            selectedStatus = selectedStatus,
+            onStatusSelected = { selectedStatus = it },
+            modifier = Modifier.weight(1f)
+        )
+        Button(
+            onClick = {
+                onAddManualReadout(
+                    selectedCompetitorId,
+                    siNumberDraft,
+                    startSecondsDraft,
+                    finishSecondsDraft,
+                    controlCodesDraft,
+                    selectedStatus
+                )
+            },
+            modifier = Modifier.weight(1f),
+            enabled = selectedCompetitorId != null ||
+                    siNumberDraft.isNotBlank() ||
+                    startSecondsDraft.isNotBlank() ||
+                    finishSecondsDraft.isNotBlank() ||
+                    controlCodesDraft.isNotBlank()
+        ) {
+            Text("Add")
         }
     }
 }
@@ -843,6 +953,50 @@ private fun ResultStatusPicker(
                     }
                 ) {
                     Text(status.toDisplayLabel())
+                }
+            }
+        }
+    }
+}
+
+/** Shows a compact competitor selector with an explicit unmatched-readout option. */
+@Composable
+private fun CompetitorPicker(
+    selectedCompetitorId: String?,
+    competitors: List<EventCompetitorDetails>,
+    onCompetitorSelected: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedCompetitorName = competitors.firstOrNull { it.id == selectedCompetitorId }?.fullName ?: "Unmatched"
+
+    Box(modifier = modifier) {
+        Button(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(selectedCompetitorName)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    onCompetitorSelected(null)
+                }
+            ) {
+                Text("Unmatched")
+            }
+            competitors.forEach { competitor ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onCompetitorSelected(competitor.id)
+                    }
+                ) {
+                    Text(competitor.fullName)
                 }
             }
         }

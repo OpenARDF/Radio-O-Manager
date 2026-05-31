@@ -157,9 +157,10 @@ repeatable package validation.
    add/delete aliases and edit existing alias SI codes and names through shared
    alias validation rules. The Readouts section now shows matched and unmatched
    SI-card readout rows and can delete readouts through shared project-editing
-   rules or set an explicit manual result status. The Results section now shows
-   competitor result rows and can set the same explicit manual result status for
-   matched readouts. A sample smoke-test project is available at
+   rules, set an explicit manual result status, or create manual readouts with
+   competitor matching, SI number, start/finish seconds, and control punch
+   codes. The Results section now shows competitor result rows and can set the
+   same explicit manual result status for matched readouts. A sample smoke-test project is available at
    `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
