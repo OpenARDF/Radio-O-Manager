@@ -40,6 +40,9 @@ The 2026-05-31 Moto/download-box Android regression pass is recorded in
 [docs/android-regression-2026-05-31.md](docs/android-regression-2026-05-31.md).
 Hidden developer-only diagnostic logging is described in
 [docs/debug-logging.md](docs/debug-logging.md).
+Security scanning notes, including the narrow Firebase client-config Gitleaks
+ignore, are documented in
+[docs/security-scanning.md](docs/security-scanning.md).
 
 ## Third party libraries and resources
  - **Logo** - using SportIdent by Gonzo from <a href="https://thenounproject.com/browse/icons/term/sportident/" target="_blank" title="SportIdent Icons">Noun Project</a> (CC BY 3.0)
