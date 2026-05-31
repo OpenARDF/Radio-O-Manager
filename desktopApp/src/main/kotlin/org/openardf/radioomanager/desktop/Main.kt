@@ -97,6 +97,18 @@ fun main(args: Array<String>) = application {
                         }
                     }
                 })
+                Item("Export Copy...", enabled = projectFile != null, onClick = {
+                    DesktopFileDialogs.chooseExportProject()?.let { path ->
+                        runCatching {
+                            projectSession.exportCopy(path)
+                            projectFile = projectSession.currentProject
+                            hasUnsavedChanges = projectSession.hasUnsavedChanges
+                            projectStatusText = "Exported ${path.fileName}"
+                        }.onFailure { error ->
+                            projectStatusText = "Export failed: ${error.message ?: error::class.simpleName}"
+                        }
+                    }
+                })
             }
         }
 

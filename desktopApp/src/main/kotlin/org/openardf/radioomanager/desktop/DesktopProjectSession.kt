@@ -63,4 +63,12 @@ class DesktopProjectSession(private val store: ProjectFileStore) {
         currentPath = path
         hasUnsavedChanges = false
     }
+
+    /** Writes the current project to another path without changing the active save location or dirty state. */
+    fun exportCopy(path: Path) {
+        val projectFile = requireNotNull(currentProject) {
+            "Cannot export before a project is open."
+        }
+        store.write(path, projectFile)
+    }
 }

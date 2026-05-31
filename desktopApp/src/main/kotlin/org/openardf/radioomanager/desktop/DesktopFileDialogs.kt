@@ -33,6 +33,11 @@ object DesktopFileDialogs {
         chooseProjectFile("Save Radio-O-Manager Project", FileDialog.SAVE)
             ?.let(DesktopProjectFilePaths::withProjectExtension)
 
+    /** Lets the user choose an export-copy location, returning null when cancelled. */
+    fun chooseExportProject(): Path? =
+        chooseProjectFile("Export Radio-O-Manager Project Copy", FileDialog.SAVE)
+            ?.let(DesktopProjectFilePaths::withProjectExtension)
+
     private fun chooseProjectFile(title: String, mode: Int): Path? {
         val dialog = FileDialog(null as Frame?, title, mode)
         dialog.filenameFilter = projectFileFilter

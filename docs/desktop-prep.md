@@ -135,8 +135,8 @@ repeatable package validation.
 3. In progress: add file-backed open/save for a shared project envelope.
    The shared `.rom.json` envelope now has a tested JSON codec; desktop file
    filesystem wiring and current-project session state now live in the desktop
-   app module. File menu open/save wiring is present, and the app can accept a
-   startup `.rom.json` path for repeatable smoke runs.
+   app module. File menu open/save/export-copy wiring is present, and the app
+   can accept a startup `.rom.json` path for repeatable smoke runs.
 4. In progress: add the first event-admin screen backed by shared models and
    services. The Races section now shows race details from shared display models
    and can edit the race name through shared project-editing rules. Desktop

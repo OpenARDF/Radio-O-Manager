@@ -113,6 +113,29 @@ class DesktopProjectSessionTest {
         assertEquals(false, session.hasUnsavedChanges)
     }
 
+    @Test
+    fun exportsCurrentProjectWithoutChangingSessionState() {
+        val source = Path.of("source.rom.json")
+        val exportPath = Path.of("export.rom.json")
+        val projectFile = projectFile("Original Race")
+        val store = InMemoryProjectFileStore(mapOf(source to projectFile))
+        val session = DesktopProjectSession(store)
+
+        session.open(source)
+        val editedProject = session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Edited Race")
+                )
+            )
+        }
+        session.exportCopy(exportPath)
+
+        assertEquals(editedProject, store.writtenProjects[exportPath])
+        assertEquals(source, session.currentPath)
+        assertEquals(true, session.hasUnsavedChanges)
+    }
+
     private fun projectFile(name: String): EventProjectFile =
         EventProjectFile(
             raceData = EventRaceData(
