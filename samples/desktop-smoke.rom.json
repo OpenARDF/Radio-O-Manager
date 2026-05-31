@@ -1,0 +1,173 @@
+{
+    "schemaVersion": 1,
+    "appName": "Radio-O-Manager",
+    "raceData": {
+        "race": {
+            "id": "desktop-smoke-race",
+            "name": "Desktop Smoke Race",
+            "apiKey": "",
+            "startDateTimeIso": "2026-05-31T10:00",
+            "raceType": "CLASSIC",
+            "raceLevel": "PRACTICE",
+            "raceBand": "M80",
+            "timeLimitSeconds": 7200
+        },
+        "categories": [
+            {
+                "category": {
+                    "id": "category-m21",
+                    "raceId": "desktop-smoke-race",
+                    "name": "M21",
+                    "isMan": true,
+                    "maxAge": null,
+                    "lengthMeters": 5000,
+                    "climbMeters": 100,
+                    "order": 1,
+                    "differentProperties": false,
+                    "raceType": null,
+                    "raceBand": null,
+                    "timeLimitSeconds": null,
+                    "controlPointsString": "31 32 33"
+                },
+                "controlPoints": [
+                    {
+                        "id": "control-31",
+                        "categoryId": "category-m21",
+                        "siCode": 31,
+                        "type": "CONTROL",
+                        "order": 1
+                    },
+                    {
+                        "id": "control-32",
+                        "categoryId": "category-m21",
+                        "siCode": 32,
+                        "type": "CONTROL",
+                        "order": 2
+                    },
+                    {
+                        "id": "control-33",
+                        "categoryId": "category-m21",
+                        "siCode": 33,
+                        "type": "CONTROL",
+                        "order": 3
+                    }
+                ],
+                "competitors": []
+            },
+            {
+                "category": {
+                    "id": "category-w21",
+                    "raceId": "desktop-smoke-race",
+                    "name": "W21",
+                    "isMan": false,
+                    "maxAge": null,
+                    "lengthMeters": 4200,
+                    "climbMeters": 80,
+                    "order": 2,
+                    "differentProperties": true,
+                    "raceType": "SPRINT",
+                    "raceBand": "M2",
+                    "timeLimitSeconds": 3600,
+                    "controlPointsString": "41 42"
+                },
+                "controlPoints": [],
+                "competitors": []
+            }
+        ],
+        "aliases": [
+            {
+                "id": "alias-31",
+                "raceId": "desktop-smoke-race",
+                "siCode": 31,
+                "name": "FOX 1"
+            }
+        ],
+        "competitorData": [
+            {
+                "competitorCategory": {
+                    "competitor": {
+                        "id": "competitor-alice",
+                        "raceId": "desktop-smoke-race",
+                        "categoryId": "category-m21",
+                        "firstName": "Alice",
+                        "lastName": "Runner",
+                        "club": "OPEN",
+                        "index": "OK001",
+                        "isMan": false,
+                        "birthYear": 1990,
+                        "siNumber": 123456,
+                        "siRent": false,
+                        "startNumber": 101,
+                        "drawnStartTimeSeconds": 600
+                    },
+                    "category": null
+                },
+                "readoutData": {
+                    "result": {
+                        "id": "result-alice",
+                        "raceId": "desktop-smoke-race",
+                        "competitorId": "competitor-alice",
+                        "siNumber": 123456,
+                        "cardType": 10,
+                        "checkTimeSeconds": null,
+                        "startTimeSeconds": 600,
+                        "finishTimeSeconds": 1800,
+                        "readoutDateTimeIso": "2026-05-31T11:00",
+                        "automaticStatus": true,
+                        "resultStatus": "OK",
+                        "points": 3,
+                        "runTimeSeconds": 1200,
+                        "modified": false,
+                        "sent": false,
+                        "place": 1
+                    },
+                    "punches": []
+                }
+            },
+            {
+                "competitorCategory": {
+                    "competitor": {
+                        "id": "competitor-bob",
+                        "raceId": "desktop-smoke-race",
+                        "categoryId": "category-w21",
+                        "firstName": "Bob",
+                        "lastName": "Runner",
+                        "club": "OPEN",
+                        "index": "OK002",
+                        "isMan": true,
+                        "birthYear": 1988,
+                        "siNumber": null,
+                        "siRent": true,
+                        "startNumber": 102,
+                        "drawnStartTimeSeconds": 660
+                    },
+                    "category": null
+                },
+                "readoutData": null
+            }
+        ],
+        "unmatchedReadoutData": [
+            {
+                "result": {
+                    "id": "result-unmatched",
+                    "raceId": "desktop-smoke-race",
+                    "competitorId": null,
+                    "siNumber": 654321,
+                    "cardType": 10,
+                    "checkTimeSeconds": null,
+                    "startTimeSeconds": 600,
+                    "finishTimeSeconds": 2100,
+                    "readoutDateTimeIso": "2026-05-31T11:05",
+                    "automaticStatus": true,
+                    "resultStatus": "NO_RANKING",
+                    "points": 2,
+                    "runTimeSeconds": 1500,
+                    "modified": false,
+                    "sent": false,
+                    "place": 0
+                },
+                "punches": []
+            }
+        ]
+    }
+}

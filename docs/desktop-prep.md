@@ -98,6 +98,8 @@ preferred release workflow.
    now shows read-only category rows using shared effective race settings. The
    Competitors section now shows read-only competitor rows with shared category
    lookup and display formatting. The Readouts section now shows read-only
-   matched and unmatched SI-card readout rows.
+   matched and unmatched SI-card readout rows. The Results section now shows
+   read-only competitor result rows. A sample smoke-test project is available at
+   `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.

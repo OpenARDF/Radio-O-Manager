@@ -39,6 +39,7 @@ import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
+import org.openardf.radioomanager.shared.event.EventResultDetails
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main() = application {
@@ -215,6 +216,9 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Readouts && projectFile != null) {
             ReadoutDetailsPanel(EventReadoutDetails.from(projectFile.raceData))
         }
+        if (section == DesktopSection.Results && projectFile != null) {
+            ResultDetailsPanel(EventResultDetails.from(projectFile.raceData))
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -226,6 +230,25 @@ private fun SectionWorkspace(
             color = DesktopPalette.Disconnected,
             fontSize = 13.sp
         )
+    }
+}
+
+/** Shows read-only competitor result rows. */
+@Composable
+private fun ResultDetailsPanel(results: List<EventResultDetails>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailHeaderRow(listOf("Place", "Competitor", "Status", "Points", "Runtime"))
+        results.forEach { result ->
+            DetailGridRow(
+                listOf(
+                    result.placeText,
+                    result.competitorName,
+                    result.statusLabel,
+                    result.pointsText,
+                    result.runTimeText
+                )
+            )
+        }
     }
 }
 
