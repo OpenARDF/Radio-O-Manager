@@ -18,6 +18,7 @@ class DesktopProjectSessionTest {
 
         assertNull(session.currentProject)
         assertNull(session.currentPath)
+        assertEquals(false, session.hasUnsavedChanges)
     }
 
     @Test
@@ -31,6 +32,69 @@ class DesktopProjectSessionTest {
 
         assertEquals(projectFile, session.currentProject)
         assertEquals(path, session.currentPath)
+        assertEquals(false, session.hasUnsavedChanges)
+    }
+
+    @Test
+    fun updatesCurrentProjectAndMarksItDirty() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Original Race")
+        val store = InMemoryProjectFileStore(mapOf(path to projectFile))
+        val session = DesktopProjectSession(store)
+
+        session.open(path)
+        val updatedProject = session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Updated Race")
+                )
+            )
+        }
+
+        assertEquals("Updated Race", updatedProject.raceData.race.name)
+        assertEquals(updatedProject, session.currentProject)
+        assertEquals(true, session.hasUnsavedChanges)
+    }
+
+    @Test
+    fun savesCurrentProjectToRememberedPath() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Original Race")
+        val store = InMemoryProjectFileStore(mapOf(path to projectFile))
+        val session = DesktopProjectSession(store)
+
+        session.open(path)
+        session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Updated Race")
+                )
+            )
+        }
+        session.save()
+
+        assertEquals("Updated Race", store.writtenProjects[path]?.raceData?.race?.name)
+        assertEquals(false, session.hasUnsavedChanges)
+    }
+
+    @Test
+    fun noOpUpdateDoesNotClearExistingUnsavedChanges() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Original Race")
+        val store = InMemoryProjectFileStore(mapOf(path to projectFile))
+        val session = DesktopProjectSession(store)
+
+        session.open(path)
+        session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Updated Race")
+                )
+            )
+        }
+        session.updateCurrentProject { it }
+
+        assertEquals(true, session.hasUnsavedChanges)
     }
 
     @Test
@@ -46,6 +110,7 @@ class DesktopProjectSessionTest {
 
         assertEquals(projectFile, store.writtenProjects[target])
         assertEquals(target, session.currentPath)
+        assertEquals(false, session.hasUnsavedChanges)
     }
 
     private fun projectFile(name: String): EventProjectFile =

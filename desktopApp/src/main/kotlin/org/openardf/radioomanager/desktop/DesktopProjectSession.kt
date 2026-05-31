@@ -22,12 +22,36 @@ class DesktopProjectSession(private val store: ProjectFileStore) {
     var currentPath: Path? = null
         private set
 
+    /** True after local edits are applied and before those edits are written to disk. */
+    var hasUnsavedChanges: Boolean = false
+        private set
+
     /** Opens a project from disk and makes its path the default save destination. */
     fun open(path: Path): EventProjectFile {
         val projectFile = store.read(path)
         currentProject = projectFile
         currentPath = path
+        hasUnsavedChanges = false
         return projectFile
+    }
+
+    /** Applies a shared project edit to the current project and marks it dirty. */
+    fun updateCurrentProject(transform: (EventProjectFile) -> EventProjectFile): EventProjectFile {
+        val projectFile = requireNotNull(currentProject) {
+            "Cannot edit before a project is open."
+        }
+        val updatedProject = transform(projectFile)
+        currentProject = updatedProject
+        hasUnsavedChanges = hasUnsavedChanges || updatedProject != projectFile
+        return updatedProject
+    }
+
+    /** Saves the current project to its existing path. */
+    fun save() {
+        val path = requireNotNull(currentPath) {
+            "Cannot save before a project path is selected."
+        }
+        saveAs(path)
     }
 
     /** Saves the current project to a specific path and makes that path current. */
@@ -37,5 +61,6 @@ class DesktopProjectSession(private val store: ProjectFileStore) {
         }
         store.write(path, projectFile)
         currentPath = path
+        hasUnsavedChanges = false
     }
 }

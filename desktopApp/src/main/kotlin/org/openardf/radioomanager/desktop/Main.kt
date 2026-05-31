@@ -19,6 +19,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import org.openardf.radioomanager.shared.event.EventCategoryDetails
 import org.openardf.radioomanager.shared.event.EventCompetitorDetails
+import org.openardf.radioomanager.shared.event.EventProjectEditor
 import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
@@ -50,6 +52,7 @@ fun main() = application {
         val projectSession = remember { DesktopProjectSession(DesktopProjectFiles) }
         var projectFile by remember { mutableStateOf(projectSession.currentProject) }
         var projectStatusText by remember { mutableStateOf("No project open.") }
+        var hasUnsavedChanges by remember { mutableStateOf(projectSession.hasUnsavedChanges) }
 
         MenuBar {
             Menu("File") {
@@ -57,16 +60,29 @@ fun main() = application {
                     DesktopFileDialogs.chooseOpenProject()?.let { path ->
                         runCatching {
                             projectFile = projectSession.open(path)
+                            hasUnsavedChanges = projectSession.hasUnsavedChanges
                             projectStatusText = "Opened ${path.fileName}"
                         }.onFailure { error ->
                             projectStatusText = "Open failed: ${error.message ?: error::class.simpleName}"
                         }
                     }
                 })
+                Item("Save", enabled = projectFile != null && hasUnsavedChanges, onClick = {
+                    runCatching {
+                        projectSession.save()
+                        projectFile = projectSession.currentProject
+                        hasUnsavedChanges = projectSession.hasUnsavedChanges
+                        projectStatusText = "Saved ${projectSession.currentPath?.fileName ?: "project"}"
+                    }.onFailure { error ->
+                        projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
+                    }
+                })
                 Item("Save As...", enabled = projectFile != null, onClick = {
                     DesktopFileDialogs.chooseSaveProject()?.let { path ->
                         runCatching {
                             projectSession.saveAs(path)
+                            projectFile = projectSession.currentProject
+                            hasUnsavedChanges = projectSession.hasUnsavedChanges
                             projectStatusText = "Saved ${path.fileName}"
                         }.onFailure { error ->
                             projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
@@ -78,7 +94,19 @@ fun main() = application {
 
         RadioOManagerDesktopApp(
             projectFile = projectFile,
-            projectStatusText = projectStatusText
+            projectStatusText = projectStatusText,
+            hasUnsavedChanges = hasUnsavedChanges,
+            onRenameRace = { name ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.renameRace(currentProject, name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            }
         )
     }
 }
@@ -93,7 +121,9 @@ fun main() = application {
 @Composable
 fun RadioOManagerDesktopApp(
     projectFile: EventProjectFile? = null,
-    projectStatusText: String = "No project open."
+    projectStatusText: String = "No project open.",
+    hasUnsavedChanges: Boolean = false,
+    onRenameRace: (String) -> Unit = {}
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -116,9 +146,9 @@ fun RadioOManagerDesktopApp(
                         selectedSection = selectedSection,
                         onSectionSelected = { selectedSection = it }
                     )
-                    SectionWorkspace(selectedSection, projectFile, projectStatusText)
+                    SectionWorkspace(selectedSection, projectFile, projectStatusText, onRenameRace)
                 }
-                StatusStrip()
+                StatusStrip(projectStatusText, hasUnsavedChanges)
             }
         }
     }
@@ -184,7 +214,8 @@ private fun NavigationRail(
 private fun SectionWorkspace(
     section: DesktopSection,
     projectFile: EventProjectFile?,
-    projectStatusText: String
+    projectStatusText: String,
+    onRenameRace: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -205,7 +236,10 @@ private fun SectionWorkspace(
             fontSize = 14.sp
         )
         if (section == DesktopSection.Races && projectFile != null) {
-            RaceDetailsPanel(EventRaceDetails.from(projectFile.raceData.race))
+            RaceDetailsPanel(
+                details = EventRaceDetails.from(projectFile.raceData.race),
+                onRenameRace = onRenameRace
+            )
         }
         if (section == DesktopSection.Categories && projectFile != null) {
             CategoryDetailsPanel(EventCategoryDetails.from(projectFile.raceData))
@@ -226,7 +260,11 @@ private fun SectionWorkspace(
                 .background(DesktopPalette.LightGrey)
         )
         Text(
-            text = projectFile?.raceData?.race?.startDateTimeIso ?: projectStatusText,
+            text = if (projectFile != null) {
+                "${projectFile.raceData.race.startDateTimeIso} - $projectStatusText"
+            } else {
+                projectStatusText
+            },
             color = DesktopPalette.Disconnected,
             fontSize = 13.sp
         )
@@ -308,10 +346,33 @@ private fun CategoryDetailsPanel(categories: List<EventCategoryDetails>) {
     }
 }
 
-/** Shows read-only race metadata using shared display values. */
+/** Shows editable race metadata backed by shared project-editing rules. */
 @Composable
-private fun RaceDetailsPanel(details: EventRaceDetails) {
+private fun RaceDetailsPanel(
+    details: EventRaceDetails,
+    onRenameRace: (String) -> Unit
+) {
+    var raceNameDraft by remember(details.name) { mutableStateOf(details.name) }
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TextField(
+                value = raceNameDraft,
+                onValueChange = { raceNameDraft = it },
+                modifier = Modifier.weight(1f),
+                label = { Text("Race name") }
+            )
+            Button(
+                onClick = { onRenameRace(raceNameDraft) },
+                enabled = raceNameDraft != details.name
+            ) {
+                Text("Apply")
+            }
+        }
         DetailRow("Start", details.startDateTimeIso)
         DetailRow("Type", details.raceTypeLabel)
         DetailRow("Level", details.raceLevelLabel)
@@ -389,9 +450,12 @@ private fun sectionSummary(section: DesktopSection, projectFile: EventProjectFil
     }
 }
 
-/** Shows the current SI-reader connection state at the bottom of the window. */
+/** Shows the current SI-reader connection state and project-save status. */
 @Composable
-private fun StatusStrip() {
+private fun StatusStrip(
+    projectStatusText: String,
+    hasUnsavedChanges: Boolean
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,7 +465,7 @@ private fun StatusStrip() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "SI station disconnected",
+            text = "SI station disconnected - $projectStatusText${if (hasUnsavedChanges) " *" else ""}",
             color = DesktopPalette.White,
             fontSize = 13.sp
         )

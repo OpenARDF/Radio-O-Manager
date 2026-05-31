@@ -131,13 +131,14 @@ signal until installer packaging metadata is finalized.
    filesystem wiring and current-project session state now live in the desktop
    app module. File menu open/save wiring is present; editing remains next.
 4. In progress: add the first event-admin screen backed by shared models and
-   services. The Races section now shows read-only race details from shared
-   display models after a `.rom.json` file is opened. The Categories section
-   now shows read-only category rows using shared effective race settings. The
-   Competitors section now shows read-only competitor rows with shared category
-   lookup and display formatting. The Readouts section now shows read-only
-   matched and unmatched SI-card readout rows. The Results section now shows
-   read-only competitor result rows. A sample smoke-test project is available at
-   `samples/desktop-smoke.rom.json`.
+   services. The Races section now shows race details from shared display models
+   and can edit the race name through shared project-editing rules. Desktop
+   project-session state now tracks unsaved edits and can save back to the
+   current project path. The Categories section now shows read-only category
+   rows using shared effective race settings. The Competitors section now shows
+   read-only competitor rows with shared category lookup and display formatting.
+   The Readouts section now shows read-only matched and unmatched SI-card
+   readout rows. The Results section now shows read-only competitor result rows.
+   A sample smoke-test project is available at `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
