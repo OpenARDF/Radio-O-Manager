@@ -28,8 +28,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.openardf.radioomanager.shared.event.EventProjectFile
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main() = application {
@@ -37,7 +39,39 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Radio-O-Manager Desktop"
     ) {
-        RadioOManagerDesktopApp()
+        val projectSession = remember { DesktopProjectSession(DesktopProjectFiles) }
+        var projectFile by remember { mutableStateOf(projectSession.currentProject) }
+        var projectStatusText by remember { mutableStateOf("No project open.") }
+
+        MenuBar {
+            Menu("File") {
+                Item("Open...", onClick = {
+                    DesktopFileDialogs.chooseOpenProject()?.let { path ->
+                        runCatching {
+                            projectFile = projectSession.open(path)
+                            projectStatusText = "Opened ${path.fileName}"
+                        }.onFailure { error ->
+                            projectStatusText = "Open failed: ${error.message ?: error::class.simpleName}"
+                        }
+                    }
+                })
+                Item("Save As...", enabled = projectFile != null, onClick = {
+                    DesktopFileDialogs.chooseSaveProject()?.let { path ->
+                        runCatching {
+                            projectSession.saveAs(path)
+                            projectStatusText = "Saved ${path.fileName}"
+                        }.onFailure { error ->
+                            projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
+                        }
+                    }
+                })
+            }
+        }
+
+        RadioOManagerDesktopApp(
+            projectFile = projectFile,
+            projectStatusText = projectStatusText
+        )
     }
 }
 
@@ -49,7 +83,10 @@ fun main() = application {
  * slices instead of being embedded directly in the desktop UI.
  */
 @Composable
-fun RadioOManagerDesktopApp() {
+fun RadioOManagerDesktopApp(
+    projectFile: EventProjectFile? = null,
+    projectStatusText: String = "No project open."
+) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
             primary = DesktopPalette.Primary,
@@ -71,7 +108,7 @@ fun RadioOManagerDesktopApp() {
                         selectedSection = selectedSection,
                         onSectionSelected = { selectedSection = it }
                     )
-                    SectionWorkspace(selectedSection)
+                    SectionWorkspace(selectedSection, projectFile, projectStatusText)
                 }
                 StatusStrip()
             }
@@ -136,7 +173,11 @@ private fun NavigationRail(
 
 /** Displays an Android-style empty state for the selected section. */
 @Composable
-private fun SectionWorkspace(section: DesktopSection) {
+private fun SectionWorkspace(
+    section: DesktopSection,
+    projectFile: EventProjectFile?,
+    projectStatusText: String
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -150,7 +191,7 @@ private fun SectionWorkspace(section: DesktopSection) {
             color = DesktopPalette.Black
         )
         Text(
-            text = emptyStateMessage(section),
+            text = sectionSummary(section, projectFile),
             color = DesktopPalette.Black,
             fontSize = 14.sp
         )
@@ -161,23 +202,29 @@ private fun SectionWorkspace(section: DesktopSection) {
                 .background(DesktopPalette.LightGrey)
         )
         Text(
-            text = "Open a race file to begin.",
+            text = projectFile?.raceData?.race?.startDateTimeIso ?: projectStatusText,
             color = DesktopPalette.Disconnected,
             fontSize = 13.sp
         )
     }
 }
 
-/** Provides section-specific empty-state copy without introducing editing behavior. */
-private fun emptyStateMessage(section: DesktopSection): String =
-    when (section) {
-        DesktopSection.Races -> "No races loaded."
-        DesktopSection.Categories -> "No categories loaded."
-        DesktopSection.Competitors -> "No competitors loaded."
-        DesktopSection.Readouts -> "No SI-card readouts loaded."
-        DesktopSection.Results -> "No results loaded."
-        DesktopSection.Settings -> "No desktop settings loaded."
+/** Provides section-specific content summaries without introducing editing behavior. */
+private fun sectionSummary(section: DesktopSection, projectFile: EventProjectFile?): String {
+    val raceData = projectFile?.raceData
+    return when (section) {
+        DesktopSection.Races -> raceData?.race?.name ?: "No races loaded."
+        DesktopSection.Categories -> "${raceData?.categories?.size ?: 0} categories loaded."
+        DesktopSection.Competitors -> "${raceData?.competitorData?.size ?: 0} competitors loaded."
+        DesktopSection.Readouts -> {
+            val readoutCount = (raceData?.competitorData?.count { it.readoutData != null } ?: 0) +
+                (raceData?.unmatchedReadoutData?.size ?: 0)
+            "$readoutCount SI-card readouts loaded."
+        }
+        DesktopSection.Results -> "${raceData?.competitorData?.count { it.readoutData != null } ?: 0} results loaded."
+        DesktopSection.Settings -> "Desktop settings."
     }
+}
 
 /** Shows the current SI-reader connection state at the bottom of the window. */
 @Composable
