@@ -82,6 +82,42 @@ Keep Hydraulic Conveyor as a comparison option if jDeploy cannot satisfy a
 specific requirement. Keep raw `jpackage` as a low-level fallback, not the
 preferred release workflow.
 
+### Local Packaging Environment
+
+Desktop packaging should run with a registered JDK 17. On macOS, Eclipse
+Temurin 17 is the recommended default because it is a standard, signed JDK
+distribution and registers cleanly with `/usr/libexec/java_home`.
+
+Verify the installed JDKs with:
+
+```shell
+/usr/libexec/java_home -V
+```
+
+Then run desktop packaging commands from a shell that selects JDK 17:
+
+```shell
+export JAVA_HOME=$(/usr/libexec/java_home -v 17)
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+
+The current desktop packaging smoke checks are:
+
+```shell
+./gradlew :desktopApp:checkRuntime
+./gradlew :desktopApp:createDistributable
+```
+
+`checkRuntime` verifies that Compose Desktop can find a usable JDK runtime.
+`createDistributable` currently writes the macOS app image to
+`desktopApp/build/compose/binaries/main/app/desktopApp.app`. The generated app
+name is still the module name; a later packaging slice should set product
+metadata before jDeploy packaging.
+
+`packageDistributionForCurrentOS` also passes in the current module shape, but
+the app-image output from `createDistributable` is the clearest local smoke
+signal until installer packaging metadata is finalized.
+
 ## First Implementation Slices
 
 1. Done: add golden-file coverage for the existing full race export shape.

@@ -35,6 +35,16 @@ git diff --check
 desktop target can execute shared business logic. The `:desktopApp:test` task
 checks the first launchable desktop UI module without opening a window.
 
+When validating local desktop packaging work, use a registered JDK 17 and run:
+
+```shell
+./gradlew :desktopApp:checkRuntime :desktopApp:createDistributable
+```
+
+On macOS, Temurin 17 is the recommended registered JDK. The current
+`createDistributable` output is an app image under
+`desktopApp/build/compose/binaries/main/app/`.
+
 Known Room/KSP warnings about missing indexes and `@Transaction` annotations
 currently predate this roadmap work. Do not treat those warnings as Stage 1
 blockers unless a change in this branch introduces new failures.
