@@ -44,6 +44,7 @@ import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
 import java.nio.file.Path
+import java.util.UUID
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main(args: Array<String>) = application {
@@ -154,6 +155,17 @@ fun main(args: Array<String>) = application {
                 }.onFailure { error ->
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
+            },
+            onAddAlias = { siCode, name ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.addAlias(currentProject, UUID.randomUUID().toString(), siCode, name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
             }
         )
     }
@@ -175,7 +187,8 @@ fun RadioOManagerDesktopApp(
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
-    onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> }
+    onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
+    onAddAlias: (String, String) -> Unit = { _, _ -> }
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -206,7 +219,8 @@ fun RadioOManagerDesktopApp(
                         onRenameCategory = onRenameCategory,
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
-                        onUpdateAlias = onUpdateAlias
+                        onUpdateAlias = onUpdateAlias,
+                        onAddAlias = onAddAlias
                     )
                 }
                 StatusStrip(projectStatusText, hasUnsavedChanges)
@@ -280,7 +294,8 @@ private fun SectionWorkspace(
     onRenameCategory: (String, String) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
-    onUpdateAlias: (String, String, String) -> Unit
+    onUpdateAlias: (String, String, String) -> Unit,
+    onAddAlias: (String, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -322,7 +337,8 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Aliases && projectFile != null) {
             AliasDetailsPanel(
                 aliases = EventAliasDetails.from(projectFile.raceData),
-                onUpdateAlias = onUpdateAlias
+                onUpdateAlias = onUpdateAlias,
+                onAddAlias = onAddAlias
             )
         }
         if (section == DesktopSection.Readouts && projectFile != null) {
@@ -471,12 +487,47 @@ private fun CompetitorDetailRow(
 @Composable
 private fun AliasDetailsPanel(
     aliases: List<EventAliasDetails>,
-    onUpdateAlias: (String, String, String) -> Unit
+    onUpdateAlias: (String, String, String) -> Unit,
+    onAddAlias: (String, String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        AliasAddRow(onAddAlias)
         DetailHeaderRow(listOf("SI code", "Alias", ""))
         aliases.forEach { alias ->
             AliasDetailRow(alias, onUpdateAlias)
+        }
+    }
+}
+
+/** Shows the new-alias entry row above the existing alias mappings. */
+@Composable
+private fun AliasAddRow(onAddAlias: (String, String) -> Unit) {
+    var siCodeDraft by remember { mutableStateOf("") }
+    var nameDraft by remember { mutableStateOf("") }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = siCodeDraft,
+            onValueChange = { siCodeDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("New SI code") }
+        )
+        TextField(
+            value = nameDraft,
+            onValueChange = { nameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("New alias") }
+        )
+        Button(
+            onClick = { onAddAlias(siCodeDraft, nameDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = siCodeDraft.isNotBlank() || nameDraft.isNotBlank()
+        ) {
+            Text("Add")
         }
     }
 }

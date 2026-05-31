@@ -178,6 +178,40 @@ class EventProjectEditorTest {
         }
     }
 
+    @Test
+    fun addsAliasUsingSharedValidationRules() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"))
+        )
+
+        val updated = EventProjectEditor.addAlias(original, "alias-2", " 32 ", " F2 ")
+
+        assertEquals(2, updated.raceData.aliases.size)
+        assertEquals("race", updated.raceData.aliases[1].raceId)
+        assertEquals(32, updated.raceData.aliases[1].siCode)
+        assertEquals("F2", updated.raceData.aliases[1].name)
+    }
+
+    @Test
+    fun rejectsInvalidAliasAdds() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "", "32", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-1", "32", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-2", "31", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-2", "32", "F1")
+        }
+    }
+
     private fun projectFile(
         name: String = "Original Race",
         categories: List<EventCategoryData> = emptyList(),

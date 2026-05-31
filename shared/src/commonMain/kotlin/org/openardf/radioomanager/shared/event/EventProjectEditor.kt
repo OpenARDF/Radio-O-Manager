@@ -203,6 +203,47 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with a validated alias appended. */
+    fun addAlias(
+        projectFile: EventProjectFile,
+        aliasId: String,
+        siCode: String,
+        name: String
+    ): EventProjectFile {
+        require(aliasId.isNotBlank()) {
+            "Alias ID cannot be blank."
+        }
+        require(projectFile.raceData.aliases.none { it.id == aliasId }) {
+            "Alias ID already exists: $aliasId"
+        }
+
+        val aliasPosition = projectFile.raceData.aliases.size
+        val trimmedCode = siCode.trim()
+        val trimmedName = name.trim()
+        val existingCodes = projectFile.raceData.aliases.map { it.siCode }
+        val existingNames = projectFile.raceData.aliases.map { it.name }
+
+        require(AliasRules.validateCode(trimmedCode, existingCodes, aliasPosition) == AliasValidationResult.Valid) {
+            "Alias SI code is invalid or duplicated."
+        }
+        require(AliasRules.validateName(trimmedName, existingNames, aliasPosition) == AliasValidationResult.Valid) {
+            "Alias name is invalid or duplicated."
+        }
+
+        val alias = EventAlias(
+            id = aliasId,
+            raceId = projectFile.raceData.race.id,
+            siCode = trimmedCode.toInt(),
+            name = trimmedName
+        )
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                aliases = projectFile.raceData.aliases + alias
+            )
+        )
+    }
+
     private inline fun <T> Iterable<T>.noneIndexed(predicate: (index: Int, T) -> Boolean): Boolean =
         withIndex().none { (index, value) -> predicate(index, value) }
 }
