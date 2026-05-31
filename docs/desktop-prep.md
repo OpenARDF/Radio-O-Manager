@@ -120,6 +120,12 @@ a positive integer and the current Android version remains `0.2.0`.
 the app-image output from `createDistributable` is the clearest local smoke
 signal until installer packaging metadata is finalized.
 
+For local macOS smoke tests, prefer copying the generated `.app` and sample
+project file to `/tmp` before launching with `open ... --args <sample.rom.json>`.
+Launching the checkout-built app bundle directly from `Documents/GitHub` can
+trigger a macOS Documents-folder permission prompt, which is not useful for
+repeatable package validation.
+
 ## First Implementation Slices
 
 1. Done: add golden-file coverage for the existing full race export shape.
