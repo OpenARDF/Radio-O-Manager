@@ -209,13 +209,27 @@ class DataProcessor private constructor(context: Context) {
     }
 
     suspend fun deleteCategory(categoryId: UUID, raceId: UUID, deleteCompetitors: Boolean) {
+        val retainedCompetitors = if (deleteCompetitors) {
+            emptyList()
+        } else {
+            ardfRepository.getCompetitorsByCategory(categoryId)
+        }
+
         if (deleteCompetitors) {
             ardfRepository.deleteCompetitorsByCategory(categoryId)
+        } else {
+            ardfRepository.clearCompetitorCategory(categoryId)
         }
 
         ardfRepository.deleteCategory(categoryId)
         ardfRepository.deleteControlPointsByCategory(categoryId)
-        getRace(raceId)?.let { race -> updateResultsForCategory(categoryId, race, this) }
+        val race = getRace(raceId)
+        race?.let {
+            // Retained competitors are now uncategorized, so update them from the captured list.
+            retainedCompetitors.forEach { competitor ->
+                updateResultsForCompetitor(competitor.id, it, this)
+            }
+        }
         updateCategoryOrder(raceId)
     }
 

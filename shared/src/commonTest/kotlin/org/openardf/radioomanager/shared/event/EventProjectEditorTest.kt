@@ -1,5 +1,6 @@
 package org.openardf.radioomanager.shared.event
 
+import org.openardf.radioomanager.shared.domain.ControlPointType
 import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
 import org.openardf.radioomanager.shared.domain.RaceType
@@ -102,6 +103,53 @@ class EventProjectEditorTest {
         }
         assertFailsWith<IllegalArgumentException> {
             EventProjectEditor.addCategory(original, "cat-2", "M21")
+        }
+    }
+
+    @Test
+    fun removesCategoryAndUnassignsKeptCompetitors() {
+        val original = projectFile(
+            categories = listOf(
+                categoryData("cat-1", "M21", order = 0, controlSiCodes = listOf(31, 32)),
+                categoryData("cat-2", "W21", order = 1, controlSiCodes = listOf(31)),
+                categoryData("cat-3", "M40", order = 2)
+            ),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")),
+                competitorData("comp-2", "Bob", "Racer", category = category("cat-2", "W21"))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCategory(original, "cat-1", deleteCompetitors = false)
+
+        assertEquals(listOf("cat-2", "cat-3"), updated.raceData.categories.map { it.category.id })
+        assertEquals(listOf(0, 1), updated.raceData.categories.map { it.category.order })
+        assertEquals(listOf(31), updated.raceData.categories.first().controlPoints.map { it.siCode })
+        assertEquals(null, updated.raceData.competitorData[0].competitorCategory.competitor.categoryId)
+        assertEquals(null, updated.raceData.competitorData[0].competitorCategory.category)
+        assertEquals("cat-2", updated.raceData.competitorData[1].competitorCategory.competitor.categoryId)
+    }
+
+    @Test
+    fun removesCategoryAndAssignedCompetitorsWhenRequested() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21"), categoryData("cat-2", "W21")),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")),
+                competitorData("comp-2", "Bob", "Racer", category = category("cat-2", "W21"))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCategory(original, "cat-1", deleteCompetitors = true)
+
+        assertEquals(listOf("cat-2"), updated.raceData.categories.map { it.category.id })
+        assertEquals(listOf("comp-2"), updated.raceData.competitorData.map { it.competitorCategory.competitor.id })
+    }
+
+    @Test
+    fun rejectsUnknownCategoryRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeCategory(projectFile(), "missing", deleteCompetitors = false)
         }
     }
 
@@ -334,25 +382,41 @@ class EventProjectEditorTest {
             )
         )
 
-    private fun categoryData(id: String, name: String): EventCategoryData =
+    private fun categoryData(
+        id: String,
+        name: String,
+        order: Int = 0,
+        controlSiCodes: List<Int> = emptyList()
+    ): EventCategoryData =
         EventCategoryData(
-            category = EventCategory(
-                id = id,
-                raceId = "race",
-                name = name,
-                isMan = name.startsWith("M"),
-                maxAge = null,
-                lengthMeters = 0,
-                climbMeters = 0,
-                order = 0,
-                differentProperties = false,
-                raceType = null,
-                raceBand = null,
-                timeLimitSeconds = null,
-                controlPointsString = ""
-            ),
-            controlPoints = emptyList(),
+            category = category(id, name, order),
+            controlPoints = controlSiCodes.mapIndexed { index, siCode ->
+                EventControlPoint(
+                    id = "$id-control-$index",
+                    categoryId = id,
+                    siCode = siCode,
+                    type = ControlPointType.CONTROL,
+                    order = index
+                )
+            },
             competitors = emptyList()
+        )
+
+    private fun category(id: String, name: String, order: Int = 0): EventCategory =
+        EventCategory(
+            id = id,
+            raceId = "race",
+            name = name,
+            isMan = name.startsWith("M"),
+            maxAge = null,
+            lengthMeters = 0,
+            climbMeters = 0,
+            order = order,
+            differentProperties = false,
+            raceType = null,
+            raceBand = null,
+            timeLimitSeconds = null,
+            controlPointsString = ""
         )
 
     private fun competitorData(
@@ -360,14 +424,15 @@ class EventProjectEditorTest {
         firstName: String,
         lastName: String,
         startNumber: Int = 1,
-        siNumber: Int? = null
+        siNumber: Int? = null,
+        category: EventCategory? = null
     ): EventCompetitorData =
         EventCompetitorData(
             competitorCategory = EventCompetitorCategory(
                 competitor = EventCompetitor(
                     id = id,
                     raceId = "race",
-                    categoryId = null,
+                    categoryId = category?.id,
                     firstName = firstName,
                     lastName = lastName,
                     club = "",
@@ -379,7 +444,7 @@ class EventProjectEditorTest {
                     startNumber = startNumber,
                     drawnStartTimeSeconds = null
                 ),
-                category = null
+                category = category
             ),
             readoutData = null
         )

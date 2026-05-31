@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -134,6 +135,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onRemoveCategory = { categoryId, deleteCompetitors ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.removeCategory(currentProject, categoryId, deleteCompetitors)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onRenameCompetitor = { competitorId, firstName, lastName ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -226,6 +238,7 @@ fun RadioOManagerDesktopApp(
     onRenameRace: (String) -> Unit = {},
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
     onAddCategory: (String) -> Unit = {},
+    onRemoveCategory: (String, Boolean) -> Unit = { _, _ -> },
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onAddCompetitor: (String, String, String, String) -> Unit = { _, _, _, _ -> },
@@ -261,6 +274,7 @@ fun RadioOManagerDesktopApp(
                         onRenameRace = onRenameRace,
                         onRenameCategory = onRenameCategory,
                         onAddCategory = onAddCategory,
+                        onRemoveCategory = onRemoveCategory,
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onAddCompetitor = onAddCompetitor,
@@ -339,6 +353,7 @@ private fun SectionWorkspace(
     onRenameRace: (String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
     onAddCategory: (String) -> Unit,
+    onRemoveCategory: (String, Boolean) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onAddCompetitor: (String, String, String, String) -> Unit,
@@ -374,7 +389,8 @@ private fun SectionWorkspace(
             CategoryDetailsPanel(
                 categories = EventCategoryDetails.from(projectFile.raceData),
                 onRenameCategory = onRenameCategory,
-                onAddCategory = onAddCategory
+                onAddCategory = onAddCategory,
+                onRemoveCategory = onRemoveCategory
             )
         }
         if (section == DesktopSection.Competitors && projectFile != null) {
@@ -685,13 +701,14 @@ private fun AliasDetailRow(
 private fun CategoryDetailsPanel(
     categories: List<EventCategoryDetails>,
     onRenameCategory: (String, String) -> Unit,
-    onAddCategory: (String) -> Unit
+    onAddCategory: (String) -> Unit,
+    onRemoveCategory: (String, Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CategoryAddRow(onAddCategory)
-        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", ""))
+        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", "", ""))
         categories.forEach { category ->
-            CategoryDetailRow(category, onRenameCategory)
+            CategoryDetailRow(category, onRenameCategory, onRemoveCategory)
         }
     }
 }
@@ -726,9 +743,11 @@ private fun CategoryAddRow(onAddCategory: (String) -> Unit) {
 @Composable
 private fun CategoryDetailRow(
     category: EventCategoryDetails,
-    onRenameCategory: (String, String) -> Unit
+    onRenameCategory: (String, String) -> Unit,
+    onRemoveCategory: (String, Boolean) -> Unit
 ) {
     var categoryNameDraft by remember(category.id, category.name) { mutableStateOf(category.name) }
+    var showDeleteDialog by remember(category.id) { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -752,6 +771,45 @@ private fun CategoryDetailRow(
         ) {
             Text("Apply")
         }
+        Button(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Delete")
+        }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete category") },
+            text = { Text("Delete ${category.name}? Competitors can be kept for reassignment or deleted too.") },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onRemoveCategory(category.id, false)
+                        }
+                    ) {
+                        Text("Keep competitors")
+                    }
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onRemoveCategory(category.id, true)
+                        }
+                    ) {
+                        Text("Delete competitors")
+                    }
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

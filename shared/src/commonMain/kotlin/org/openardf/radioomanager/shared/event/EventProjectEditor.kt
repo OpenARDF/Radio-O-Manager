@@ -104,6 +104,59 @@ object EventProjectEditor {
         )
     }
 
+    /**
+     * Returns a copy of the project file with one category and its course removed.
+     *
+     * Desktop project files do not have Room foreign keys, so this helper makes
+     * the deletion policy explicit: category-owned control points disappear with
+     * the category, remaining categories are renumbered, and kept competitors are
+     * made uncategorized instead of retaining an invisible dangling category ID.
+     */
+    fun removeCategory(
+        projectFile: EventProjectFile,
+        categoryId: String,
+        deleteCompetitors: Boolean
+    ): EventProjectFile {
+        require(projectFile.raceData.categories.any { it.category.id == categoryId }) {
+            "Category was not found: $categoryId"
+        }
+
+        val categories = projectFile.raceData.categories
+            .filterNot { it.category.id == categoryId }
+            .mapIndexed { index, categoryData ->
+                categoryData.copy(category = categoryData.category.copy(order = index))
+            }
+
+        val competitorData = if (deleteCompetitors) {
+            projectFile.raceData.competitorData.filterNot { data ->
+                data.competitorCategory.competitor.categoryId == categoryId ||
+                    data.competitorCategory.category?.id == categoryId
+            }
+        } else {
+            projectFile.raceData.competitorData.map { data ->
+                val competitorCategory = data.competitorCategory
+                val competitor = competitorCategory.competitor
+                if (competitor.categoryId == categoryId || competitorCategory.category?.id == categoryId) {
+                    data.copy(
+                        competitorCategory = competitorCategory.copy(
+                            competitor = competitor.copy(categoryId = null),
+                            category = null
+                        )
+                    )
+                } else {
+                    data
+                }
+            }
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                categories = categories,
+                competitorData = competitorData
+            )
+        )
+    }
+
     /** Returns a copy of the project file with one competitor's validated name changed. */
     fun renameCompetitor(
         projectFile: EventProjectFile,

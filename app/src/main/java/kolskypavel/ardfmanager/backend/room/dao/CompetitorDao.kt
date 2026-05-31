@@ -63,6 +63,10 @@ interface CompetitorDao {
     @Query("DELETE FROM competitor WHERE category_id =(:categoryId)")
     suspend fun deleteCompetitorsByCategory(categoryId: UUID)
 
+    /** Clears the category assignment for all competitors assigned to a category. */
+    @Query("UPDATE competitor SET category_id = NULL WHERE category_id =(:categoryId)")
+    suspend fun clearCompetitorCategory(categoryId: UUID)
+
     /** Deletes all competitors belonging to a race. */
     @Query("DELETE FROM competitor WHERE race_id =(:raceId)")
     suspend fun deleteAllCompetitorsByRace(raceId: UUID)

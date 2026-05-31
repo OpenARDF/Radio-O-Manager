@@ -134,6 +134,9 @@ class ARDFRepository private constructor(context: Context) {
     suspend fun deleteCompetitorsByCategory(categoryId: UUID) =
         eventDatabase.competitorDao().deleteCompetitorsByCategory(categoryId)
 
+    suspend fun clearCompetitorCategory(categoryId: UUID) =
+        eventDatabase.competitorDao().clearCompetitorCategory(categoryId)
+
     suspend fun deleteAllCompetitorsByRace(raceId: UUID) =
         eventDatabase.competitorDao().deleteAllCompetitorsByRace(raceId)
 

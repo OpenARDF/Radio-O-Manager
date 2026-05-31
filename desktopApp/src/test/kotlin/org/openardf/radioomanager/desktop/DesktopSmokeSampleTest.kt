@@ -33,35 +33,47 @@ class DesktopSmokeSampleTest {
 
         val original = DesktopProjectFiles.read(source)
         val categoryId = original.raceData.categories.first().category.id
+        val removedCategoryId = original.raceData.categories.last().category.id
         val competitorId = original.raceData.competitorData.first().competitorCategory.competitor.id
         val aliasId = original.raceData.aliases.first().id
 
-        val edited = EventProjectEditor.updateAlias(
-            EventProjectEditor.updateCompetitorNumbers(
-                EventProjectEditor.renameCompetitor(
-                    EventProjectEditor.renameCategory(
-                        EventProjectEditor.renameRace(original, "Edited Smoke Race"),
-                        categoryId,
-                        "M21E"
+        val edited = EventProjectEditor.removeCategory(
+            EventProjectEditor.updateAlias(
+                EventProjectEditor.updateCompetitorNumbers(
+                    EventProjectEditor.renameCompetitor(
+                        EventProjectEditor.renameCategory(
+                            EventProjectEditor.renameRace(original, "Edited Smoke Race"),
+                            categoryId,
+                            "M21E"
+                        ),
+                        competitorId,
+                        "Edited",
+                        "Runner"
                     ),
                     competitorId,
-                    "Edited",
-                    "Runner"
+                    "501",
+                    "7654321"
                 ),
-                competitorId,
-                "501",
-                "7654321"
+                aliasId,
+                "40",
+                "F4"
             ),
-            aliasId,
-            "40",
-            "F4"
+            removedCategoryId,
+            deleteCompetitors = false
         )
 
         DesktopProjectFiles.write(target, edited)
         val readBack = DesktopProjectFiles.read(target)
 
         assertEquals("Edited Smoke Race", readBack.raceData.race.name)
+        assertEquals(listOf(categoryId), readBack.raceData.categories.map { it.category.id })
         assertEquals("M21E", readBack.raceData.categories.first { it.category.id == categoryId }.category.name)
+        assertEquals(
+            null,
+            readBack.raceData.competitorData
+                .first { it.competitorCategory.competitor.id != competitorId }
+                .competitorCategory.competitor.categoryId
+        )
         assertEquals(
             "Edited",
             readBack.raceData.competitorData
