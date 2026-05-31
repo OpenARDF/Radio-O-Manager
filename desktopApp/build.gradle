@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
 }
 
+import java.util.jar.JarFile
+
 kotlin {
     jvmToolchain(17)
 }
@@ -26,6 +28,104 @@ compose.desktop {
 
             macOS {
                 bundleID = "org.openardf.radioomanager.desktop"
+            }
+        }
+    }
+}
+
+def desktopMainClass = "org.openardf.radioomanager.desktop.MainKt"
+def desktopAppName = "Radio-O-Manager"
+def desktopJdeployBundleDir = layout.buildDirectory.dir("jdeploy")
+def desktopJdeployLibsDir = desktopJdeployBundleDir.map { it.dir("libs") }
+def desktopJdeployJarName = "Radio-O-Manager-jdeploy.jar"
+def runtimeClasspath = configurations.runtimeClasspath
+def desktopImplementationVersion = version.toString()
+
+tasks.register("stageDesktopJdeployLibs", Sync) {
+    group = "distribution"
+    description = "Stages desktop runtime dependencies for the Radio-O-Manager jDeploy bundle."
+
+    from(runtimeClasspath)
+    into(desktopJdeployLibsDir)
+}
+
+tasks.register("desktopJdeployJar", Jar) {
+    group = "distribution"
+    description = "Builds an executable desktop jar for jDeploy."
+
+    dependsOn(tasks.named("jar"))
+    dependsOn(tasks.named("stageDesktopJdeployLibs"))
+
+    archiveFileName = desktopJdeployJarName
+    destinationDirectory = desktopJdeployBundleDir
+
+    from({
+        zipTree(tasks.named("jar").get().archiveFile.get().asFile)
+    })
+
+    doFirst {
+        def runtimeClasspathEntries = []
+        runtimeClasspath.files.each { file ->
+            runtimeClasspathEntries.add("libs/${file.name}")
+        }
+        runtimeClasspathEntries.sort()
+
+        manifest {
+            attributes(
+                    "Main-Class": desktopMainClass,
+                    "Class-Path": runtimeClasspathEntries.join(" "),
+                    "Implementation-Title": desktopAppName,
+                    "Implementation-Version": desktopImplementationVersion
+            )
+        }
+    }
+}
+
+def desktopJdeployJarFile = tasks.named("desktopJdeployJar").flatMap { it.archiveFile }
+
+tasks.register("prepareDesktopJdeployBundle") {
+    group = "distribution"
+    description = "Prepares the executable jar and dependency layout needed by jDeploy."
+
+    dependsOn(tasks.named("stageDesktopJdeployLibs"))
+    dependsOn(tasks.named("desktopJdeployJar"))
+}
+
+tasks.register("verifyDesktopJdeployBundle") {
+    group = "distribution"
+    description = "Verifies that the generated Radio-O-Manager jDeploy jar is executable and references staged dependencies."
+
+    dependsOn(tasks.named("prepareDesktopJdeployBundle"))
+
+    doLast {
+        def jarFile = desktopJdeployJarFile.get().asFile
+        if (!jarFile.isFile()) {
+            throw new GradleException("Expected jDeploy jar at ${jarFile.absolutePath}")
+        }
+
+        new JarFile(jarFile).withCloseable { archive ->
+            def manifest = archive.manifest
+            if (manifest == null) {
+                throw new GradleException("Generated jDeploy jar is missing a manifest.")
+            }
+            def attributes = manifest.mainAttributes
+            def mainClass = attributes.getValue("Main-Class")
+            if (mainClass != desktopMainClass) {
+                throw new GradleException("Expected Main-Class=${desktopMainClass} but found ${mainClass ?: "<missing>"}")
+            }
+
+            def classPathEntries = (attributes.getValue("Class-Path") ?: "")
+                    .split(" ")
+                    .findAll { it }
+            if (classPathEntries.isEmpty()) {
+                throw new GradleException("Generated jDeploy jar is missing a Class-Path manifest entry.")
+            }
+
+            classPathEntries.each { relativePath ->
+                def dependencyFile = new File(jarFile.parentFile, relativePath)
+                if (!dependencyFile.isFile()) {
+                    throw new GradleException("Class-Path entry ${relativePath} does not exist next to the generated jDeploy jar.")
+                }
             }
         }
     }

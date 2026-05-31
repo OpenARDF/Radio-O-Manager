@@ -106,6 +106,7 @@ The current desktop packaging smoke checks are:
 ```shell
 ./gradlew :desktopApp:checkRuntime
 ./gradlew :desktopApp:createDistributable
+./gradlew :desktopApp:prepareDesktopJdeployBundle :desktopApp:verifyDesktopJdeployBundle
 ```
 
 `checkRuntime` verifies that Compose Desktop can find a usable JDK runtime.
@@ -119,6 +120,11 @@ a positive integer and the current Android version remains `0.2.0`.
 `packageDistributionForCurrentOS` also passes in the current module shape, but
 the app-image output from `createDistributable` is the clearest local smoke
 signal until installer packaging metadata is finalized.
+
+`prepareDesktopJdeployBundle` stages an executable desktop jar plus runtime
+libraries under `desktopApp/build/jdeploy`. `verifyDesktopJdeployBundle` checks
+the jar manifest and staged classpath layout that the future jDeploy package
+metadata will consume.
 
 For local macOS smoke tests, prefer copying the generated `.app` and sample
 project file to `/tmp` before launching with `open ... --args <sample.rom.json>`.
@@ -162,5 +168,8 @@ repeatable package validation.
    codes. The Results section now shows competitor result rows and can set the
    same explicit manual result status for matched readouts. A sample smoke-test project is available at
    `samples/desktop-smoke.rom.json`.
-5. Add jDeploy metadata only after the desktop app can complete a real smoke
-   scenario.
+5. In progress: add jDeploy metadata after the desktop app can complete a real
+   smoke scenario. The Gradle-side jDeploy bundle tasks now build and verify
+   `desktopApp/build/jdeploy/Radio-O-Manager-jdeploy.jar`. The npm/jDeploy
+   package metadata, local install smoke, release workflow, and public package
+   name remain pending.
