@@ -38,6 +38,25 @@ Prefer a small desktop app module that depends on `:shared`. Compose
 Multiplatform Desktop is the default UI candidate because it keeps the app in
 Kotlin and aligns naturally with the existing Kotlin Multiplatform foundation.
 
+The desktop app should intentionally feel like the Android app, not like a new
+product. Reuse the Android visual language where practical:
+
+- preserve the same primary workflows and vocabulary: races, categories,
+  competitors, readouts, results, aliases, and settings;
+- reuse or port the existing Android vector icons for matching actions and tabs;
+- use the Android theme colors as the starting desktop palette, including
+  primary purple, secondary teal, white/black text defaults, grey disconnected
+  state, orange reading state, green connected/read state, yellow warning state,
+  and red error state;
+- mirror the Android status-strip behavior for SI/readout state, even when the
+  beta desktop app only shows simulated or manually entered readout state;
+- keep dialogs, table rows, edit forms, and result/readout status colors close
+  enough that Android users recognize the desktop screens immediately.
+
+Desktop ergonomics can adapt to larger screens, menus, keyboard shortcuts, and
+resizable windows, but those adaptations should extend the Android interface
+rather than inventing a separate desktop visual identity.
+
 The desktop app should keep platform concerns thin:
 
 - file pickers and local filesystem permissions in the desktop module;
