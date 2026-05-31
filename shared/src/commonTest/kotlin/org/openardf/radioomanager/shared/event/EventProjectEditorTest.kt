@@ -448,6 +448,53 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun updatesMatchedReadoutManualStatus() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.updateReadoutManualStatus(
+            original,
+            "result-1",
+            ResultStatus.DISQUALIFIED
+        )
+
+        val result = updated.raceData.competitorData.single().readoutData!!.result
+        assertEquals(ResultStatus.DISQUALIFIED, result.resultStatus)
+        assertEquals(false, result.automaticStatus)
+        assertEquals(true, result.modified)
+        assertEquals(false, result.sent)
+    }
+
+    @Test
+    fun updatesUnmatchedReadoutManualStatus() {
+        val original = projectFile(
+            unmatchedReadouts = listOf(readout("result-1", null, 1111))
+        )
+
+        val updated = EventProjectEditor.updateReadoutManualStatus(
+            original,
+            "result-1",
+            ResultStatus.DID_NOT_FINISH
+        )
+
+        val result = updated.raceData.unmatchedReadoutData.single().result
+        assertEquals(ResultStatus.DID_NOT_FINISH, result.resultStatus)
+        assertEquals(false, result.automaticStatus)
+        assertEquals(true, result.modified)
+        assertEquals(false, result.sent)
+    }
+
+    @Test
+    fun rejectsUnknownReadoutStatusUpdate() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateReadoutManualStatus(projectFile(), "missing", ResultStatus.DISQUALIFIED)
+        }
+    }
+
+    @Test
     fun updatesAliasUsingSharedValidationRules() {
         val original = projectFile(
             aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))

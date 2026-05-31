@@ -16,6 +16,8 @@ class EventReadoutDetailsTest {
         assertEquals("matched", rows[0].id)
         assertEquals("123456", rows[0].siNumberText)
         assertEquals("RUNNER Alice", rows[0].competitorName)
+        assertEquals(ResultStatus.OK, rows[0].resultStatus)
+        assertEquals(true, rows[0].automaticStatus)
         assertEquals("OK", rows[0].statusLabel)
         assertEquals("3", rows[0].pointsText)
         assertEquals("00:20:00", rows[0].runTimeText)
@@ -23,6 +25,8 @@ class EventReadoutDetailsTest {
         assertEquals("unmatched", rows[1].id)
         assertEquals("654321", rows[1].siNumberText)
         assertEquals("", rows[1].competitorName)
+        assertEquals(ResultStatus.NO_RANKING, rows[1].resultStatus)
+        assertEquals(true, rows[1].automaticStatus)
         assertEquals("No ranking", rows[1].statusLabel)
     }
 

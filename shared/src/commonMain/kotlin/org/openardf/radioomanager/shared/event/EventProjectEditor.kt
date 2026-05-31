@@ -3,6 +3,7 @@ package org.openardf.radioomanager.shared.event
 import org.openardf.radioomanager.shared.alias.AliasRules
 import org.openardf.radioomanager.shared.alias.AliasValidationResult
 import org.openardf.radioomanager.shared.course.ControlPointRules
+import org.openardf.radioomanager.shared.domain.ResultStatus
 import org.openardf.radioomanager.shared.sportident.SportIdentCodes
 
 /** Shared event-project editing helpers used by desktop and future non-Android flows. */
@@ -456,6 +457,54 @@ object EventProjectEditor {
                 foundReadout = true
             }
             matches
+        }
+        require(foundReadout) {
+            "Readout was not found: $resultId"
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                competitorData = competitorData,
+                unmatchedReadoutData = unmatchedReadoutData
+            )
+        )
+    }
+
+    /**
+     * Returns a copy of the project file with one readout set to a manual status.
+     *
+     * Android can recalculate automatic status because it has Room-backed race,
+     * category, and punch services available. The desktop project editor keeps
+     * this operation intentionally explicit: choosing a status makes the readout
+     * manual, marks it modified, and marks it unsent.
+     */
+    fun updateReadoutManualStatus(
+        projectFile: EventProjectFile,
+        resultId: String,
+        resultStatus: ResultStatus
+    ): EventProjectFile {
+        var foundReadout = false
+        fun EventReadoutData.withManualStatus(): EventReadoutData {
+            foundReadout = true
+            return copy(
+                result = result.copy(
+                    automaticStatus = false,
+                    resultStatus = resultStatus,
+                    modified = true,
+                    sent = false
+                )
+            )
+        }
+
+        val competitorData = projectFile.raceData.competitorData.map { data ->
+            if (data.readoutData?.result?.id == resultId) {
+                data.copy(readoutData = data.readoutData.withManualStatus())
+            } else {
+                data
+            }
+        }
+        val unmatchedReadoutData = projectFile.raceData.unmatchedReadoutData.map { readoutData ->
+            if (readoutData.result.id == resultId) readoutData.withManualStatus() else readoutData
         }
         require(foundReadout) {
             "Readout was not found: $resultId"

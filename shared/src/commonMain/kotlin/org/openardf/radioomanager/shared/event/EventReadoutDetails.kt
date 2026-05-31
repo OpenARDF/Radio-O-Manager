@@ -8,6 +8,8 @@ data class EventReadoutDetails(
     val id: String,
     val siNumberText: String,
     val competitorName: String,
+    val resultStatus: ResultStatus,
+    val automaticStatus: Boolean,
     val statusLabel: String,
     val pointsText: String,
     val runTimeText: String
@@ -34,6 +36,8 @@ data class EventReadoutDetails(
                 id = result.id,
                 siNumberText = result.siNumber?.toString() ?: "",
                 competitorName = competitorName,
+                resultStatus = result.resultStatus,
+                automaticStatus = result.automaticStatus,
                 statusLabel = result.resultStatus.toDisplayLabel(),
                 pointsText = result.points.toString(),
                 runTimeText = DurationFormatter.secondsToFormattedString(result.runTimeSeconds, useMinutes = false)

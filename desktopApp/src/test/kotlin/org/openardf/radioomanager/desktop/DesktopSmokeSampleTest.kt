@@ -9,6 +9,7 @@ import org.openardf.radioomanager.shared.event.EventProjectEditor
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
+import org.openardf.radioomanager.shared.domain.ResultStatus
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -123,5 +124,28 @@ class DesktopSmokeSampleTest {
         assertEquals(0, EventReadoutDetails.from(readBack.raceData).size)
         assertEquals(null, readBack.raceData.competitorData.first().readoutData)
         assertTrue(readBack.raceData.unmatchedReadoutData.isEmpty())
+    }
+
+    @Test
+    fun repositorySmokeSampleReadoutStatusCanBeEditedAndSaved() {
+        val source = Path.of("..", "samples", "desktop-smoke.rom.json")
+        val target = Files.createTempDirectory("rom-desktop-status-smoke").resolve("edited.rom.json")
+
+        val original = DesktopProjectFiles.read(source)
+        val matchedReadoutId = original.raceData.competitorData.first { it.readoutData != null }.readoutData!!.result.id
+        val edited = EventProjectEditor.updateReadoutManualStatus(
+            original,
+            matchedReadoutId,
+            ResultStatus.DISQUALIFIED
+        )
+
+        DesktopProjectFiles.write(target, edited)
+        val readBack = DesktopProjectFiles.read(target)
+        val result = readBack.raceData.competitorData.first { it.readoutData != null }.readoutData!!.result
+
+        assertEquals(ResultStatus.DISQUALIFIED, result.resultStatus)
+        assertEquals(false, result.automaticStatus)
+        assertEquals(true, result.modified)
+        assertEquals(false, result.sent)
     }
 }

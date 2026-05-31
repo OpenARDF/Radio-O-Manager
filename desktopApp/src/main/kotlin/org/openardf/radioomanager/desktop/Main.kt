@@ -46,6 +46,8 @@ import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
+import org.openardf.radioomanager.shared.event.toDisplayLabel
+import org.openardf.radioomanager.shared.domain.ResultStatus
 import java.nio.file.Path
 import java.util.UUID
 
@@ -319,6 +321,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onUpdateReadoutStatus = { resultId, resultStatus ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.updateReadoutManualStatus(currentProject, resultId, resultStatus)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -408,6 +421,7 @@ fun RadioOManagerDesktopApp(
     onAssignCompetitorCategory: (String, String?) -> Unit = { _, _ -> },
     onRemoveCompetitor: (String, Boolean) -> Unit = { _, _ -> },
     onRemoveReadout: (String) -> Unit = {},
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit = { _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -448,6 +462,7 @@ fun RadioOManagerDesktopApp(
                         onAssignCompetitorCategory = onAssignCompetitorCategory,
                         onRemoveCompetitor = onRemoveCompetitor,
                         onRemoveReadout = onRemoveReadout,
+                        onUpdateReadoutStatus = onUpdateReadoutStatus,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -531,6 +546,7 @@ private fun SectionWorkspace(
     onAssignCompetitorCategory: (String, String?) -> Unit,
     onRemoveCompetitor: (String, Boolean) -> Unit,
     onRemoveReadout: (String) -> Unit,
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -590,7 +606,8 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Readouts && projectFile != null) {
             ReadoutDetailsPanel(
                 readouts = EventReadoutDetails.from(projectFile.raceData),
-                onRemoveReadout = onRemoveReadout
+                onRemoveReadout = onRemoveReadout,
+                onUpdateReadoutStatus = onUpdateReadoutStatus
             )
         }
         if (section == DesktopSection.Results && projectFile != null) {
@@ -637,12 +654,13 @@ private fun ResultDetailsPanel(results: List<EventResultDetails>) {
 @Composable
 private fun ReadoutDetailsPanel(
     readouts: List<EventReadoutDetails>,
-    onRemoveReadout: (String) -> Unit
+    onRemoveReadout: (String) -> Unit,
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", ""))
+        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", "", ""))
         readouts.forEach { readout ->
-            ReadoutDetailRow(readout, onRemoveReadout)
+            ReadoutDetailRow(readout, onRemoveReadout, onUpdateReadoutStatus)
         }
     }
 }
@@ -651,9 +669,11 @@ private fun ReadoutDetailsPanel(
 @Composable
 private fun ReadoutDetailRow(
     readout: EventReadoutDetails,
-    onRemoveReadout: (String) -> Unit
+    onRemoveReadout: (String) -> Unit,
+    onUpdateReadoutStatus: (String, ResultStatus) -> Unit
 ) {
     var showDeleteDialog by remember(readout.id) { mutableStateOf(false) }
+    var selectedStatus by remember(readout.id, readout.resultStatus) { mutableStateOf(readout.resultStatus) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -662,9 +682,20 @@ private fun ReadoutDetailRow(
     ) {
         Text(readout.siNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Text(readout.competitorName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
-        Text(readout.statusLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        ResultStatusPicker(
+            selectedStatus = selectedStatus,
+            onStatusSelected = { selectedStatus = it },
+            modifier = Modifier.weight(1f)
+        )
         Text(readout.pointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Text(readout.runTimeText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Button(
+            onClick = { onUpdateReadoutStatus(readout.id, selectedStatus) },
+            modifier = Modifier.weight(1f),
+            enabled = selectedStatus != readout.resultStatus || readout.automaticStatus
+        ) {
+            Text("Status")
+        }
         Button(
             onClick = { showDeleteDialog = true },
             modifier = Modifier.weight(1f)
@@ -694,6 +725,40 @@ private fun ReadoutDetailRow(
                 }
             }
         )
+    }
+}
+
+/** Shows result statuses as explicit manual-status choices. */
+@Composable
+private fun ResultStatusPicker(
+    selectedStatus: ResultStatus,
+    onStatusSelected: (ResultStatus) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Button(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(selectedStatus.toDisplayLabel())
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            ResultStatus.entries.forEach { status ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onStatusSelected(status)
+                    }
+                ) {
+                    Text(status.toDisplayLabel())
+                }
+            }
+        }
     }
 }
 
