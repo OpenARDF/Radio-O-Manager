@@ -37,29 +37,33 @@ class DesktopSmokeSampleTest {
         val competitorId = original.raceData.competitorData.first().competitorCategory.competitor.id
         val aliasId = original.raceData.aliases.first().id
 
-        val edited = EventProjectEditor.removeCategory(
-            EventProjectEditor.updateAlias(
-                EventProjectEditor.updateCompetitorNumbers(
-                    EventProjectEditor.renameCompetitor(
-                        EventProjectEditor.renameCategory(
-                            EventProjectEditor.renameRace(original, "Edited Smoke Race"),
-                            categoryId,
-                            "M21E"
+        val edited = EventProjectEditor.assignCompetitorCategory(
+            EventProjectEditor.removeCategory(
+                EventProjectEditor.updateAlias(
+                    EventProjectEditor.updateCompetitorNumbers(
+                        EventProjectEditor.renameCompetitor(
+                            EventProjectEditor.renameCategory(
+                                EventProjectEditor.renameRace(original, "Edited Smoke Race"),
+                                categoryId,
+                                "M21E"
+                            ),
+                            competitorId,
+                            "Edited",
+                            "Runner"
                         ),
                         competitorId,
-                        "Edited",
-                        "Runner"
+                        "501",
+                        "7654321"
                     ),
-                    competitorId,
-                    "501",
-                    "7654321"
+                    aliasId,
+                    "40",
+                    "F4"
                 ),
-                aliasId,
-                "40",
-                "F4"
+                removedCategoryId,
+                deleteCompetitors = false
             ),
-            removedCategoryId,
-            deleteCompetitors = false
+            competitorId,
+            null
         )
 
         DesktopProjectFiles.write(target, edited)
@@ -79,6 +83,12 @@ class DesktopSmokeSampleTest {
             readBack.raceData.competitorData
                 .first { it.competitorCategory.competitor.id == competitorId }
                 .competitorCategory.competitor.firstName
+        )
+        assertEquals(
+            null,
+            readBack.raceData.competitorData
+                .first { it.competitorCategory.competitor.id == competitorId }
+                .competitorCategory.competitor.categoryId
         )
         assertEquals(501, readBack.raceData.competitorData.first().competitorCategory.competitor.startNumber)
         assertEquals(7_654_321, readBack.raceData.competitorData.first().competitorCategory.competitor.siNumber)

@@ -17,6 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -186,6 +188,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onAssignCompetitorCategory = { competitorId, categoryId ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.assignCompetitorCategory(currentProject, competitorId, categoryId)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -242,6 +255,7 @@ fun RadioOManagerDesktopApp(
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onAddCompetitor: (String, String, String, String) -> Unit = { _, _, _, _ -> },
+    onAssignCompetitorCategory: (String, String?) -> Unit = { _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -278,6 +292,7 @@ fun RadioOManagerDesktopApp(
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onAddCompetitor = onAddCompetitor,
+                        onAssignCompetitorCategory = onAssignCompetitorCategory,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -357,6 +372,7 @@ private fun SectionWorkspace(
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onAddCompetitor: (String, String, String, String) -> Unit,
+    onAssignCompetitorCategory: (String, String?) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -396,9 +412,11 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Competitors && projectFile != null) {
             CompetitorDetailsPanel(
                 competitors = EventCompetitorDetails.from(projectFile.raceData),
+                categories = EventCategoryDetails.from(projectFile.raceData),
                 onRenameCompetitor = onRenameCompetitor,
                 onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
-                onAddCompetitor = onAddCompetitor
+                onAddCompetitor = onAddCompetitor,
+                onAssignCompetitorCategory = onAssignCompetitorCategory
             )
         }
         if (section == DesktopSection.Aliases && projectFile != null) {
@@ -475,18 +493,22 @@ private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
 @Composable
 private fun CompetitorDetailsPanel(
     competitors: List<EventCompetitorDetails>,
+    categories: List<EventCategoryDetails>,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
-    onAddCompetitor: (String, String, String, String) -> Unit
+    onAddCompetitor: (String, String, String, String) -> Unit,
+    onAssignCompetitorCategory: (String, String?) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CompetitorAddRow(onAddCompetitor)
-        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", ""))
+        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", "", ""))
         competitors.forEach { competitor ->
             CompetitorDetailRow(
                 competitor = competitor,
+                categories = categories,
                 onRenameCompetitor = onRenameCompetitor,
-                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers
+                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
+                onAssignCompetitorCategory = onAssignCompetitorCategory
             )
         }
     }
@@ -546,8 +568,10 @@ private fun CompetitorAddRow(onAddCompetitor: (String, String, String, String) -
 @Composable
 private fun CompetitorDetailRow(
     competitor: EventCompetitorDetails,
+    categories: List<EventCategoryDetails>,
     onRenameCompetitor: (String, String, String) -> Unit,
-    onUpdateCompetitorNumbers: (String, String, String) -> Unit
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit,
+    onAssignCompetitorCategory: (String, String?) -> Unit
 ) {
     var firstNameDraft by remember(competitor.id, competitor.firstName) { mutableStateOf(competitor.firstName) }
     var lastNameDraft by remember(competitor.id, competitor.lastName) { mutableStateOf(competitor.lastName) }
@@ -555,6 +579,7 @@ private fun CompetitorDetailRow(
         mutableStateOf(competitor.startNumberText)
     }
     var siNumberDraft by remember(competitor.id, competitor.siNumberText) { mutableStateOf(competitor.siNumberText) }
+    var selectedCategoryId by remember(competitor.id, competitor.categoryId) { mutableStateOf(competitor.categoryId) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -573,7 +598,12 @@ private fun CompetitorDetailRow(
             modifier = Modifier.weight(1f),
             label = { Text("Last") }
         )
-        Text(competitor.categoryName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        CategoryPicker(
+            selectedCategoryId = selectedCategoryId,
+            categories = categories,
+            onCategorySelected = { selectedCategoryId = it },
+            modifier = Modifier.weight(1f)
+        )
         TextField(
             value = startNumberDraft,
             onValueChange = { startNumberDraft = it },
@@ -599,6 +629,57 @@ private fun CompetitorDetailRow(
             enabled = startNumberDraft != competitor.startNumberText || siNumberDraft != competitor.siNumberText
         ) {
             Text("Nos.")
+        }
+        Button(
+            onClick = { onAssignCompetitorCategory(competitor.id, selectedCategoryId) },
+            modifier = Modifier.weight(1f),
+            enabled = selectedCategoryId != competitor.categoryId
+        ) {
+            Text("Cat.")
+        }
+    }
+}
+
+/** Shows a compact category selector with an explicit unassigned option. */
+@Composable
+private fun CategoryPicker(
+    selectedCategoryId: String?,
+    categories: List<EventCategoryDetails>,
+    onCategorySelected: (String?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedCategoryName = categories.firstOrNull { it.id == selectedCategoryId }?.name ?: "Unassigned"
+
+    Box(modifier = modifier) {
+        Button(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(selectedCategoryName)
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    expanded = false
+                    onCategorySelected(null)
+                }
+            ) {
+                Text("Unassigned")
+            }
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onCategorySelected(category.id)
+                    }
+                ) {
+                    Text(category.name)
+                }
+            }
         }
     }
 }

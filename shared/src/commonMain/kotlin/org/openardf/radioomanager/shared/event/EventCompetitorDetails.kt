@@ -6,6 +6,7 @@ data class EventCompetitorDetails(
     val firstName: String,
     val lastName: String,
     val fullName: String,
+    val categoryId: String?,
     val categoryName: String,
     val startNumber: Int,
     val startNumberText: String,
@@ -24,6 +25,7 @@ data class EventCompetitorDetails(
                         firstName = competitor.firstName,
                         lastName = competitor.lastName,
                         fullName = competitor.fullName(),
+                        categoryId = competitor.categoryId,
                         categoryName = competitorCategory.category?.name
                             ?: competitor.categoryId?.let { categoryNamesById[it] }
                             ?: "",

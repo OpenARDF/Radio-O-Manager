@@ -192,6 +192,49 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun assignsCompetitorToCategory() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"))
+        )
+
+        val updated = EventProjectEditor.assignCompetitorCategory(original, "comp-1", " cat-1 ")
+
+        val competitorCategory = updated.raceData.competitorData.single().competitorCategory
+        assertEquals("cat-1", competitorCategory.competitor.categoryId)
+        assertEquals("M21", competitorCategory.category?.name)
+    }
+
+    @Test
+    fun unassignsCompetitorFromCategory() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")))
+        )
+
+        val updated = EventProjectEditor.assignCompetitorCategory(original, "comp-1", null)
+
+        val competitorCategory = updated.raceData.competitorData.single().competitorCategory
+        assertEquals(null, competitorCategory.competitor.categoryId)
+        assertEquals(null, competitorCategory.category)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorCategoryAssignment() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.assignCompetitorCategory(original, "missing", "cat-1")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.assignCompetitorCategory(original, "comp-1", "missing")
+        }
+    }
+
+    @Test
     fun updatesCompetitorNumbersUsingSharedValidationRules() {
         val original = projectFile(
             competitors = listOf(

@@ -146,8 +146,8 @@ repeatable package validation.
    defaults, and can edit category names through shared project-editing rules.
    The Competitors section now shows competitor rows with shared category lookup
    and display formatting, can add uncategorized competitors with conservative
-   defaults, and can edit competitor first and last names, start numbers, and SI
-   numbers through shared project-editing rules. The Aliases section can
+   defaults, and can edit competitor first and last names, category assignment,
+   start numbers, and SI numbers through shared project-editing rules. The Aliases section can
    add/delete aliases and edit existing alias SI codes and names through shared
    alias validation rules. The Readouts section now shows read-only matched and
    unmatched SI-card readout rows. The Results section now shows read-only

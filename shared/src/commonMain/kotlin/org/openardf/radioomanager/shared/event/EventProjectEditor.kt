@@ -200,6 +200,45 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with one competitor assigned to a category, or to no category. */
+    fun assignCompetitorCategory(
+        projectFile: EventProjectFile,
+        competitorId: String,
+        categoryId: String?
+    ): EventProjectFile {
+        val trimmedCategoryId = categoryId?.trim()?.takeIf { it.isNotEmpty() }
+        val category = trimmedCategoryId?.let { requestedCategoryId ->
+            projectFile.raceData.categories
+                .firstOrNull { it.category.id == requestedCategoryId }
+                ?.category
+                ?: throw IllegalArgumentException("Category was not found: $requestedCategoryId")
+        }
+
+        var foundCompetitor = false
+        val competitorData = projectFile.raceData.competitorData.map { data ->
+            val competitorCategory = data.competitorCategory
+            val competitor = competitorCategory.competitor
+            if (competitor.id == competitorId) {
+                foundCompetitor = true
+                data.copy(
+                    competitorCategory = competitorCategory.copy(
+                        competitor = competitor.copy(categoryId = category?.id),
+                        category = category
+                    )
+                )
+            } else {
+                data
+            }
+        }
+        require(foundCompetitor) {
+            "Competitor was not found: $competitorId"
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(competitorData = competitorData)
+        )
+    }
+
     /** Returns a copy of the project file with one competitor's validated numbers changed. */
     fun updateCompetitorNumbers(
         projectFile: EventProjectFile,
