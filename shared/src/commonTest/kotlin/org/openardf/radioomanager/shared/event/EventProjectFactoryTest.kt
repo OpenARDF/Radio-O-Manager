@@ -24,7 +24,7 @@ class EventProjectFactoryTest {
         assertEquals(RaceType.CLASSIC, race.raceType)
         assertEquals(RaceLevel.PRACTICE, race.raceLevel)
         assertEquals(RaceBand.M80, race.raceBand)
-        assertEquals(0, race.timeLimitSeconds)
+        assertEquals(7_200, race.timeLimitSeconds)
         assertEquals(emptyList(), projectFile.raceData.categories)
         assertEquals(emptyList(), projectFile.raceData.aliases)
         assertEquals(emptyList(), projectFile.raceData.competitorData)

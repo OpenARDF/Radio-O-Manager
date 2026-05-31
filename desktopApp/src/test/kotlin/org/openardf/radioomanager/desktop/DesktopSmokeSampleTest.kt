@@ -9,6 +9,9 @@ import org.openardf.radioomanager.shared.event.EventProjectEditor
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
+import org.openardf.radioomanager.shared.domain.RaceBand
+import org.openardf.radioomanager.shared.domain.RaceLevel
+import org.openardf.radioomanager.shared.domain.RaceType
 import org.openardf.radioomanager.shared.domain.ResultStatus
 import java.nio.file.Files
 import java.nio.file.Path
@@ -70,11 +73,22 @@ class DesktopSmokeSampleTest {
             competitorId,
             null
         )
+        val editedWithRaceSettings = EventProjectEditor.updateRaceSettings(
+            edited,
+            RaceType.FOXORING,
+            RaceLevel.REGIONAL,
+            RaceBand.COMBINED,
+            "90"
+        )
 
-        DesktopProjectFiles.write(target, edited)
+        DesktopProjectFiles.write(target, editedWithRaceSettings)
         val readBack = DesktopProjectFiles.read(target)
 
         assertEquals("Edited Smoke Race", readBack.raceData.race.name)
+        assertEquals(RaceType.FOXORING, readBack.raceData.race.raceType)
+        assertEquals(RaceLevel.REGIONAL, readBack.raceData.race.raceLevel)
+        assertEquals(RaceBand.COMBINED, readBack.raceData.race.raceBand)
+        assertEquals(5_400, readBack.raceData.race.timeLimitSeconds)
         assertEquals(listOf(categoryId), readBack.raceData.categories.map { it.category.id })
         assertEquals("M21E", readBack.raceData.categories.first { it.category.id == categoryId }.category.name)
         assertEquals("31 32 36B", readBack.raceData.categories.first().category.controlPointsString)

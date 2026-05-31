@@ -9,9 +9,13 @@ import org.openardf.radioomanager.shared.time.DurationFormatter
 data class EventRaceDetails(
     val name: String,
     val startDateTimeIso: String,
+    val raceType: RaceType,
     val raceTypeLabel: String,
+    val raceLevel: RaceLevel,
     val raceLevelLabel: String,
+    val raceBand: RaceBand,
     val raceBandLabel: String,
+    val timeLimitMinutesText: String,
     val timeLimitText: String
 ) {
     companion object {
@@ -20,9 +24,13 @@ data class EventRaceDetails(
             EventRaceDetails(
                 name = race.name,
                 startDateTimeIso = race.startDateTimeIso,
+                raceType = race.raceType,
                 raceTypeLabel = race.raceType.toDisplayLabel(),
+                raceLevel = race.raceLevel,
                 raceLevelLabel = race.raceLevel.toDisplayLabel(),
+                raceBand = race.raceBand,
                 raceBandLabel = race.raceBand.toDisplayLabel(),
+                timeLimitMinutesText = (race.timeLimitSeconds / 60).toString(),
                 timeLimitText = DurationFormatter.secondsToFormattedString(race.timeLimitSeconds, useMinutes = true)
             )
     }

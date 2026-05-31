@@ -13,9 +13,13 @@ class EventRaceDetailsTest {
 
         assertEquals("Desktop Test Race", details.name)
         assertEquals("2026-05-31T10:00", details.startDateTimeIso)
+        assertEquals(RaceType.CLASSIC, details.raceType)
         assertEquals("Classic", details.raceTypeLabel)
+        assertEquals(RaceLevel.PRACTICE, details.raceLevel)
         assertEquals("Practice", details.raceLevelLabel)
+        assertEquals(RaceBand.M80, details.raceBand)
         assertEquals("80m", details.raceBandLabel)
+        assertEquals("120", details.timeLimitMinutesText)
         assertEquals("120:00", details.timeLimitText)
     }
 

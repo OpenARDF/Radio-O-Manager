@@ -38,7 +38,7 @@ object EventProjectFactory {
                     raceType = RaceType.CLASSIC,
                     raceLevel = RaceLevel.PRACTICE,
                     raceBand = RaceBand.M80,
-                    timeLimitSeconds = 0
+                    timeLimitSeconds = 7_200
                 ),
                 categories = emptyList(),
                 aliases = emptyList(),

@@ -3,6 +3,9 @@ package org.openardf.radioomanager.shared.event
 import org.openardf.radioomanager.shared.alias.AliasRules
 import org.openardf.radioomanager.shared.alias.AliasValidationResult
 import org.openardf.radioomanager.shared.course.ControlPointRules
+import org.openardf.radioomanager.shared.domain.RaceBand
+import org.openardf.radioomanager.shared.domain.RaceLevel
+import org.openardf.radioomanager.shared.domain.RaceType
 import org.openardf.radioomanager.shared.domain.ResultStatus
 import org.openardf.radioomanager.shared.sportident.SportIdentCodes
 
@@ -18,6 +21,36 @@ object EventProjectEditor {
         return projectFile.copy(
             raceData = projectFile.raceData.copy(
                 race = projectFile.raceData.race.copy(name = trimmedName)
+            )
+        )
+    }
+
+    /** Returns a copy of the project file with race-level settings changed. */
+    fun updateRaceSettings(
+        projectFile: EventProjectFile,
+        raceType: RaceType,
+        raceLevel: RaceLevel,
+        raceBand: RaceBand,
+        timeLimitMinutes: String
+    ): EventProjectFile {
+        val trimmedTimeLimit = timeLimitMinutes.trim()
+        require(trimmedTimeLimit.isNotEmpty()) {
+            "Race time limit is required."
+        }
+        val timeLimitMinutesValue = trimmedTimeLimit.toLongOrNull()
+            ?: throw IllegalArgumentException("Race time limit is invalid.")
+        require(timeLimitMinutesValue >= 0) {
+            "Race time limit cannot be negative."
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                race = projectFile.raceData.race.copy(
+                    raceType = raceType,
+                    raceLevel = raceLevel,
+                    raceBand = raceBand,
+                    timeLimitSeconds = timeLimitMinutesValue * 60
+                )
             )
         )
     }

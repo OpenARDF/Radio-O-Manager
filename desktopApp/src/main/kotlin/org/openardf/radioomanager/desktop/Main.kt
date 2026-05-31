@@ -48,6 +48,9 @@ import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
 import org.openardf.radioomanager.shared.event.toDisplayLabel
+import org.openardf.radioomanager.shared.domain.RaceBand
+import org.openardf.radioomanager.shared.domain.RaceLevel
+import org.openardf.radioomanager.shared.domain.RaceType
 import org.openardf.radioomanager.shared.domain.ResultStatus
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -224,6 +227,23 @@ fun main(args: Array<String>) = application {
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
                         EventProjectEditor.renameRace(currentProject, name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
+            onUpdateRaceSettings = { raceType, raceLevel, raceBand, timeLimitMinutes ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.updateRaceSettings(
+                            currentProject,
+                            raceType,
+                            raceLevel,
+                            raceBand,
+                            timeLimitMinutes
+                        )
                     }
                     hasUnsavedChanges = projectSession.hasUnsavedChanges
                     projectStatusText = "Unsaved changes."
@@ -444,6 +464,7 @@ fun RadioOManagerDesktopApp(
     projectStatusText: String = "No project open.",
     hasUnsavedChanges: Boolean = false,
     onRenameRace: (String) -> Unit = {},
+    onUpdateRaceSettings: (RaceType, RaceLevel, RaceBand, String) -> Unit = { _, _, _, _ -> },
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
     onUpdateCategoryControlPoints: (String, String) -> Unit = { _, _ -> },
     onAddCategory: (String) -> Unit = {},
@@ -485,6 +506,7 @@ fun RadioOManagerDesktopApp(
                         projectFile = projectFile,
                         projectStatusText = projectStatusText,
                         onRenameRace = onRenameRace,
+                        onUpdateRaceSettings = onUpdateRaceSettings,
                         onRenameCategory = onRenameCategory,
                         onUpdateCategoryControlPoints = onUpdateCategoryControlPoints,
                         onAddCategory = onAddCategory,
@@ -569,6 +591,7 @@ private fun SectionWorkspace(
     projectFile: EventProjectFile?,
     projectStatusText: String,
     onRenameRace: (String) -> Unit,
+    onUpdateRaceSettings: (RaceType, RaceLevel, RaceBand, String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
     onUpdateCategoryControlPoints: (String, String) -> Unit,
     onAddCategory: (String) -> Unit,
@@ -605,7 +628,8 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Races && projectFile != null) {
             RaceDetailsPanel(
                 details = EventRaceDetails.from(projectFile.raceData.race),
-                onRenameRace = onRenameRace
+                onRenameRace = onRenameRace,
+                onUpdateRaceSettings = onUpdateRaceSettings
             )
         }
         if (section == DesktopSection.Categories && projectFile != null) {
@@ -1294,9 +1318,16 @@ private fun CategoryDetailRow(
 @Composable
 private fun RaceDetailsPanel(
     details: EventRaceDetails,
-    onRenameRace: (String) -> Unit
+    onRenameRace: (String) -> Unit,
+    onUpdateRaceSettings: (RaceType, RaceLevel, RaceBand, String) -> Unit
 ) {
     var raceNameDraft by remember(details.name) { mutableStateOf(details.name) }
+    var selectedRaceType by remember(details.raceType) { mutableStateOf(details.raceType) }
+    var selectedRaceLevel by remember(details.raceLevel) { mutableStateOf(details.raceLevel) }
+    var selectedRaceBand by remember(details.raceBand) { mutableStateOf(details.raceBand) }
+    var timeLimitMinutesDraft by remember(details.timeLimitMinutesText) {
+        mutableStateOf(details.timeLimitMinutesText)
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -1318,10 +1349,122 @@ private fun RaceDetailsPanel(
             }
         }
         DetailRow("Start", details.startDateTimeIso)
-        DetailRow("Type", details.raceTypeLabel)
-        DetailRow("Level", details.raceLevelLabel)
-        DetailRow("Band", details.raceBandLabel)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RaceTypePicker(selectedRaceType, { selectedRaceType = it }, Modifier.weight(1f))
+            RaceLevelPicker(selectedRaceLevel, { selectedRaceLevel = it }, Modifier.weight(1f))
+            RaceBandPicker(selectedRaceBand, { selectedRaceBand = it }, Modifier.weight(1f))
+            TextField(
+                value = timeLimitMinutesDraft,
+                onValueChange = { timeLimitMinutesDraft = it },
+                modifier = Modifier.weight(1f),
+                label = { Text("Limit min") }
+            )
+            Button(
+                onClick = {
+                    onUpdateRaceSettings(
+                        selectedRaceType,
+                        selectedRaceLevel,
+                        selectedRaceBand,
+                        timeLimitMinutesDraft
+                    )
+                },
+                enabled = selectedRaceType != details.raceType ||
+                        selectedRaceLevel != details.raceLevel ||
+                        selectedRaceBand != details.raceBand ||
+                        timeLimitMinutesDraft != details.timeLimitMinutesText
+            ) {
+                Text("Settings")
+            }
+        }
         DetailRow("Time limit", details.timeLimitText)
+    }
+}
+
+/** Shows the race type selector using Android-compatible labels. */
+@Composable
+private fun RaceTypePicker(
+    selectedRaceType: RaceType,
+    onRaceTypeSelected: (RaceType) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    EnumPicker(
+        selectedValue = selectedRaceType,
+        values = RaceType.entries,
+        label = RaceType::toDisplayLabel,
+        onValueSelected = onRaceTypeSelected,
+        modifier = modifier
+    )
+}
+
+/** Shows the race level selector using Android-compatible labels. */
+@Composable
+private fun RaceLevelPicker(
+    selectedRaceLevel: RaceLevel,
+    onRaceLevelSelected: (RaceLevel) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    EnumPicker(
+        selectedValue = selectedRaceLevel,
+        values = RaceLevel.entries,
+        label = RaceLevel::toDisplayLabel,
+        onValueSelected = onRaceLevelSelected,
+        modifier = modifier
+    )
+}
+
+/** Shows the race band selector using Android-compatible labels. */
+@Composable
+private fun RaceBandPicker(
+    selectedRaceBand: RaceBand,
+    onRaceBandSelected: (RaceBand) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    EnumPicker(
+        selectedValue = selectedRaceBand,
+        values = RaceBand.entries,
+        label = RaceBand::toDisplayLabel,
+        onValueSelected = onRaceBandSelected,
+        modifier = modifier
+    )
+}
+
+/** Generic dropdown for small enum-backed desktop selectors. */
+@Composable
+private fun <T> EnumPicker(
+    selectedValue: T,
+    values: List<T>,
+    label: (T) -> String,
+    onValueSelected: (T) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = modifier) {
+        Button(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(label(selectedValue))
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            values.forEach { value ->
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onValueSelected(value)
+                    }
+                ) {
+                    Text(label(value))
+                }
+            }
+        }
     }
 }
 

@@ -30,6 +30,38 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun updatesRaceSettingsUsingAndroidMinuteLimitConvention() {
+        val original = projectFile("Original Race")
+
+        val updated = EventProjectEditor.updateRaceSettings(
+            original,
+            raceType = RaceType.FOXORING,
+            raceLevel = RaceLevel.REGIONAL,
+            raceBand = RaceBand.COMBINED,
+            timeLimitMinutes = " 90 "
+        )
+
+        val race = updated.raceData.race
+        assertEquals(RaceType.FOXORING, race.raceType)
+        assertEquals(RaceLevel.REGIONAL, race.raceLevel)
+        assertEquals(RaceBand.COMBINED, race.raceBand)
+        assertEquals(5_400, race.timeLimitSeconds)
+    }
+
+    @Test
+    fun rejectsInvalidRaceSettings() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "abc")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "-1")
+        }
+    }
+
+    @Test
     fun renamesCategoryWithoutChangingOtherCategories() {
         val original = projectFile(
             name = "Original Race",
