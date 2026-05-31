@@ -49,18 +49,6 @@ import org.openardf.radioomanager.shared.event.EventResultDetails
 import java.nio.file.Path
 import java.util.UUID
 
-/** Deferred operation that first needs a save/discard/cancel decision for dirty project state. */
-private sealed interface PendingDirtyProjectAction {
-    /** Open the selected project after the user decides what to do with unsaved edits. */
-    data class OpenProject(val path: Path) : PendingDirtyProjectAction
-
-    /** Close the current project after the user decides what to do with unsaved edits. */
-    data object CloseProject : PendingDirtyProjectAction
-
-    /** Exit the application after the user decides what to do with unsaved edits. */
-    data object ExitApplication : PendingDirtyProjectAction
-}
-
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main(args: Array<String>) = application {
     lateinit var requestWindowClose: () -> Unit
@@ -117,14 +105,18 @@ fun main(args: Array<String>) = application {
             when (action) {
                 PendingDirtyProjectAction.ExitApplication -> exitApplication()
                 is PendingDirtyProjectAction.OpenProject -> openProject(action.path)
-                PendingDirtyProjectAction.CloseProject -> closeProject(discardUnsavedChanges = !saveFirst)
+                PendingDirtyProjectAction.CloseProject -> closeProject(
+                    discardUnsavedChanges = DesktopDirtyProjectActions.shouldDiscardForClose(saveFirst)
+                )
             }
         }
 
         requestWindowClose = {
-            if (hasUnsavedChanges) {
-                pendingDirtyProjectAction = PendingDirtyProjectAction.ExitApplication
-            } else {
+            pendingDirtyProjectAction = DesktopDirtyProjectActions.pendingActionOrNull(
+                hasUnsavedChanges,
+                PendingDirtyProjectAction.ExitApplication
+            )
+            if (pendingDirtyProjectAction == null) {
                 exitApplication()
             }
         }
@@ -133,9 +125,11 @@ fun main(args: Array<String>) = application {
             Menu("File") {
                 Item("Open...", onClick = {
                     DesktopFileDialogs.chooseOpenProject()?.let { path ->
-                        if (hasUnsavedChanges) {
-                            pendingDirtyProjectAction = PendingDirtyProjectAction.OpenProject(path)
-                        } else {
+                        pendingDirtyProjectAction = DesktopDirtyProjectActions.pendingActionOrNull(
+                            hasUnsavedChanges,
+                            PendingDirtyProjectAction.OpenProject(path)
+                        )
+                        if (pendingDirtyProjectAction == null) {
                             openProject(path)
                         }
                     }
@@ -168,9 +162,11 @@ fun main(args: Array<String>) = application {
                     }
                 })
                 Item("Close Project", enabled = projectFile != null, onClick = {
-                    if (hasUnsavedChanges) {
-                        pendingDirtyProjectAction = PendingDirtyProjectAction.CloseProject
-                    } else {
+                    pendingDirtyProjectAction = DesktopDirtyProjectActions.pendingActionOrNull(
+                        hasUnsavedChanges,
+                        PendingDirtyProjectAction.CloseProject
+                    )
+                    if (pendingDirtyProjectAction == null) {
                         closeProject()
                     }
                 })
