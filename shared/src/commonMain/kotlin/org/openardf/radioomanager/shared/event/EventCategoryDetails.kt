@@ -1,0 +1,32 @@
+package org.openardf.radioomanager.shared.event
+
+import org.openardf.radioomanager.shared.time.DurationFormatter
+
+/** Shared read-only category row prepared for desktop and other event-admin surfaces. */
+data class EventCategoryDetails(
+    val name: String,
+    val raceTypeLabel: String,
+    val raceBandLabel: String,
+    val timeLimitText: String,
+    val controlPointsText: String
+) {
+    companion object {
+        /** Builds display rows sorted the same way category administration presents them. */
+        fun from(raceData: EventRaceData): List<EventCategoryDetails> =
+            raceData.categories
+                .sortedWith(compareBy<EventCategoryData> { it.category.order }.thenBy { it.category.name })
+                .map { categoryData ->
+                    val category = categoryData.category
+                    EventCategoryDetails(
+                        name = category.name,
+                        raceTypeLabel = category.effectiveRaceType(raceData.race).toDisplayLabel(),
+                        raceBandLabel = category.effectiveRaceBand(raceData.race).toDisplayLabel(),
+                        timeLimitText = DurationFormatter.secondsToFormattedString(
+                            category.effectiveTimeLimitSeconds(raceData.race),
+                            useMinutes = true
+                        ),
+                        controlPointsText = category.controlPointsString
+                    )
+                }
+    }
+}

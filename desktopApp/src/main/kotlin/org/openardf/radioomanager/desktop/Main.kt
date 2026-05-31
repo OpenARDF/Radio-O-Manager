@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import org.openardf.radioomanager.shared.event.EventCategoryDetails
 import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
@@ -183,7 +186,8 @@ private fun SectionWorkspace(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Text(
@@ -200,6 +204,9 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Races && projectFile != null) {
             RaceDetailsPanel(EventRaceDetails.from(projectFile.raceData.race))
         }
+        if (section == DesktopSection.Categories && projectFile != null) {
+            CategoryDetailsPanel(EventCategoryDetails.from(projectFile.raceData))
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -214,6 +221,25 @@ private fun SectionWorkspace(
     }
 }
 
+/** Shows read-only category rows using shared effective race settings. */
+@Composable
+private fun CategoryDetailsPanel(categories: List<EventCategoryDetails>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls"))
+        categories.forEach { category ->
+            DetailGridRow(
+                listOf(
+                    category.name,
+                    category.raceTypeLabel,
+                    category.raceBandLabel,
+                    category.timeLimitText,
+                    category.controlPointsText
+                )
+            )
+        }
+    }
+}
+
 /** Shows read-only race metadata using shared display values. */
 @Composable
 private fun RaceDetailsPanel(details: EventRaceDetails) {
@@ -223,6 +249,43 @@ private fun RaceDetailsPanel(details: EventRaceDetails) {
         DetailRow("Level", details.raceLevelLabel)
         DetailRow("Band", details.raceBandLabel)
         DetailRow("Time limit", details.timeLimitText)
+    }
+}
+
+/** Displays a compact header row for read-only desktop detail grids. */
+@Composable
+private fun DetailHeaderRow(values: List<String>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        values.forEach { value ->
+            Text(
+                text = value,
+                modifier = Modifier.weight(1f),
+                color = DesktopPalette.Disconnected,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+/** Displays a compact value row for read-only desktop detail grids. */
+@Composable
+private fun DetailGridRow(values: List<String>) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        values.forEach { value ->
+            Text(
+                text = value,
+                modifier = Modifier.weight(1f),
+                color = DesktopPalette.Black,
+                fontSize = 13.sp
+            )
+        }
     }
 }
 

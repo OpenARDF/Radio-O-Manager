@@ -94,6 +94,7 @@ preferred release workflow.
    app module. File menu open/save wiring is present; editing remains next.
 4. In progress: add the first event-admin screen backed by shared models and
    services. The Races section now shows read-only race details from shared
-   display models after a `.rom.json` file is opened.
+   display models after a `.rom.json` file is opened. The Categories section
+   now shows read-only category rows using shared effective race settings.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.
