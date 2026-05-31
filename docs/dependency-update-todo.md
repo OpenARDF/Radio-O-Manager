@@ -9,9 +9,9 @@ Android while giving future desktop work a cleaner shared-code base.
 
 ## Dependency Management
 
-- Introduce a Gradle version catalog at `gradle/libs.versions.toml` without
-  changing dependency versions in the first slice.
-- Move root plugin versions and app/shared library coordinates into the version
+- Done: introduced a Gradle version catalog at `gradle/libs.versions.toml`
+  without changing dependency versions.
+- Done: moved root plugin versions and app library coordinates into the version
   catalog so future updates are easier to review.
 - Keep coupled versions grouped together, especially Kotlin/KSP, Room
   runtime/compiler, Navigation plugin/runtime artifacts, OkHttp artifacts, and
