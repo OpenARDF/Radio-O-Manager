@@ -56,14 +56,15 @@ private sealed interface PendingDirtyProjectAction {
 
     /** Close the current project after the user decides what to do with unsaved edits. */
     data object CloseProject : PendingDirtyProjectAction
+
+    /** Exit the application after the user decides what to do with unsaved edits. */
+    data object ExitApplication : PendingDirtyProjectAction
 }
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main(args: Array<String>) = application {
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Radio-O-Manager Desktop"
-    ) {
+    lateinit var requestWindowClose: () -> Unit
+    Window(onCloseRequest = { requestWindowClose() }, title = "Radio-O-Manager Desktop") {
         val startupPath = remember(args.toList()) { args.firstOrNull()?.let(Path::of) }
         val projectSession = remember { DesktopProjectSession(DesktopProjectFiles) }
         val startupStatus = remember(startupPath) { openStartupProject(projectSession, startupPath) }
@@ -114,8 +115,17 @@ fun main(args: Array<String>) = application {
             }
             pendingDirtyProjectAction = null
             when (action) {
+                PendingDirtyProjectAction.ExitApplication -> exitApplication()
                 is PendingDirtyProjectAction.OpenProject -> openProject(action.path)
                 PendingDirtyProjectAction.CloseProject -> closeProject(discardUnsavedChanges = !saveFirst)
+            }
+        }
+
+        requestWindowClose = {
+            if (hasUnsavedChanges) {
+                pendingDirtyProjectAction = PendingDirtyProjectAction.ExitApplication
+            } else {
+                exitApplication()
             }
         }
 
