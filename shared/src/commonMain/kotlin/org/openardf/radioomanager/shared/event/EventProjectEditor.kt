@@ -51,4 +51,47 @@ object EventProjectEditor {
             raceData = projectFile.raceData.copy(categories = categories)
         )
     }
+
+    /** Returns a copy of the project file with one competitor's validated name changed. */
+    fun renameCompetitor(
+        projectFile: EventProjectFile,
+        competitorId: String,
+        firstName: String,
+        lastName: String
+    ): EventProjectFile {
+        val trimmedFirstName = firstName.trim()
+        val trimmedLastName = lastName.trim()
+        require(trimmedFirstName.isNotEmpty()) {
+            "Competitor first name cannot be blank."
+        }
+        require(trimmedLastName.isNotEmpty()) {
+            "Competitor last name cannot be blank."
+        }
+
+        var foundCompetitor = false
+        val competitorData = projectFile.raceData.competitorData.map { data ->
+            val competitorCategory = data.competitorCategory
+            val competitor = competitorCategory.competitor
+            if (competitor.id == competitorId) {
+                foundCompetitor = true
+                data.copy(
+                    competitorCategory = competitorCategory.copy(
+                        competitor = competitor.copy(
+                            firstName = trimmedFirstName,
+                            lastName = trimmedLastName
+                        )
+                    )
+                )
+            } else {
+                data
+            }
+        }
+        require(foundCompetitor) {
+            "Competitor was not found: $competitorId"
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(competitorData = competitorData)
+        )
+    }
 }

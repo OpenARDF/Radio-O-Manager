@@ -67,9 +67,48 @@ class EventProjectEditorTest {
         }
     }
 
+    @Test
+    fun renamesCompetitorWithoutChangingOtherCompetitors() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"), competitorData("comp-2", "Bob", "Racer"))
+        )
+
+        val updated = EventProjectEditor.renameCompetitor(original, "comp-2", " Robert ", " Runner ")
+
+        assertEquals("Alice", updated.raceData.competitorData[0].competitorCategory.competitor.firstName)
+        assertEquals("Robert", updated.raceData.competitorData[1].competitorCategory.competitor.firstName)
+        assertEquals("Runner", updated.raceData.competitorData[1].competitorCategory.competitor.lastName)
+    }
+
+    @Test
+    fun rejectsBlankCompetitorFirstName() {
+        val original = projectFile(competitors = listOf(competitorData("comp-1", "Alice", "Runner")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(original, "comp-1", " ", "Runner")
+        }
+    }
+
+    @Test
+    fun rejectsBlankCompetitorLastName() {
+        val original = projectFile(competitors = listOf(competitorData("comp-1", "Alice", "Runner")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(original, "comp-1", "Alice", " ")
+        }
+    }
+
+    @Test
+    fun rejectsUnknownCompetitorId() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(projectFile(), "missing", "Alice", "Runner")
+        }
+    }
+
     private fun projectFile(
         name: String = "Original Race",
-        categories: List<EventCategoryData> = emptyList()
+        categories: List<EventCategoryData> = emptyList(),
+        competitors: List<EventCompetitorData> = emptyList()
     ): EventProjectFile =
         EventProjectFile(
             raceData = EventRaceData(
@@ -85,7 +124,7 @@ class EventProjectEditorTest {
                 ),
                 categories = categories,
                 aliases = emptyList(),
-                competitorData = emptyList(),
+                competitorData = competitors,
                 unmatchedReadoutData = emptyList()
             )
         )
@@ -109,5 +148,32 @@ class EventProjectEditorTest {
             ),
             controlPoints = emptyList(),
             competitors = emptyList()
+        )
+
+    private fun competitorData(
+        id: String,
+        firstName: String,
+        lastName: String
+    ): EventCompetitorData =
+        EventCompetitorData(
+            competitorCategory = EventCompetitorCategory(
+                competitor = EventCompetitor(
+                    id = id,
+                    raceId = "race",
+                    categoryId = null,
+                    firstName = firstName,
+                    lastName = lastName,
+                    club = "",
+                    index = "",
+                    isMan = true,
+                    birthYear = null,
+                    siNumber = null,
+                    siRent = false,
+                    startNumber = 1,
+                    drawnStartTimeSeconds = null
+                ),
+                category = null
+            ),
+            readoutData = null
         )
 }

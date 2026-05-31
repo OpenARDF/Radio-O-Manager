@@ -12,11 +12,15 @@ class EventCompetitorDetailsTest {
         val rows = EventCompetitorDetails.from(raceData())
 
         assertEquals(2, rows.size)
+        assertEquals("Alice", rows[0].id)
+        assertEquals("Alice", rows[0].firstName)
+        assertEquals("Runner", rows[0].lastName)
         assertEquals("RUNNER Alice", rows[0].fullName)
         assertEquals("W21", rows[0].categoryName)
         assertEquals("101", rows[0].startNumberText)
         assertEquals("123456", rows[0].siNumberText)
 
+        assertEquals("Bob", rows[1].id)
         assertEquals("RUNNER Bob", rows[1].fullName)
         assertEquals("", rows[1].categoryName)
         assertEquals("102", rows[1].startNumberText)

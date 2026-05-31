@@ -136,9 +136,10 @@ signal until installer packaging metadata is finalized.
    project-session state now tracks unsaved edits and can save back to the
    current project path. The Categories section now shows category rows using
    shared effective race settings and can edit category names through shared
-   project-editing rules. The Competitors section now shows read-only competitor
-   rows with shared category lookup and display formatting. The Readouts section
-   now shows read-only matched and unmatched SI-card readout rows. The Results
+   project-editing rules. The Competitors section now shows competitor rows with
+   shared category lookup and display formatting, and can edit competitor first
+   and last names through shared project-editing rules. The Readouts section now
+   shows read-only matched and unmatched SI-card readout rows. The Results
    section now shows read-only competitor result rows. A sample smoke-test
    project is available at `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke

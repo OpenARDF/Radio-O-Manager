@@ -117,6 +117,17 @@ fun main() = application {
                 }.onFailure { error ->
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
+            },
+            onRenameCompetitor = { competitorId, firstName, lastName ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.renameCompetitor(currentProject, competitorId, firstName, lastName)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
             }
         )
     }
@@ -135,7 +146,8 @@ fun RadioOManagerDesktopApp(
     projectStatusText: String = "No project open.",
     hasUnsavedChanges: Boolean = false,
     onRenameRace: (String) -> Unit = {},
-    onRenameCategory: (String, String) -> Unit = { _, _ -> }
+    onRenameCategory: (String, String) -> Unit = { _, _ -> },
+    onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> }
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -163,7 +175,8 @@ fun RadioOManagerDesktopApp(
                         projectFile = projectFile,
                         projectStatusText = projectStatusText,
                         onRenameRace = onRenameRace,
-                        onRenameCategory = onRenameCategory
+                        onRenameCategory = onRenameCategory,
+                        onRenameCompetitor = onRenameCompetitor
                     )
                 }
                 StatusStrip(projectStatusText, hasUnsavedChanges)
@@ -234,7 +247,8 @@ private fun SectionWorkspace(
     projectFile: EventProjectFile?,
     projectStatusText: String,
     onRenameRace: (String) -> Unit,
-    onRenameCategory: (String, String) -> Unit
+    onRenameCategory: (String, String) -> Unit,
+    onRenameCompetitor: (String, String, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -267,7 +281,10 @@ private fun SectionWorkspace(
             )
         }
         if (section == DesktopSection.Competitors && projectFile != null) {
-            CompetitorDetailsPanel(EventCompetitorDetails.from(projectFile.raceData))
+            CompetitorDetailsPanel(
+                competitors = EventCompetitorDetails.from(projectFile.raceData),
+                onRenameCompetitor = onRenameCompetitor
+            )
         }
         if (section == DesktopSection.Readouts && projectFile != null) {
             ReadoutDetailsPanel(EventReadoutDetails.from(projectFile.raceData))
@@ -331,20 +348,55 @@ private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
     }
 }
 
-/** Shows read-only competitor rows using shared category lookup and formatting. */
+/** Shows editable competitor names using shared category lookup and formatting. */
 @Composable
-private fun CompetitorDetailsPanel(competitors: List<EventCompetitorDetails>) {
+private fun CompetitorDetailsPanel(
+    competitors: List<EventCompetitorDetails>,
+    onRenameCompetitor: (String, String, String) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("Name", "Category", "Start no.", "SI no."))
+        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", ""))
         competitors.forEach { competitor ->
-            DetailGridRow(
-                listOf(
-                    competitor.fullName,
-                    competitor.categoryName,
-                    competitor.startNumberText,
-                    competitor.siNumberText
-                )
-            )
+            CompetitorDetailRow(competitor, onRenameCompetitor)
+        }
+    }
+}
+
+/** Shows one editable competitor-name row plus read-only assignment fields. */
+@Composable
+private fun CompetitorDetailRow(
+    competitor: EventCompetitorDetails,
+    onRenameCompetitor: (String, String, String) -> Unit
+) {
+    var firstNameDraft by remember(competitor.id, competitor.firstName) { mutableStateOf(competitor.firstName) }
+    var lastNameDraft by remember(competitor.id, competitor.lastName) { mutableStateOf(competitor.lastName) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = firstNameDraft,
+            onValueChange = { firstNameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("First") }
+        )
+        TextField(
+            value = lastNameDraft,
+            onValueChange = { lastNameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Last") }
+        )
+        Text(competitor.categoryName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(competitor.startNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(competitor.siNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Button(
+            onClick = { onRenameCompetitor(competitor.id, firstNameDraft, lastNameDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = firstNameDraft != competitor.firstName || lastNameDraft != competitor.lastName
+        ) {
+            Text("Apply")
         }
     }
 }

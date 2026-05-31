@@ -2,6 +2,9 @@ package org.openardf.radioomanager.shared.event
 
 /** Shared read-only competitor row prepared for desktop and other event-admin surfaces. */
 data class EventCompetitorDetails(
+    val id: String,
+    val firstName: String,
+    val lastName: String,
     val fullName: String,
     val categoryName: String,
     val startNumber: Int,
@@ -17,6 +20,9 @@ data class EventCompetitorDetails(
                     val competitorCategory = competitorData.competitorCategory
                     val competitor = competitorCategory.competitor
                     EventCompetitorDetails(
+                        id = competitor.id,
+                        firstName = competitor.firstName,
+                        lastName = competitor.lastName,
                         fullName = competitor.fullName(),
                         categoryName = competitorCategory.category?.name
                             ?: competitor.categoryId?.let { categoryNamesById[it] }
