@@ -137,6 +137,7 @@ repeatable package validation.
    filesystem wiring and current-project session state now live in the desktop
    app module. File menu open/save/export-copy/close wiring is present, dirty
    open/close/exit paths prompt to save, discard, or cancel, and the app can
+   create a new empty project using shared Android-compatible race defaults or
    accept a startup `.rom.json` path for repeatable smoke runs.
 4. In progress: add the first event-admin screen backed by shared models and
    services. The Races section now shows race details from shared display models

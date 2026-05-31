@@ -35,6 +35,14 @@ class DesktopProjectSession(private val store: ProjectFileStore) {
         return projectFile
     }
 
+    /** Starts a new unsaved project that must later be saved to a chosen path. */
+    fun newProject(projectFile: EventProjectFile): EventProjectFile {
+        currentProject = projectFile
+        currentPath = null
+        hasUnsavedChanges = true
+        return projectFile
+    }
+
     /** Applies a shared project edit to the current project and marks it dirty. */
     fun updateCurrentProject(transform: (EventProjectFile) -> EventProjectFile): EventProjectFile {
         val projectFile = requireNotNull(currentProject) {

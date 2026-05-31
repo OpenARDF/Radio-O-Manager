@@ -4,6 +4,9 @@ import java.nio.file.Path
 
 /** Deferred operation that first needs a save/discard/cancel decision for dirty project state. */
 sealed interface PendingDirtyProjectAction {
+    /** Create a new project after the user decides what to do with unsaved edits. */
+    data object NewProject : PendingDirtyProjectAction
+
     /** Open the selected project after the user decides what to do with unsaved edits. */
     data class OpenProject(val path: Path) : PendingDirtyProjectAction
 

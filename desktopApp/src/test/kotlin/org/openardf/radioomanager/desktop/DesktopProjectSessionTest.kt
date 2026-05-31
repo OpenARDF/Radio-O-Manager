@@ -37,6 +37,18 @@ class DesktopProjectSessionTest {
     }
 
     @Test
+    fun startsNewProjectWithoutAPathAndMarksItDirty() {
+        val projectFile = projectFile("New Race")
+        val session = DesktopProjectSession(InMemoryProjectFileStore())
+
+        session.newProject(projectFile)
+
+        assertEquals(projectFile, session.currentProject)
+        assertNull(session.currentPath)
+        assertEquals(true, session.hasUnsavedChanges)
+    }
+
+    @Test
     fun updatesCurrentProjectAndMarksItDirty() {
         val path = Path.of("event.rom.json")
         val projectFile = projectFile("Original Race")

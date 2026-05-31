@@ -15,7 +15,7 @@ class DesktopDirtyProjectActionsTest {
 
     @Test
     fun dirtyProjectActionsBecomePending() {
-        val action = PendingDirtyProjectAction.CloseProject
+        val action = PendingDirtyProjectAction.NewProject
 
         assertEquals(action, DesktopDirtyProjectActions.pendingActionOrNull(true, action))
     }

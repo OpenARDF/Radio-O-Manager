@@ -41,6 +41,7 @@ import org.openardf.radioomanager.shared.event.EventAliasDetails
 import org.openardf.radioomanager.shared.event.EventCategoryDetails
 import org.openardf.radioomanager.shared.event.EventCompetitorDetails
 import org.openardf.radioomanager.shared.event.EventProjectEditor
+import org.openardf.radioomanager.shared.event.EventProjectFactory
 import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
@@ -49,6 +50,7 @@ import org.openardf.radioomanager.shared.event.EventResultDetails
 import org.openardf.radioomanager.shared.event.toDisplayLabel
 import org.openardf.radioomanager.shared.domain.ResultStatus
 import java.nio.file.Path
+import java.time.LocalDateTime
 import java.util.UUID
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
@@ -88,7 +90,28 @@ fun main(args: Array<String>) = application {
             }
         }
 
+        fun createNewProject() {
+            val project = EventProjectFactory.createEmptyProject(
+                raceId = UUID.randomUUID().toString(),
+                raceName = "New Event",
+                startDateTimeIso = LocalDateTime.now().withNano(0).toString()
+            )
+            projectSession.newProject(project)
+            syncProjectState()
+            projectStatusText = "New unsaved project."
+        }
+
         fun saveCurrentProject(): Boolean {
+            if (projectSession.currentPath == null) {
+                val path = DesktopFileDialogs.chooseSaveProject() ?: return false
+                return runCatching {
+                    projectSession.saveAs(path)
+                    syncProjectState()
+                    projectStatusText = "Saved ${path.fileName}"
+                }.onFailure { error ->
+                    projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
+                }.isSuccess
+            }
             return runCatching {
                 projectSession.save()
                 syncProjectState()
@@ -106,6 +129,7 @@ fun main(args: Array<String>) = application {
             pendingDirtyProjectAction = null
             when (action) {
                 PendingDirtyProjectAction.ExitApplication -> exitApplication()
+                PendingDirtyProjectAction.NewProject -> createNewProject()
                 is PendingDirtyProjectAction.OpenProject -> openProject(action.path)
                 PendingDirtyProjectAction.CloseProject -> closeProject(
                     discardUnsavedChanges = DesktopDirtyProjectActions.shouldDiscardForClose(saveFirst)
@@ -125,6 +149,15 @@ fun main(args: Array<String>) = application {
 
         MenuBar {
             Menu("File") {
+                Item("New Project", onClick = {
+                    pendingDirtyProjectAction = DesktopDirtyProjectActions.pendingActionOrNull(
+                        hasUnsavedChanges,
+                        PendingDirtyProjectAction.NewProject
+                    )
+                    if (pendingDirtyProjectAction == null) {
+                        createNewProject()
+                    }
+                })
                 Item("Open...", onClick = {
                     DesktopFileDialogs.chooseOpenProject()?.let { path ->
                         pendingDirtyProjectAction = DesktopDirtyProjectActions.pendingActionOrNull(
