@@ -186,6 +186,47 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun addsCompetitorUsingConservativeDefaults() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111))
+        )
+
+        val updated = EventProjectEditor.addCompetitor(original, "comp-2", " Bob ", " Racer ", " 2 ", " ")
+
+        val competitor = updated.raceData.competitorData.last().competitorCategory.competitor
+        assertEquals("comp-2", competitor.id)
+        assertEquals("race", competitor.raceId)
+        assertEquals(null, competitor.categoryId)
+        assertEquals("Bob", competitor.firstName)
+        assertEquals("Racer", competitor.lastName)
+        assertEquals(2, competitor.startNumber)
+        assertEquals(null, competitor.siNumber)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorAdds() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "", "Bob", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-1", "Bob", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "Bob", "Racer", "1", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "Bob", "Racer", "2", "1111")
+        }
+    }
+
+    @Test
     fun updatesAliasUsingSharedValidationRules() {
         val original = projectFile(
             aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))

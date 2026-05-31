@@ -214,6 +214,46 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with a new uncategorized competitor appended. */
+    fun addCompetitor(
+        projectFile: EventProjectFile,
+        competitorId: String,
+        firstName: String,
+        lastName: String,
+        startNumber: String,
+        siNumber: String
+    ): EventProjectFile {
+        require(competitorId.isNotBlank()) {
+            "Competitor ID cannot be blank."
+        }
+        require(projectFile.raceData.competitorData.none { it.competitorCategory.competitor.id == competitorId }) {
+            "Competitor ID already exists: $competitorId"
+        }
+
+        val competitor = validatedCompetitorBasics(
+            raceId = projectFile.raceData.race.id,
+            competitorId = competitorId,
+            firstName = firstName,
+            lastName = lastName,
+            startNumber = startNumber,
+            siNumber = siNumber,
+            existingCompetitors = projectFile.raceData.competitorData,
+            existingCompetitorPosition = null
+        )
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                competitorData = projectFile.raceData.competitorData + EventCompetitorData(
+                    competitorCategory = EventCompetitorCategory(
+                        competitor = competitor,
+                        category = null
+                    ),
+                    readoutData = null
+                )
+            )
+        )
+    }
+
     /** Returns a copy of the project file with one validated alias changed. */
     fun updateAlias(
         projectFile: EventProjectFile,
@@ -307,4 +347,72 @@ object EventProjectEditor {
 
     private inline fun <T> Iterable<T>.noneIndexed(predicate: (index: Int, T) -> Boolean): Boolean =
         withIndex().none { (index, value) -> predicate(index, value) }
+
+    private fun validatedCompetitorBasics(
+        raceId: String,
+        competitorId: String,
+        firstName: String,
+        lastName: String,
+        startNumber: String,
+        siNumber: String,
+        existingCompetitors: List<EventCompetitorData>,
+        existingCompetitorPosition: Int?
+    ): EventCompetitor {
+        val trimmedFirstName = firstName.trim()
+        val trimmedLastName = lastName.trim()
+        require(trimmedFirstName.isNotEmpty()) {
+            "Competitor first name cannot be blank."
+        }
+        require(trimmedLastName.isNotEmpty()) {
+            "Competitor last name cannot be blank."
+        }
+
+        val trimmedStartNumber = startNumber.trim()
+        require(trimmedStartNumber.isNotEmpty()) {
+            "Start number is required."
+        }
+        val startNumberValue = trimmedStartNumber.toIntOrNull()
+            ?: throw IllegalArgumentException("Start number is invalid.")
+        require(
+            existingCompetitors.noneIndexed { index, data ->
+                index != existingCompetitorPosition && data.competitorCategory.competitor.startNumber == startNumberValue
+            }
+        ) {
+            "Start number must be unique."
+        }
+
+        val trimmedSiNumber = siNumber.trim()
+        val siNumberValue = if (trimmedSiNumber.isEmpty()) {
+            null
+        } else {
+            trimmedSiNumber.toIntOrNull()
+                ?: throw IllegalArgumentException("SI number is invalid.")
+        }
+        require(siNumberValue == null || SportIdentCodes.isSINumberValid(siNumberValue)) {
+            "SI number is outside the supported SportIdent card range."
+        }
+        require(
+            siNumberValue == null || existingCompetitors.noneIndexed { index, data ->
+                index != existingCompetitorPosition && data.competitorCategory.competitor.siNumber == siNumberValue
+            }
+        ) {
+            "SI number must be unique."
+        }
+
+        return EventCompetitor(
+            id = competitorId,
+            raceId = raceId,
+            categoryId = null,
+            firstName = trimmedFirstName,
+            lastName = trimmedLastName,
+            club = "",
+            index = "",
+            isMan = true,
+            birthYear = null,
+            siNumber = siNumberValue,
+            siRent = false,
+            startNumber = startNumberValue,
+            drawnStartTimeSeconds = null
+        )
+    }
 }

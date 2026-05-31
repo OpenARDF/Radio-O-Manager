@@ -156,6 +156,24 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onAddCompetitor = { firstName, lastName, startNumber, siNumber ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.addCompetitor(
+                            currentProject,
+                            UUID.randomUUID().toString(),
+                            firstName,
+                            lastName,
+                            startNumber,
+                            siNumber
+                        )
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -210,6 +228,7 @@ fun RadioOManagerDesktopApp(
     onAddCategory: (String) -> Unit = {},
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
+    onAddCompetitor: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -244,6 +263,7 @@ fun RadioOManagerDesktopApp(
                         onAddCategory = onAddCategory,
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
+                        onAddCompetitor = onAddCompetitor,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -321,6 +341,7 @@ private fun SectionWorkspace(
     onAddCategory: (String) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
+    onAddCompetitor: (String, String, String, String) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -360,7 +381,8 @@ private fun SectionWorkspace(
             CompetitorDetailsPanel(
                 competitors = EventCompetitorDetails.from(projectFile.raceData),
                 onRenameCompetitor = onRenameCompetitor,
-                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers
+                onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
+                onAddCompetitor = onAddCompetitor
             )
         }
         if (section == DesktopSection.Aliases && projectFile != null) {
@@ -438,9 +460,11 @@ private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
 private fun CompetitorDetailsPanel(
     competitors: List<EventCompetitorDetails>,
     onRenameCompetitor: (String, String, String) -> Unit,
-    onUpdateCompetitorNumbers: (String, String, String) -> Unit
+    onUpdateCompetitorNumbers: (String, String, String) -> Unit,
+    onAddCompetitor: (String, String, String, String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        CompetitorAddRow(onAddCompetitor)
         DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", ""))
         competitors.forEach { competitor ->
             CompetitorDetailRow(
@@ -448,6 +472,56 @@ private fun CompetitorDetailsPanel(
                 onRenameCompetitor = onRenameCompetitor,
                 onUpdateCompetitorNumbers = onUpdateCompetitorNumbers
             )
+        }
+    }
+}
+
+/** Shows the new-competitor entry row above existing competitor definitions. */
+@Composable
+private fun CompetitorAddRow(onAddCompetitor: (String, String, String, String) -> Unit) {
+    var firstNameDraft by remember { mutableStateOf("") }
+    var lastNameDraft by remember { mutableStateOf("") }
+    var startNumberDraft by remember { mutableStateOf("") }
+    var siNumberDraft by remember { mutableStateOf("") }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = firstNameDraft,
+            onValueChange = { firstNameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("First") }
+        )
+        TextField(
+            value = lastNameDraft,
+            onValueChange = { lastNameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Last") }
+        )
+        TextField(
+            value = startNumberDraft,
+            onValueChange = { startNumberDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Start") }
+        )
+        TextField(
+            value = siNumberDraft,
+            onValueChange = { siNumberDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("SI") }
+        )
+        Button(
+            onClick = { onAddCompetitor(firstNameDraft, lastNameDraft, startNumberDraft, siNumberDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = firstNameDraft.isNotBlank() ||
+                    lastNameDraft.isNotBlank() ||
+                    startNumberDraft.isNotBlank() ||
+                    siNumberDraft.isNotBlank()
+        ) {
+            Text("Add")
         }
     }
 }
