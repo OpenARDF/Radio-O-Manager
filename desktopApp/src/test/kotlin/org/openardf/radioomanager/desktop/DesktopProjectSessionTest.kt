@@ -174,6 +174,27 @@ class DesktopProjectSessionTest {
         assertEquals(true, session.hasUnsavedChanges)
     }
 
+    @Test
+    fun closesAndDiscardsUnsavedChangesWhenRequested() {
+        val path = Path.of("event.rom.json")
+        val projectFile = projectFile("Dirty Race")
+        val session = DesktopProjectSession(InMemoryProjectFileStore(mapOf(path to projectFile)))
+
+        session.open(path)
+        session.updateCurrentProject { current ->
+            current.copy(
+                raceData = current.raceData.copy(
+                    race = current.raceData.race.copy(name = "Edited Race")
+                )
+            )
+        }
+        session.closeProject(discardUnsavedChanges = true)
+
+        assertNull(session.currentProject)
+        assertNull(session.currentPath)
+        assertEquals(false, session.hasUnsavedChanges)
+    }
+
     private fun projectFile(name: String): EventProjectFile =
         EventProjectFile(
             raceData = EventRaceData(

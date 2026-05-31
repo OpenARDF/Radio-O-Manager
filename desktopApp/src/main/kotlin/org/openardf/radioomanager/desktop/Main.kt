@@ -49,6 +49,15 @@ import org.openardf.radioomanager.shared.event.EventResultDetails
 import java.nio.file.Path
 import java.util.UUID
 
+/** Deferred operation that first needs a save/discard/cancel decision for dirty project state. */
+private sealed interface PendingDirtyProjectAction {
+    /** Open the selected project after the user decides what to do with unsaved edits. */
+    data class OpenProject(val path: Path) : PendingDirtyProjectAction
+
+    /** Close the current project after the user decides what to do with unsaved edits. */
+    data object CloseProject : PendingDirtyProjectAction
+}
+
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
 fun main(args: Array<String>) = application {
     Window(
@@ -61,29 +70,68 @@ fun main(args: Array<String>) = application {
         var projectFile by remember { mutableStateOf(projectSession.currentProject) }
         var projectStatusText by remember { mutableStateOf(startupStatus) }
         var hasUnsavedChanges by remember { mutableStateOf(projectSession.hasUnsavedChanges) }
+        var pendingDirtyProjectAction by remember { mutableStateOf<PendingDirtyProjectAction?>(null) }
+
+        fun syncProjectState() {
+            projectFile = projectSession.currentProject
+            hasUnsavedChanges = projectSession.hasUnsavedChanges
+        }
+
+        fun openProject(path: Path) {
+            runCatching {
+                projectFile = projectSession.open(path)
+                hasUnsavedChanges = projectSession.hasUnsavedChanges
+                projectStatusText = "Opened ${path.fileName}"
+            }.onFailure { error ->
+                projectStatusText = "Open failed: ${error.message ?: error::class.simpleName}"
+            }
+        }
+
+        fun closeProject(discardUnsavedChanges: Boolean = false) {
+            runCatching {
+                projectSession.closeProject(discardUnsavedChanges)
+                syncProjectState()
+                projectStatusText = "No project open."
+            }.onFailure { error ->
+                projectStatusText = "Close failed: ${error.message ?: error::class.simpleName}"
+            }
+        }
+
+        fun saveCurrentProject(): Boolean {
+            return runCatching {
+                projectSession.save()
+                syncProjectState()
+                projectStatusText = "Saved ${projectSession.currentPath?.fileName ?: "project"}"
+            }.onFailure { error ->
+                projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
+            }.isSuccess
+        }
+
+        fun continuePendingDirtyAction(saveFirst: Boolean) {
+            val action = pendingDirtyProjectAction ?: return
+            if (saveFirst && !saveCurrentProject()) {
+                return
+            }
+            pendingDirtyProjectAction = null
+            when (action) {
+                is PendingDirtyProjectAction.OpenProject -> openProject(action.path)
+                PendingDirtyProjectAction.CloseProject -> closeProject(discardUnsavedChanges = !saveFirst)
+            }
+        }
 
         MenuBar {
             Menu("File") {
                 Item("Open...", onClick = {
                     DesktopFileDialogs.chooseOpenProject()?.let { path ->
-                        runCatching {
-                            projectFile = projectSession.open(path)
-                            hasUnsavedChanges = projectSession.hasUnsavedChanges
-                            projectStatusText = "Opened ${path.fileName}"
-                        }.onFailure { error ->
-                            projectStatusText = "Open failed: ${error.message ?: error::class.simpleName}"
+                        if (hasUnsavedChanges) {
+                            pendingDirtyProjectAction = PendingDirtyProjectAction.OpenProject(path)
+                        } else {
+                            openProject(path)
                         }
                     }
                 })
                 Item("Save", enabled = projectFile != null && hasUnsavedChanges, onClick = {
-                    runCatching {
-                        projectSession.save()
-                        projectFile = projectSession.currentProject
-                        hasUnsavedChanges = projectSession.hasUnsavedChanges
-                        projectStatusText = "Saved ${projectSession.currentPath?.fileName ?: "project"}"
-                    }.onFailure { error ->
-                        projectStatusText = "Save failed: ${error.message ?: error::class.simpleName}"
-                    }
+                    saveCurrentProject()
                 })
                 Item("Save As...", enabled = projectFile != null, onClick = {
                     DesktopFileDialogs.chooseSaveProject()?.let { path ->
@@ -109,17 +157,22 @@ fun main(args: Array<String>) = application {
                         }
                     }
                 })
-                Item("Close Project", enabled = projectFile != null && !hasUnsavedChanges, onClick = {
-                    runCatching {
-                        projectSession.closeProject()
-                        projectFile = projectSession.currentProject
-                        hasUnsavedChanges = projectSession.hasUnsavedChanges
-                        projectStatusText = "No project open."
-                    }.onFailure { error ->
-                        projectStatusText = "Close failed: ${error.message ?: error::class.simpleName}"
+                Item("Close Project", enabled = projectFile != null, onClick = {
+                    if (hasUnsavedChanges) {
+                        pendingDirtyProjectAction = PendingDirtyProjectAction.CloseProject
+                    } else {
+                        closeProject()
                     }
                 })
             }
+        }
+
+        pendingDirtyProjectAction?.let {
+            UnsavedChangesDialog(
+                onSave = { continuePendingDirtyAction(saveFirst = true) },
+                onDiscard = { continuePendingDirtyAction(saveFirst = false) },
+                onCancel = { pendingDirtyProjectAction = null }
+            )
         }
 
         RadioOManagerDesktopApp(
@@ -273,6 +326,35 @@ fun main(args: Array<String>) = application {
             }
         )
     }
+}
+
+/** Prompts for the standard save/discard/cancel decision before replacing or closing a dirty project. */
+@Composable
+private fun UnsavedChangesDialog(
+    onSave: () -> Unit,
+    onDiscard: () -> Unit,
+    onCancel: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancel,
+        title = { Text("Unsaved changes") },
+        text = { Text("Save changes before continuing?") },
+        confirmButton = {
+            Button(onClick = onSave) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onDiscard) {
+                    Text("Discard")
+                }
+                Button(onClick = onCancel) {
+                    Text("Cancel")
+                }
+            }
+        }
+    )
 }
 
 /**
