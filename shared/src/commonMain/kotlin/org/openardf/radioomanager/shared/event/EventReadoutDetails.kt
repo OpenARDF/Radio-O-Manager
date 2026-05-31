@@ -5,6 +5,7 @@ import org.openardf.radioomanager.shared.time.DurationFormatter
 
 /** Shared read-only readout row for matched and unmatched SI-card data. */
 data class EventReadoutDetails(
+    val id: String,
     val siNumberText: String,
     val competitorName: String,
     val statusLabel: String,
@@ -30,6 +31,7 @@ data class EventReadoutDetails(
         private fun fromReadout(readoutData: EventReadoutData, competitorName: String): EventReadoutDetails {
             val result = readoutData.result
             return EventReadoutDetails(
+                id = result.id,
                 siNumberText = result.siNumber?.toString() ?: "",
                 competitorName = competitorName,
                 statusLabel = result.resultStatus.toDisplayLabel(),

@@ -413,6 +413,41 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun removesMatchedReadoutFromCompetitor() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.removeReadout(original, "result-1")
+
+        assertEquals(null, updated.raceData.competitorData.single().readoutData)
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun removesUnmatchedReadout() {
+        val original = projectFile(
+            unmatchedReadouts = listOf(
+                readout("result-1", null, 1111),
+                readout("result-2", null, 2222)
+            )
+        )
+
+        val updated = EventProjectEditor.removeReadout(original, "result-1")
+
+        assertEquals(listOf("result-2"), updated.raceData.unmatchedReadoutData.map { it.result.id })
+    }
+
+    @Test
+    fun rejectsUnknownReadoutRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeReadout(projectFile(), "missing")
+        }
+    }
+
+    @Test
     fun updatesAliasUsingSharedValidationRules() {
         val original = projectFile(
             aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
@@ -499,7 +534,8 @@ class EventProjectEditorTest {
         name: String = "Original Race",
         categories: List<EventCategoryData> = emptyList(),
         competitors: List<EventCompetitorData> = emptyList(),
-        aliases: List<EventAlias> = emptyList()
+        aliases: List<EventAlias> = emptyList(),
+        unmatchedReadouts: List<EventReadoutData> = emptyList()
     ): EventProjectFile =
         EventProjectFile(
             raceData = EventRaceData(
@@ -516,7 +552,7 @@ class EventProjectEditorTest {
                 categories = categories,
                 aliases = aliases,
                 competitorData = competitors,
-                unmatchedReadoutData = emptyList()
+                unmatchedReadoutData = unmatchedReadouts
             )
         )
 

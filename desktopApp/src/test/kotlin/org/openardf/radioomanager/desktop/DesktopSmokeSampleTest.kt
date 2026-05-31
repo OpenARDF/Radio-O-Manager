@@ -104,4 +104,24 @@ class DesktopSmokeSampleTest {
         assertEquals(7_654_321, readBack.raceData.competitorData.first().competitorCategory.competitor.siNumber)
         assertEquals("F4", readBack.raceData.aliases.first { it.id == aliasId }.name)
     }
+
+    @Test
+    fun repositorySmokeSampleReadoutsCanBeDeletedAndSaved() {
+        val source = Path.of("..", "samples", "desktop-smoke.rom.json")
+        val target = Files.createTempDirectory("rom-desktop-readout-smoke").resolve("edited.rom.json")
+
+        val original = DesktopProjectFiles.read(source)
+        val matchedReadoutId = original.raceData.competitorData.first { it.readoutData != null }.readoutData!!.result.id
+        val unmatchedReadoutId = original.raceData.unmatchedReadoutData.single().result.id
+
+        val withoutMatched = EventProjectEditor.removeReadout(original, matchedReadoutId)
+        val withoutBoth = EventProjectEditor.removeReadout(withoutMatched, unmatchedReadoutId)
+
+        DesktopProjectFiles.write(target, withoutBoth)
+        val readBack = DesktopProjectFiles.read(target)
+
+        assertEquals(0, EventReadoutDetails.from(readBack.raceData).size)
+        assertEquals(null, readBack.raceData.competitorData.first().readoutData)
+        assertTrue(readBack.raceData.unmatchedReadoutData.isEmpty())
+    }
 }

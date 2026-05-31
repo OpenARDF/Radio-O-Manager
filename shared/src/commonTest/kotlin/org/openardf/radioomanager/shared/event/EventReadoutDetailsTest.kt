@@ -13,12 +13,14 @@ class EventReadoutDetailsTest {
         val rows = EventReadoutDetails.from(raceData())
 
         assertEquals(2, rows.size)
+        assertEquals("matched", rows[0].id)
         assertEquals("123456", rows[0].siNumberText)
         assertEquals("RUNNER Alice", rows[0].competitorName)
         assertEquals("OK", rows[0].statusLabel)
         assertEquals("3", rows[0].pointsText)
         assertEquals("00:20:00", rows[0].runTimeText)
 
+        assertEquals("unmatched", rows[1].id)
         assertEquals("654321", rows[1].siNumberText)
         assertEquals("", rows[1].competitorName)
         assertEquals("No ranking", rows[1].statusLabel)

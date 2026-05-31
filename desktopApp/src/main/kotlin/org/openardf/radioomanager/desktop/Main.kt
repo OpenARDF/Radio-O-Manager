@@ -308,6 +308,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onRemoveReadout = { resultId ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.removeReadout(currentProject, resultId)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -396,6 +407,7 @@ fun RadioOManagerDesktopApp(
     onAddCompetitor: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     onAssignCompetitorCategory: (String, String?) -> Unit = { _, _ -> },
     onRemoveCompetitor: (String, Boolean) -> Unit = { _, _ -> },
+    onRemoveReadout: (String) -> Unit = {},
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -435,6 +447,7 @@ fun RadioOManagerDesktopApp(
                         onAddCompetitor = onAddCompetitor,
                         onAssignCompetitorCategory = onAssignCompetitorCategory,
                         onRemoveCompetitor = onRemoveCompetitor,
+                        onRemoveReadout = onRemoveReadout,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -517,6 +530,7 @@ private fun SectionWorkspace(
     onAddCompetitor: (String, String, String, String) -> Unit,
     onAssignCompetitorCategory: (String, String?) -> Unit,
     onRemoveCompetitor: (String, Boolean) -> Unit,
+    onRemoveReadout: (String) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -574,7 +588,10 @@ private fun SectionWorkspace(
             )
         }
         if (section == DesktopSection.Readouts && projectFile != null) {
-            ReadoutDetailsPanel(EventReadoutDetails.from(projectFile.raceData))
+            ReadoutDetailsPanel(
+                readouts = EventReadoutDetails.from(projectFile.raceData),
+                onRemoveReadout = onRemoveReadout
+            )
         }
         if (section == DesktopSection.Results && projectFile != null) {
             ResultDetailsPanel(EventResultDetails.from(projectFile.raceData))
@@ -618,20 +635,65 @@ private fun ResultDetailsPanel(results: List<EventResultDetails>) {
 
 /** Shows read-only matched and unmatched SI-card readout rows. */
 @Composable
-private fun ReadoutDetailsPanel(readouts: List<EventReadoutDetails>) {
+private fun ReadoutDetailsPanel(
+    readouts: List<EventReadoutDetails>,
+    onRemoveReadout: (String) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime"))
+        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", ""))
         readouts.forEach { readout ->
-            DetailGridRow(
-                listOf(
-                    readout.siNumberText,
-                    readout.competitorName,
-                    readout.statusLabel,
-                    readout.pointsText,
-                    readout.runTimeText
-                )
-            )
+            ReadoutDetailRow(readout, onRemoveReadout)
         }
+    }
+}
+
+/** Shows one readout row with deletion routed through shared project-editing rules. */
+@Composable
+private fun ReadoutDetailRow(
+    readout: EventReadoutDetails,
+    onRemoveReadout: (String) -> Unit
+) {
+    var showDeleteDialog by remember(readout.id) { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(readout.siNumberText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(readout.competitorName, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(readout.statusLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(readout.pointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(readout.runTimeText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Button(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Delete")
+        }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete readout") },
+            text = { Text("Delete readout for SI ${readout.siNumberText}?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDeleteDialog = false
+                        onRemoveReadout(readout.id)
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

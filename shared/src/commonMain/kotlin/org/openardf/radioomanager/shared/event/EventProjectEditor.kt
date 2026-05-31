@@ -432,6 +432,43 @@ object EventProjectEditor {
         )
     }
 
+    /**
+     * Returns a copy of the project file with one readout/result removed.
+     *
+     * Android deletes the result row and relies on Room to cascade punch rows.
+     * Desktop project files keep result and punch data together, so removing
+     * the readout data from its matched competitor or unmatched list expresses
+     * the same policy without a database.
+     */
+    fun removeReadout(projectFile: EventProjectFile, resultId: String): EventProjectFile {
+        var foundReadout = false
+        val competitorData = projectFile.raceData.competitorData.map { data ->
+            if (data.readoutData?.result?.id == resultId) {
+                foundReadout = true
+                data.copy(readoutData = null)
+            } else {
+                data
+            }
+        }
+        val unmatchedReadoutData = projectFile.raceData.unmatchedReadoutData.filterNot { readoutData ->
+            val matches = readoutData.result.id == resultId
+            if (matches) {
+                foundReadout = true
+            }
+            matches
+        }
+        require(foundReadout) {
+            "Readout was not found: $resultId"
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                competitorData = competitorData,
+                unmatchedReadoutData = unmatchedReadoutData
+            )
+        )
+    }
+
     /** Returns a copy of the project file with one validated alias changed. */
     fun updateAlias(
         projectFile: EventProjectFile,
