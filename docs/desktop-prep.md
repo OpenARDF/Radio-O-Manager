@@ -146,9 +146,9 @@ repeatable package validation.
    project-editing rules. The Competitors section now shows competitor rows with
    shared category lookup and display formatting, and can edit competitor first
    and last names, start numbers, and SI numbers through shared project-editing
-   rules. The Aliases section can add aliases and edit existing alias SI codes
-   and names through shared alias validation rules. The Readouts section now
-   shows read-only matched and unmatched SI-card readout rows. The Results
+   rules. The Aliases section can add/delete aliases and edit existing alias SI
+   codes and names through shared alias validation rules. The Readouts section
+   now shows read-only matched and unmatched SI-card readout rows. The Results
    section now shows read-only competitor result rows. A sample smoke-test
    project is available at `samples/desktop-smoke.rom.json`.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke

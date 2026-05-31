@@ -212,6 +212,24 @@ class EventProjectEditorTest {
         }
     }
 
+    @Test
+    fun removesAlias() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        val updated = EventProjectEditor.removeAlias(original, "alias-1")
+
+        assertEquals(listOf("alias-2"), updated.raceData.aliases.map { it.id })
+    }
+
+    @Test
+    fun rejectsUnknownAliasRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeAlias(projectFile(), "missing")
+        }
+    }
+
     private fun projectFile(
         name: String = "Original Race",
         categories: List<EventCategoryData> = emptyList(),

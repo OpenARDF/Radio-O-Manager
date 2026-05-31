@@ -244,6 +244,19 @@ object EventProjectEditor {
         )
     }
 
+    /** Returns a copy of the project file with one alias removed. */
+    fun removeAlias(projectFile: EventProjectFile, aliasId: String): EventProjectFile {
+        require(projectFile.raceData.aliases.any { it.id == aliasId }) {
+            "Alias was not found: $aliasId"
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                aliases = projectFile.raceData.aliases.filterNot { it.id == aliasId }
+            )
+        )
+    }
+
     private inline fun <T> Iterable<T>.noneIndexed(predicate: (index: Int, T) -> Boolean): Boolean =
         withIndex().none { (index, value) -> predicate(index, value) }
 }

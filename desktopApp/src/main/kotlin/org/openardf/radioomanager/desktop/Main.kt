@@ -166,6 +166,17 @@ fun main(args: Array<String>) = application {
                 }.onFailure { error ->
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
+            },
+            onRemoveAlias = { aliasId ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.removeAlias(currentProject, aliasId)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
             }
         )
     }
@@ -188,7 +199,8 @@ fun RadioOManagerDesktopApp(
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
-    onAddAlias: (String, String) -> Unit = { _, _ -> }
+    onAddAlias: (String, String) -> Unit = { _, _ -> },
+    onRemoveAlias: (String) -> Unit = {}
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -220,7 +232,8 @@ fun RadioOManagerDesktopApp(
                         onRenameCompetitor = onRenameCompetitor,
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onUpdateAlias = onUpdateAlias,
-                        onAddAlias = onAddAlias
+                        onAddAlias = onAddAlias,
+                        onRemoveAlias = onRemoveAlias
                     )
                 }
                 StatusStrip(projectStatusText, hasUnsavedChanges)
@@ -295,7 +308,8 @@ private fun SectionWorkspace(
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
-    onAddAlias: (String, String) -> Unit
+    onAddAlias: (String, String) -> Unit,
+    onRemoveAlias: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -338,7 +352,8 @@ private fun SectionWorkspace(
             AliasDetailsPanel(
                 aliases = EventAliasDetails.from(projectFile.raceData),
                 onUpdateAlias = onUpdateAlias,
-                onAddAlias = onAddAlias
+                onAddAlias = onAddAlias,
+                onRemoveAlias = onRemoveAlias
             )
         }
         if (section == DesktopSection.Readouts && projectFile != null) {
@@ -488,13 +503,14 @@ private fun CompetitorDetailRow(
 private fun AliasDetailsPanel(
     aliases: List<EventAliasDetails>,
     onUpdateAlias: (String, String, String) -> Unit,
-    onAddAlias: (String, String) -> Unit
+    onAddAlias: (String, String) -> Unit,
+    onRemoveAlias: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         AliasAddRow(onAddAlias)
-        DetailHeaderRow(listOf("SI code", "Alias", ""))
+        DetailHeaderRow(listOf("SI code", "Alias", "", ""))
         aliases.forEach { alias ->
-            AliasDetailRow(alias, onUpdateAlias)
+            AliasDetailRow(alias, onUpdateAlias, onRemoveAlias)
         }
     }
 }
@@ -536,7 +552,8 @@ private fun AliasAddRow(onAddAlias: (String, String) -> Unit) {
 @Composable
 private fun AliasDetailRow(
     alias: EventAliasDetails,
-    onUpdateAlias: (String, String, String) -> Unit
+    onUpdateAlias: (String, String, String) -> Unit,
+    onRemoveAlias: (String) -> Unit
 ) {
     var siCodeDraft by remember(alias.id, alias.siCodeText) { mutableStateOf(alias.siCodeText) }
     var nameDraft by remember(alias.id, alias.name) { mutableStateOf(alias.name) }
@@ -564,6 +581,12 @@ private fun AliasDetailRow(
             enabled = siCodeDraft != alias.siCodeText || nameDraft != alias.name
         ) {
             Text("Apply")
+        }
+        Button(
+            onClick = { onRemoveAlias(alias.id) },
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Delete")
         }
     }
 }
