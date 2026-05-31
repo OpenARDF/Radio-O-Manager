@@ -6,7 +6,12 @@ import org.openardf.radioomanager.shared.course.ControlPointRules
 import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
 import org.openardf.radioomanager.shared.domain.RaceType
+import org.openardf.radioomanager.shared.domain.PunchStatus
 import org.openardf.radioomanager.shared.domain.ResultStatus
+import org.openardf.radioomanager.shared.domain.SIRecordType
+import org.openardf.radioomanager.shared.results.CourseEvaluator
+import org.openardf.radioomanager.shared.results.EvaluationControlPoint
+import org.openardf.radioomanager.shared.results.EvaluationPunch
 import org.openardf.radioomanager.shared.sportident.SportIdentCodes
 
 /** Shared event-project editing helpers used by desktop and future non-Android flows. */
@@ -551,6 +556,126 @@ object EventProjectEditor {
         )
     }
 
+    /**
+     * Adds a manually entered readout with competitor matching, timing, controls, and status in one operation.
+     *
+     * The shared implementation deliberately accepts plain text values so desktop and future UI
+     * layers can stay thin while this helper owns validation, category-course evaluation, and the
+     * matched-versus-unmatched project-file placement policy.
+     */
+    fun addManualReadout(
+        projectFile: EventProjectFile,
+        resultId: String,
+        competitorId: String?,
+        siNumber: String,
+        startSeconds: String,
+        finishSeconds: String,
+        controlCodes: String,
+        resultStatus: ResultStatus,
+        readoutDateTimeIso: String,
+        punchIdFactory: (Int, SIRecordType) -> String
+    ): EventProjectFile {
+        require(resultId.isNotBlank()) {
+            "Readout ID cannot be blank."
+        }
+        require(!projectFile.raceData.containsReadout(resultId)) {
+            "Readout ID already exists: $resultId"
+        }
+        val matchedCompetitorIndex = competitorId?.trim()?.takeIf { it.isNotEmpty() }?.let { requestedCompetitorId ->
+            val index = projectFile.raceData.competitorData.indexOfFirst {
+                it.competitorCategory.competitor.id == requestedCompetitorId
+            }
+            require(index >= 0) {
+                "Competitor was not found: $requestedCompetitorId"
+            }
+            require(projectFile.raceData.competitorData[index].readoutData == null) {
+                "Competitor already has a readout."
+            }
+            index
+        }
+
+        val siNumberValue = parseOptionalSiNumber(siNumber, matchedCompetitorIndex?.let { index ->
+            projectFile.raceData.competitorData[index].competitorCategory.competitor.siNumber
+        })
+        val startSecondsValue = parseOptionalDaySeconds(startSeconds, "Start time")
+        val finishSecondsValue = parseOptionalDaySeconds(finishSeconds, "Finish time")
+        require(startSecondsValue == null || finishSecondsValue == null || finishSecondsValue >= startSecondsValue) {
+            "Finish time cannot be earlier than start time."
+        }
+        val controlCodeValues = parseControlCodes(controlCodes)
+        require(readoutDateTimeIso.isNotBlank()) {
+            "Readout date/time cannot be blank."
+        }
+
+        val matchedCompetitorData = matchedCompetitorIndex?.let { projectFile.raceData.competitorData[it] }
+        val categoryData = matchedCompetitorData?.competitorCategory?.competitor?.categoryId?.let { categoryId ->
+            projectFile.raceData.categories.firstOrNull { it.category.id == categoryId }
+        }
+        val evaluation = categoryData?.let { data ->
+            CourseEvaluator.evaluate(
+                raceType = data.category.effectiveRaceType(projectFile.raceData.race),
+                punches = controlCodeValues.map { EvaluationPunch(it, SIRecordType.CONTROL) },
+                controlPoints = data.controlPoints.map { EvaluationControlPoint(it.siCode, it.type) }
+            )
+        }
+        val effectiveStatus = if (resultStatus == ResultStatus.OK && evaluation != null) {
+            evaluation.resultStatus
+        } else {
+            resultStatus
+        }
+        val runTimeSeconds = if (startSecondsValue != null && finishSecondsValue != null) {
+            finishSecondsValue - startSecondsValue
+        } else {
+            0
+        }
+        val punches = buildManualPunches(
+            raceId = projectFile.raceData.race.id,
+            resultId = resultId,
+            siNumber = siNumberValue,
+            startSeconds = startSecondsValue,
+            finishSeconds = finishSecondsValue,
+            controlCodes = controlCodeValues,
+            controlStatuses = evaluation?.punchStatuses,
+            punchIdFactory = punchIdFactory
+        )
+        val readoutData = EventReadoutData(
+            result = EventResult(
+                id = resultId,
+                raceId = projectFile.raceData.race.id,
+                competitorId = matchedCompetitorData?.competitorCategory?.competitor?.id,
+                siNumber = siNumberValue,
+                cardType = 0,
+                checkTimeSeconds = null,
+                startTimeSeconds = startSecondsValue,
+                finishTimeSeconds = finishSecondsValue,
+                readoutDateTimeIso = readoutDateTimeIso,
+                automaticStatus = false,
+                resultStatus = effectiveStatus,
+                points = evaluation?.points ?: 0,
+                runTimeSeconds = runTimeSeconds,
+                modified = true,
+                sent = false
+            ),
+            punches = punches
+        )
+
+        return if (matchedCompetitorIndex != null) {
+            projectFile.copy(
+                raceData = projectFile.raceData.copy(
+                    competitorData = projectFile.raceData.competitorData.mapIndexed { index, data ->
+                        if (index == matchedCompetitorIndex) data.copy(readoutData = readoutData) else data
+                    }
+                )
+            )
+        } else {
+            projectFile.copy(
+                raceData = projectFile.raceData.copy(
+                    unmatchedReadoutData = projectFile.raceData.unmatchedReadoutData + readoutData
+                )
+            )
+        }
+    }
+
     /** Returns a copy of the project file with one validated alias changed. */
     fun updateAlias(
         projectFile: EventProjectFile,
@@ -644,6 +769,133 @@ object EventProjectEditor {
 
     private inline fun <T> Iterable<T>.noneIndexed(predicate: (index: Int, T) -> Boolean): Boolean =
         withIndex().none { (index, value) -> predicate(index, value) }
+
+    private fun EventRaceData.containsReadout(resultId: String): Boolean =
+        competitorData.any { it.readoutData?.result?.id == resultId } ||
+            unmatchedReadoutData.any { it.result.id == resultId }
+
+    private fun parseOptionalSiNumber(siNumber: String, fallbackSiNumber: Int?): Int? {
+        val trimmedSiNumber = siNumber.trim()
+        val siNumberValue = if (trimmedSiNumber.isEmpty()) {
+            fallbackSiNumber
+        } else {
+            trimmedSiNumber.toIntOrNull()
+                ?: throw IllegalArgumentException("SI number is invalid.")
+        }
+        require(siNumberValue == null || SportIdentCodes.isSINumberValid(siNumberValue)) {
+            "SI number is outside the supported SportIdent card range."
+        }
+        return siNumberValue
+    }
+
+    private fun parseOptionalDaySeconds(value: String, fieldName: String): Long? {
+        val trimmedValue = value.trim()
+        if (trimmedValue.isEmpty()) {
+            return null
+        }
+        val seconds = trimmedValue.toLongOrNull()
+            ?: throw IllegalArgumentException("$fieldName is invalid.")
+        require(seconds in 0..<SportIdentCodes.SECONDS_DAY) {
+            "$fieldName must be within one day."
+        }
+        return seconds
+    }
+
+    private fun parseControlCodes(controlCodes: String): List<Int> =
+        controlCodes
+            .trim()
+            .takeIf { it.isNotEmpty() }
+            ?.split(Regex("[,\\s]+"))
+            ?.map { token ->
+                val code = token.toIntOrNull()
+                    ?: throw IllegalArgumentException("Control code is invalid: $token")
+                require(SportIdentCodes.isSICodeValid(code)) {
+                    "Control code is outside the supported SportIdent station range: $code"
+                }
+                code
+            }
+            ?: emptyList()
+
+    private fun buildManualPunches(
+        raceId: String,
+        resultId: String,
+        siNumber: Int?,
+        startSeconds: Long?,
+        finishSeconds: Long?,
+        controlCodes: List<Int>,
+        controlStatuses: List<PunchStatus>?,
+        punchIdFactory: (Int, SIRecordType) -> String
+    ): List<EventAliasPunch> {
+        val punches = mutableListOf<EventAliasPunch>()
+        startSeconds?.let {
+            punches += manualPunch(
+                id = punchIdFactory(punches.size, SIRecordType.START),
+                raceId = raceId,
+                resultId = resultId,
+                siNumber = siNumber,
+                siCode = 0,
+                siTimeSeconds = it,
+                punchType = SIRecordType.START,
+                order = punches.size,
+                punchStatus = PunchStatus.VALID
+            )
+        }
+        controlCodes.forEachIndexed { index, code ->
+            punches += manualPunch(
+                id = punchIdFactory(punches.size, SIRecordType.CONTROL),
+                raceId = raceId,
+                resultId = resultId,
+                siNumber = siNumber,
+                siCode = code,
+                siTimeSeconds = startSeconds ?: 0,
+                punchType = SIRecordType.CONTROL,
+                order = punches.size,
+                punchStatus = controlStatuses?.getOrNull(index) ?: PunchStatus.UNKNOWN
+            )
+        }
+        finishSeconds?.let {
+            punches += manualPunch(
+                id = punchIdFactory(punches.size, SIRecordType.FINISH),
+                raceId = raceId,
+                resultId = resultId,
+                siNumber = siNumber,
+                siCode = 0,
+                siTimeSeconds = it,
+                punchType = SIRecordType.FINISH,
+                order = punches.size,
+                punchStatus = PunchStatus.VALID
+            )
+        }
+        return punches
+    }
+
+    private fun manualPunch(
+        id: String,
+        raceId: String,
+        resultId: String,
+        siNumber: Int?,
+        siCode: Int,
+        siTimeSeconds: Long,
+        punchType: SIRecordType,
+        order: Int,
+        punchStatus: PunchStatus
+    ): EventAliasPunch =
+        EventAliasPunch(
+            punch = EventPunch(
+                id = id,
+                raceId = raceId,
+                resultId = resultId,
+                cardNumber = siNumber,
+                siCode = siCode,
+                siTimeSeconds = siTimeSeconds,
+                originalSiTimeSeconds = siTimeSeconds,
+                punchType = punchType,
+                order = order,
+                punchStatus = punchStatus,
+                splitSeconds = 0
+            ),
+            alias = null
+        )
 
     private fun validatedCompetitorBasics(
         raceId: String,

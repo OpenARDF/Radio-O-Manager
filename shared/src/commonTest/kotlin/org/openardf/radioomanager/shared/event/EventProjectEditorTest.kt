@@ -5,6 +5,7 @@ import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
 import org.openardf.radioomanager.shared.domain.RaceType
 import org.openardf.radioomanager.shared.domain.ResultStatus
+import org.openardf.radioomanager.shared.domain.SIRecordType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -523,6 +524,99 @@ class EventProjectEditorTest {
     fun rejectsUnknownReadoutStatusUpdate() {
         assertFailsWith<IllegalArgumentException> {
             EventProjectEditor.updateReadoutManualStatus(projectFile(), "missing", ResultStatus.DISQUALIFIED)
+        }
+    }
+
+    @Test
+    fun addsManualReadoutForMatchedCompetitorAndEvaluatesCourse() {
+        val category = category("cat-1", "M21")
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21", controlSiCodes = listOf(31, 32, 33))),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", siNumber = 123456, category = category)
+            )
+        )
+
+        val updated = EventProjectEditor.addManualReadout(
+            projectFile = original,
+            resultId = "result-1",
+            competitorId = "comp-1",
+            siNumber = "",
+            startSeconds = "600",
+            finishSeconds = "1800",
+            controlCodes = "31 32 33",
+            resultStatus = ResultStatus.OK,
+            readoutDateTimeIso = "2026-05-31T12:00",
+            punchIdFactory = { index, type -> "punch-$index-${type.name}" }
+        )
+
+        val readout = updated.raceData.competitorData.single().readoutData!!
+        assertEquals("comp-1", readout.result.competitorId)
+        assertEquals(123456, readout.result.siNumber)
+        assertEquals(600, readout.result.startTimeSeconds)
+        assertEquals(1800, readout.result.finishTimeSeconds)
+        assertEquals(1200, readout.result.runTimeSeconds)
+        assertEquals(3, readout.result.points)
+        assertEquals(ResultStatus.OK, readout.result.resultStatus)
+        assertEquals(false, readout.result.automaticStatus)
+        assertEquals(true, readout.result.modified)
+        assertEquals(false, readout.result.sent)
+        assertEquals(listOf(SIRecordType.START, SIRecordType.CONTROL, SIRecordType.CONTROL, SIRecordType.CONTROL, SIRecordType.FINISH), readout.punches.map { it.punch.punchType })
+        assertEquals(listOf(0, 31, 32, 33, 0), readout.punches.map { it.punch.siCode })
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun addsManualReadoutAsUnmatchedWhenNoCompetitorIsSelected() {
+        val original = projectFile()
+
+        val updated = EventProjectEditor.addManualReadout(
+            projectFile = original,
+            resultId = "result-1",
+            competitorId = null,
+            siNumber = "123456",
+            startSeconds = "",
+            finishSeconds = "",
+            controlCodes = "31, 32",
+            resultStatus = ResultStatus.NO_RANKING,
+            readoutDateTimeIso = "2026-05-31T12:00",
+            punchIdFactory = { index, type -> "punch-$index-${type.name}" }
+        )
+
+        val readout = updated.raceData.unmatchedReadoutData.single()
+        assertEquals(null, readout.result.competitorId)
+        assertEquals(123456, readout.result.siNumber)
+        assertEquals(null, readout.result.startTimeSeconds)
+        assertEquals(null, readout.result.finishTimeSeconds)
+        assertEquals(ResultStatus.NO_RANKING, readout.result.resultStatus)
+        assertEquals(2, readout.punches.size)
+    }
+
+    @Test
+    fun rejectsInvalidManualReadoutInputs() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("existing", "comp-1", 123456))
+            )
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "", null, "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "new", "missing", "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "new", "comp-1", "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "999", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "123456", "900", "600", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "123456", "", "", "999", ResultStatus.OK, "now") { index, type -> "$index-$type" }
         }
     }
 
