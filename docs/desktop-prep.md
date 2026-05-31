@@ -95,6 +95,8 @@ preferred release workflow.
 4. In progress: add the first event-admin screen backed by shared models and
    services. The Races section now shows read-only race details from shared
    display models after a `.rom.json` file is opened. The Categories section
-   now shows read-only category rows using shared effective race settings.
+   now shows read-only category rows using shared effective race settings. The
+   Competitors section now shows read-only competitor rows with shared category
+   lookup and display formatting.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.

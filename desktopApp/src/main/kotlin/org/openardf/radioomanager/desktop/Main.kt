@@ -34,6 +34,7 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import org.openardf.radioomanager.shared.event.EventCategoryDetails
+import org.openardf.radioomanager.shared.event.EventCompetitorDetails
 import org.openardf.radioomanager.shared.event.EventRaceDetails
 import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
@@ -207,6 +208,9 @@ private fun SectionWorkspace(
         if (section == DesktopSection.Categories && projectFile != null) {
             CategoryDetailsPanel(EventCategoryDetails.from(projectFile.raceData))
         }
+        if (section == DesktopSection.Competitors && projectFile != null) {
+            CompetitorDetailsPanel(EventCompetitorDetails.from(projectFile.raceData))
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -218,6 +222,24 @@ private fun SectionWorkspace(
             color = DesktopPalette.Disconnected,
             fontSize = 13.sp
         )
+    }
+}
+
+/** Shows read-only competitor rows using shared category lookup and formatting. */
+@Composable
+private fun CompetitorDetailsPanel(competitors: List<EventCompetitorDetails>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        DetailHeaderRow(listOf("Name", "Category", "Start no.", "SI no."))
+        competitors.forEach { competitor ->
+            DetailGridRow(
+                listOf(
+                    competitor.fullName,
+                    competitor.categoryName,
+                    competitor.startNumberText,
+                    competitor.siNumberText
+                )
+            )
+        }
     }
 }
 
