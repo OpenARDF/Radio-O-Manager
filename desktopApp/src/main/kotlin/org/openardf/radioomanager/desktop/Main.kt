@@ -126,6 +126,23 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onUpdateCategoryControlPoints = { categoryId, controlPointsText ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.updateCategoryControlPoints(
+                            currentProject,
+                            categoryId,
+                            controlPointsText
+                        ) {
+                            UUID.randomUUID().toString()
+                        }
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onAddCategory = { name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -250,6 +267,7 @@ fun RadioOManagerDesktopApp(
     hasUnsavedChanges: Boolean = false,
     onRenameRace: (String) -> Unit = {},
     onRenameCategory: (String, String) -> Unit = { _, _ -> },
+    onUpdateCategoryControlPoints: (String, String) -> Unit = { _, _ -> },
     onAddCategory: (String) -> Unit = {},
     onRemoveCategory: (String, Boolean) -> Unit = { _, _ -> },
     onRenameCompetitor: (String, String, String) -> Unit = { _, _, _ -> },
@@ -287,6 +305,7 @@ fun RadioOManagerDesktopApp(
                         projectStatusText = projectStatusText,
                         onRenameRace = onRenameRace,
                         onRenameCategory = onRenameCategory,
+                        onUpdateCategoryControlPoints = onUpdateCategoryControlPoints,
                         onAddCategory = onAddCategory,
                         onRemoveCategory = onRemoveCategory,
                         onRenameCompetitor = onRenameCompetitor,
@@ -367,6 +386,7 @@ private fun SectionWorkspace(
     projectStatusText: String,
     onRenameRace: (String) -> Unit,
     onRenameCategory: (String, String) -> Unit,
+    onUpdateCategoryControlPoints: (String, String) -> Unit,
     onAddCategory: (String) -> Unit,
     onRemoveCategory: (String, Boolean) -> Unit,
     onRenameCompetitor: (String, String, String) -> Unit,
@@ -405,6 +425,7 @@ private fun SectionWorkspace(
             CategoryDetailsPanel(
                 categories = EventCategoryDetails.from(projectFile.raceData),
                 onRenameCategory = onRenameCategory,
+                onUpdateCategoryControlPoints = onUpdateCategoryControlPoints,
                 onAddCategory = onAddCategory,
                 onRemoveCategory = onRemoveCategory
             )
@@ -782,14 +803,15 @@ private fun AliasDetailRow(
 private fun CategoryDetailsPanel(
     categories: List<EventCategoryDetails>,
     onRenameCategory: (String, String) -> Unit,
+    onUpdateCategoryControlPoints: (String, String) -> Unit,
     onAddCategory: (String) -> Unit,
     onRemoveCategory: (String, Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CategoryAddRow(onAddCategory)
-        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", "", ""))
+        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", "", "", ""))
         categories.forEach { category ->
-            CategoryDetailRow(category, onRenameCategory, onRemoveCategory)
+            CategoryDetailRow(category, onRenameCategory, onUpdateCategoryControlPoints, onRemoveCategory)
         }
     }
 }
@@ -825,9 +847,13 @@ private fun CategoryAddRow(onAddCategory: (String) -> Unit) {
 private fun CategoryDetailRow(
     category: EventCategoryDetails,
     onRenameCategory: (String, String) -> Unit,
+    onUpdateCategoryControlPoints: (String, String) -> Unit,
     onRemoveCategory: (String, Boolean) -> Unit
 ) {
     var categoryNameDraft by remember(category.id, category.name) { mutableStateOf(category.name) }
+    var controlPointsDraft by remember(category.id, category.controlPointsText) {
+        mutableStateOf(category.controlPointsText)
+    }
     var showDeleteDialog by remember(category.id) { mutableStateOf(false) }
 
     Row(
@@ -844,13 +870,25 @@ private fun CategoryDetailRow(
         Text(category.raceTypeLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Text(category.raceBandLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Text(category.timeLimitText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
-        Text(category.controlPointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        TextField(
+            value = controlPointsDraft,
+            onValueChange = { controlPointsDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Controls") }
+        )
         Button(
             onClick = { onRenameCategory(category.id, categoryNameDraft) },
             modifier = Modifier.weight(1f),
             enabled = categoryNameDraft != category.name
         ) {
             Text("Apply")
+        }
+        Button(
+            onClick = { onUpdateCategoryControlPoints(category.id, controlPointsDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = controlPointsDraft != category.controlPointsText
+        ) {
+            Text("Ctrls")
         }
         Button(
             onClick = { showDeleteDialog = true },

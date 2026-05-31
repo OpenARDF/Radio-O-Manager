@@ -2,6 +2,7 @@ package org.openardf.radioomanager.shared.event
 
 import org.openardf.radioomanager.shared.alias.AliasRules
 import org.openardf.radioomanager.shared.alias.AliasValidationResult
+import org.openardf.radioomanager.shared.course.ControlPointRules
 import org.openardf.radioomanager.shared.sportident.SportIdentCodes
 
 /** Shared event-project editing helpers used by desktop and future non-Android flows. */
@@ -154,6 +155,47 @@ object EventProjectEditor {
                 categories = categories,
                 competitorData = competitorData
             )
+        )
+    }
+
+    /** Returns a copy of the project file with a category course parsed from a control-point string. */
+    fun updateCategoryControlPoints(
+        projectFile: EventProjectFile,
+        categoryId: String,
+        controlPointsText: String,
+        controlPointIdFactory: (Int) -> String
+    ): EventProjectFile {
+        val categoryData = projectFile.raceData.categories.firstOrNull { it.category.id == categoryId }
+            ?: throw IllegalArgumentException("Category was not found: $categoryId")
+
+        val definitions = ControlPointRules.parseControlPoints(
+            input = controlPointsText.trim(),
+            raceType = categoryData.category.effectiveRaceType(projectFile.raceData.race)
+        )
+        val controlPoints = definitions.mapIndexed { index, definition ->
+            EventControlPoint(
+                id = controlPointIdFactory(index),
+                categoryId = categoryId,
+                siCode = definition.siCode,
+                type = definition.type,
+                order = definition.order
+            )
+        }
+        val formattedControlPoints = ControlPointRules.formatControlPoints(definitions)
+
+        val categories = projectFile.raceData.categories.map { data ->
+            if (data.category.id == categoryId) {
+                data.copy(
+                    category = data.category.copy(controlPointsString = formattedControlPoints),
+                    controlPoints = controlPoints
+                )
+            } else {
+                data
+            }
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(categories = categories)
         )
     }
 

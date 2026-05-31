@@ -42,11 +42,15 @@ class DesktopSmokeSampleTest {
                 EventProjectEditor.updateAlias(
                     EventProjectEditor.updateCompetitorNumbers(
                         EventProjectEditor.renameCompetitor(
-                            EventProjectEditor.renameCategory(
-                                EventProjectEditor.renameRace(original, "Edited Smoke Race"),
+                            EventProjectEditor.updateCategoryControlPoints(
+                                EventProjectEditor.renameCategory(
+                                    EventProjectEditor.renameRace(original, "Edited Smoke Race"),
+                                    categoryId,
+                                    "M21E"
+                                ),
                                 categoryId,
-                                "M21E"
-                            ),
+                                "31 32 36B"
+                            ) { index -> "edited-control-$index" },
                             competitorId,
                             "Edited",
                             "Runner"
@@ -72,6 +76,12 @@ class DesktopSmokeSampleTest {
         assertEquals("Edited Smoke Race", readBack.raceData.race.name)
         assertEquals(listOf(categoryId), readBack.raceData.categories.map { it.category.id })
         assertEquals("M21E", readBack.raceData.categories.first { it.category.id == categoryId }.category.name)
+        assertEquals("31 32 36B", readBack.raceData.categories.first().category.controlPointsString)
+        assertEquals(
+            listOf("edited-control-0", "edited-control-1", "edited-control-2"),
+            readBack.raceData.categories.first().controlPoints.map { it.id }
+        )
+        assertEquals(listOf(31, 32, 36), readBack.raceData.categories.first().controlPoints.map { it.siCode })
         assertEquals(
             null,
             readBack.raceData.competitorData

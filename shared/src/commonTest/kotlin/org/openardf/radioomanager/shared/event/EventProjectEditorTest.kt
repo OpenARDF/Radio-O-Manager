@@ -154,6 +154,47 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun updatesCategoryControlPointsUsingSharedValidationRules() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21")))
+
+        val updated = EventProjectEditor.updateCategoryControlPoints(original, "cat-1", " 31 32 36B ") { index ->
+            "control-$index"
+        }
+
+        val categoryData = updated.raceData.categories.single()
+        assertEquals("31 32 36B", categoryData.category.controlPointsString)
+        assertEquals(listOf("control-0", "control-1", "control-2"), categoryData.controlPoints.map { it.id })
+        assertEquals(listOf(31, 32, 36), categoryData.controlPoints.map { it.siCode })
+        assertEquals(listOf(1, 2, 3), categoryData.controlPoints.map { it.order })
+        assertEquals(listOf(ControlPointType.CONTROL, ControlPointType.CONTROL, ControlPointType.BEACON), categoryData.controlPoints.map { it.type })
+    }
+
+    @Test
+    fun clearsCategoryControlPoints() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21", controlSiCodes = listOf(31, 32))))
+
+        val updated = EventProjectEditor.updateCategoryControlPoints(original, "cat-1", " ") { index ->
+            "control-$index"
+        }
+
+        val categoryData = updated.raceData.categories.single()
+        assertEquals("", categoryData.category.controlPointsString)
+        assertEquals(emptyList(), categoryData.controlPoints)
+    }
+
+    @Test
+    fun rejectsInvalidCategoryControlPointUpdates() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCategoryControlPoints(original, "missing", "31") { index -> "control-$index" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCategoryControlPoints(original, "cat-1", "31 31") { index -> "control-$index" }
+        }
+    }
+
+    @Test
     fun renamesCompetitorWithoutChangingOtherCompetitors() {
         val original = projectFile(
             competitors = listOf(competitorData("comp-1", "Alice", "Runner"), competitorData("comp-2", "Bob", "Racer"))
