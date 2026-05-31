@@ -4,6 +4,7 @@ import org.openardf.radioomanager.shared.domain.ControlPointType
 import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
 import org.openardf.radioomanager.shared.domain.RaceType
+import org.openardf.radioomanager.shared.domain.ResultStatus
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -359,6 +360,59 @@ class EventProjectEditorTest {
     }
 
     @Test
+    fun removesCompetitorAndKeepsReadoutAsUnmatched() {
+        val readoutData = readout("result-1", "comp-1", siNumber = 1111)
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readoutData)
+            )
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = false)
+
+        assertEquals(emptyList(), updated.raceData.competitorData)
+        assertEquals(1, updated.raceData.unmatchedReadoutData.size)
+        assertEquals("result-1", updated.raceData.unmatchedReadoutData.single().result.id)
+        assertEquals(null, updated.raceData.unmatchedReadoutData.single().result.competitorId)
+        assertEquals(1111, updated.raceData.unmatchedReadoutData.single().result.siNumber)
+    }
+
+    @Test
+    fun removesCompetitorAndReadoutWhenRequested() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = true)
+
+        assertEquals(emptyList(), updated.raceData.competitorData)
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun removesCompetitorFromCategoryAggregates() {
+        val category = category("cat-1", "M21")
+        val competitor = competitorData("comp-1", "Alice", "Runner", category = category)
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21", competitors = listOf(competitor.competitorCategory.competitor))),
+            competitors = listOf(competitor)
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = false)
+
+        assertEquals(emptyList(), updated.raceData.categories.single().competitors)
+    }
+
+    @Test
+    fun rejectsUnknownCompetitorRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeCompetitor(projectFile(), "missing", deleteReadout = false)
+        }
+    }
+
+    @Test
     fun updatesAliasUsingSharedValidationRules() {
         val original = projectFile(
             aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
@@ -470,7 +524,8 @@ class EventProjectEditorTest {
         id: String,
         name: String,
         order: Int = 0,
-        controlSiCodes: List<Int> = emptyList()
+        controlSiCodes: List<Int> = emptyList(),
+        competitors: List<EventCompetitor> = emptyList()
     ): EventCategoryData =
         EventCategoryData(
             category = category(id, name, order),
@@ -483,7 +538,7 @@ class EventProjectEditorTest {
                     order = index
                 )
             },
-            competitors = emptyList()
+            competitors = competitors
         )
 
     private fun category(id: String, name: String, order: Int = 0): EventCategory =
@@ -509,7 +564,8 @@ class EventProjectEditorTest {
         lastName: String,
         startNumber: Int = 1,
         siNumber: Int? = null,
-        category: EventCategory? = null
+        category: EventCategory? = null,
+        readoutData: EventReadoutData? = null
     ): EventCompetitorData =
         EventCompetitorData(
             competitorCategory = EventCompetitorCategory(
@@ -530,7 +586,29 @@ class EventProjectEditorTest {
                 ),
                 category = category
             ),
-            readoutData = null
+            readoutData = readoutData
+        )
+
+    private fun readout(id: String, competitorId: String?, siNumber: Int): EventReadoutData =
+        EventReadoutData(
+            result = EventResult(
+                id = id,
+                raceId = "race",
+                competitorId = competitorId,
+                siNumber = siNumber,
+                cardType = 0,
+                checkTimeSeconds = null,
+                startTimeSeconds = null,
+                finishTimeSeconds = null,
+                readoutDateTimeIso = "2026-05-31T11:00",
+                automaticStatus = true,
+                resultStatus = ResultStatus.OK,
+                points = 0,
+                runTimeSeconds = 0,
+                modified = false,
+                sent = false
+            ),
+            punches = emptyList()
         )
 
     private fun alias(id: String, siCode: Int, name: String): EventAlias =

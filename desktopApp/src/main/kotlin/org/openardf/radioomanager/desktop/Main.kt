@@ -297,6 +297,17 @@ fun main(args: Array<String>) = application {
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
             },
+            onRemoveCompetitor = { competitorId, deleteReadout ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.removeCompetitor(currentProject, competitorId, deleteReadout)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
+            },
             onUpdateAlias = { aliasId, siCode, name ->
                 runCatching {
                     projectFile = projectSession.updateCurrentProject { currentProject ->
@@ -384,6 +395,7 @@ fun RadioOManagerDesktopApp(
     onUpdateCompetitorNumbers: (String, String, String) -> Unit = { _, _, _ -> },
     onAddCompetitor: (String, String, String, String) -> Unit = { _, _, _, _ -> },
     onAssignCompetitorCategory: (String, String?) -> Unit = { _, _ -> },
+    onRemoveCompetitor: (String, Boolean) -> Unit = { _, _ -> },
     onUpdateAlias: (String, String, String) -> Unit = { _, _, _ -> },
     onAddAlias: (String, String) -> Unit = { _, _ -> },
     onRemoveAlias: (String) -> Unit = {}
@@ -422,6 +434,7 @@ fun RadioOManagerDesktopApp(
                         onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                         onAddCompetitor = onAddCompetitor,
                         onAssignCompetitorCategory = onAssignCompetitorCategory,
+                        onRemoveCompetitor = onRemoveCompetitor,
                         onUpdateAlias = onUpdateAlias,
                         onAddAlias = onAddAlias,
                         onRemoveAlias = onRemoveAlias
@@ -503,6 +516,7 @@ private fun SectionWorkspace(
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onAddCompetitor: (String, String, String, String) -> Unit,
     onAssignCompetitorCategory: (String, String?) -> Unit,
+    onRemoveCompetitor: (String, Boolean) -> Unit,
     onUpdateAlias: (String, String, String) -> Unit,
     onAddAlias: (String, String) -> Unit,
     onRemoveAlias: (String) -> Unit
@@ -547,7 +561,8 @@ private fun SectionWorkspace(
                 onRenameCompetitor = onRenameCompetitor,
                 onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
                 onAddCompetitor = onAddCompetitor,
-                onAssignCompetitorCategory = onAssignCompetitorCategory
+                onAssignCompetitorCategory = onAssignCompetitorCategory,
+                onRemoveCompetitor = onRemoveCompetitor
             )
         }
         if (section == DesktopSection.Aliases && projectFile != null) {
@@ -628,18 +643,20 @@ private fun CompetitorDetailsPanel(
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
     onAddCompetitor: (String, String, String, String) -> Unit,
-    onAssignCompetitorCategory: (String, String?) -> Unit
+    onAssignCompetitorCategory: (String, String?) -> Unit,
+    onRemoveCompetitor: (String, Boolean) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         CompetitorAddRow(onAddCompetitor)
-        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", "", ""))
+        DetailHeaderRow(listOf("First", "Last", "Category", "Start no.", "SI no.", "", "", "", ""))
         competitors.forEach { competitor ->
             CompetitorDetailRow(
                 competitor = competitor,
                 categories = categories,
                 onRenameCompetitor = onRenameCompetitor,
                 onUpdateCompetitorNumbers = onUpdateCompetitorNumbers,
-                onAssignCompetitorCategory = onAssignCompetitorCategory
+                onAssignCompetitorCategory = onAssignCompetitorCategory,
+                onRemoveCompetitor = onRemoveCompetitor
             )
         }
     }
@@ -702,7 +719,8 @@ private fun CompetitorDetailRow(
     categories: List<EventCategoryDetails>,
     onRenameCompetitor: (String, String, String) -> Unit,
     onUpdateCompetitorNumbers: (String, String, String) -> Unit,
-    onAssignCompetitorCategory: (String, String?) -> Unit
+    onAssignCompetitorCategory: (String, String?) -> Unit,
+    onRemoveCompetitor: (String, Boolean) -> Unit
 ) {
     var firstNameDraft by remember(competitor.id, competitor.firstName) { mutableStateOf(competitor.firstName) }
     var lastNameDraft by remember(competitor.id, competitor.lastName) { mutableStateOf(competitor.lastName) }
@@ -711,6 +729,7 @@ private fun CompetitorDetailRow(
     }
     var siNumberDraft by remember(competitor.id, competitor.siNumberText) { mutableStateOf(competitor.siNumberText) }
     var selectedCategoryId by remember(competitor.id, competitor.categoryId) { mutableStateOf(competitor.categoryId) }
+    var showDeleteDialog by remember(competitor.id) { mutableStateOf(false) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -768,6 +787,45 @@ private fun CompetitorDetailRow(
         ) {
             Text("Cat.")
         }
+        Button(
+            onClick = { showDeleteDialog = true },
+            modifier = Modifier.weight(1f)
+        ) {
+            Text("Delete")
+        }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete competitor") },
+            text = { Text("Delete ${competitor.fullName}? The readout can be kept as unmatched or deleted too.") },
+            confirmButton = {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onRemoveCompetitor(competitor.id, false)
+                        }
+                    ) {
+                        Text("Keep readout")
+                    }
+                    Button(
+                        onClick = {
+                            showDeleteDialog = false
+                            onRemoveCompetitor(competitor.id, true)
+                        }
+                    ) {
+                        Text("Delete readout")
+                    }
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 

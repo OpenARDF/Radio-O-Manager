@@ -388,6 +388,50 @@ object EventProjectEditor {
         )
     }
 
+    /**
+     * Returns a copy of the project file with one competitor removed.
+     *
+     * This mirrors Android's Room-backed deletion policy for retained results:
+     * the competitor record is always removed, and its matched readout is either
+     * deleted too or moved to the unmatched readout list with the competitor
+     * reference cleared.
+     */
+    fun removeCompetitor(
+        projectFile: EventProjectFile,
+        competitorId: String,
+        deleteReadout: Boolean
+    ): EventProjectFile {
+        val competitorData = projectFile.raceData.competitorData
+        val removedCompetitorData = competitorData.firstOrNull {
+            it.competitorCategory.competitor.id == competitorId
+        } ?: throw IllegalArgumentException("Competitor was not found: $competitorId")
+
+        val categories = projectFile.raceData.categories.map { categoryData ->
+            categoryData.copy(
+                competitors = categoryData.competitors.filterNot { it.id == competitorId }
+            )
+        }
+        val unmatchedReadoutData = if (deleteReadout) {
+            projectFile.raceData.unmatchedReadoutData
+        } else {
+            removedCompetitorData.readoutData?.let { readoutData ->
+                projectFile.raceData.unmatchedReadoutData + readoutData.copy(
+                    result = readoutData.result.copy(competitorId = null)
+                )
+            } ?: projectFile.raceData.unmatchedReadoutData
+        }
+
+        return projectFile.copy(
+            raceData = projectFile.raceData.copy(
+                categories = categories,
+                competitorData = competitorData.filterNot {
+                    it.competitorCategory.competitor.id == competitorId
+                },
+                unmatchedReadoutData = unmatchedReadoutData
+            )
+        )
+    }
+
     /** Returns a copy of the project file with one validated alias changed. */
     fun updateAlias(
         projectFile: EventProjectFile,
