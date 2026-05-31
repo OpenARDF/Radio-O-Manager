@@ -106,6 +106,17 @@ fun main() = application {
                 }.onFailure { error ->
                     projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
                 }
+            },
+            onRenameCategory = { categoryId, name ->
+                runCatching {
+                    projectFile = projectSession.updateCurrentProject { currentProject ->
+                        EventProjectEditor.renameCategory(currentProject, categoryId, name)
+                    }
+                    hasUnsavedChanges = projectSession.hasUnsavedChanges
+                    projectStatusText = "Unsaved changes."
+                }.onFailure { error ->
+                    projectStatusText = "Edit failed: ${error.message ?: error::class.simpleName}"
+                }
             }
         )
     }
@@ -123,7 +134,8 @@ fun RadioOManagerDesktopApp(
     projectFile: EventProjectFile? = null,
     projectStatusText: String = "No project open.",
     hasUnsavedChanges: Boolean = false,
-    onRenameRace: (String) -> Unit = {}
+    onRenameRace: (String) -> Unit = {},
+    onRenameCategory: (String, String) -> Unit = { _, _ -> }
 ) {
     MaterialTheme(
         colors = MaterialTheme.colors.copy(
@@ -146,7 +158,13 @@ fun RadioOManagerDesktopApp(
                         selectedSection = selectedSection,
                         onSectionSelected = { selectedSection = it }
                     )
-                    SectionWorkspace(selectedSection, projectFile, projectStatusText, onRenameRace)
+                    SectionWorkspace(
+                        section = selectedSection,
+                        projectFile = projectFile,
+                        projectStatusText = projectStatusText,
+                        onRenameRace = onRenameRace,
+                        onRenameCategory = onRenameCategory
+                    )
                 }
                 StatusStrip(projectStatusText, hasUnsavedChanges)
             }
@@ -215,7 +233,8 @@ private fun SectionWorkspace(
     section: DesktopSection,
     projectFile: EventProjectFile?,
     projectStatusText: String,
-    onRenameRace: (String) -> Unit
+    onRenameRace: (String) -> Unit,
+    onRenameCategory: (String, String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -242,7 +261,10 @@ private fun SectionWorkspace(
             )
         }
         if (section == DesktopSection.Categories && projectFile != null) {
-            CategoryDetailsPanel(EventCategoryDetails.from(projectFile.raceData))
+            CategoryDetailsPanel(
+                categories = EventCategoryDetails.from(projectFile.raceData),
+                onRenameCategory = onRenameCategory
+            )
         }
         if (section == DesktopSection.Competitors && projectFile != null) {
             CompetitorDetailsPanel(EventCompetitorDetails.from(projectFile.raceData))
@@ -327,21 +349,49 @@ private fun CompetitorDetailsPanel(competitors: List<EventCompetitorDetails>) {
     }
 }
 
-/** Shows read-only category rows using shared effective race settings. */
+/** Shows editable category names with read-only effective race settings. */
 @Composable
-private fun CategoryDetailsPanel(categories: List<EventCategoryDetails>) {
+private fun CategoryDetailsPanel(
+    categories: List<EventCategoryDetails>,
+    onRenameCategory: (String, String) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls"))
+        DetailHeaderRow(listOf("Name", "Type", "Band", "Limit", "Controls", ""))
         categories.forEach { category ->
-            DetailGridRow(
-                listOf(
-                    category.name,
-                    category.raceTypeLabel,
-                    category.raceBandLabel,
-                    category.timeLimitText,
-                    category.controlPointsText
-                )
-            )
+            CategoryDetailRow(category, onRenameCategory)
+        }
+    }
+}
+
+/** Shows one editable category-name row plus read-only derived category settings. */
+@Composable
+private fun CategoryDetailRow(
+    category: EventCategoryDetails,
+    onRenameCategory: (String, String) -> Unit
+) {
+    var categoryNameDraft by remember(category.id, category.name) { mutableStateOf(category.name) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TextField(
+            value = categoryNameDraft,
+            onValueChange = { categoryNameDraft = it },
+            modifier = Modifier.weight(1f),
+            label = { Text("Category") }
+        )
+        Text(category.raceTypeLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(category.raceBandLabel, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(category.timeLimitText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(category.controlPointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Button(
+            onClick = { onRenameCategory(category.id, categoryNameDraft) },
+            modifier = Modifier.weight(1f),
+            enabled = categoryNameDraft != category.name
+        ) {
+            Text("Apply")
         }
     }
 }

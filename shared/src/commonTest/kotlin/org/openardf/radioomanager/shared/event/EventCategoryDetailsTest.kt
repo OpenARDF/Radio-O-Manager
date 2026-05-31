@@ -12,12 +12,14 @@ class EventCategoryDetailsTest {
         val rows = EventCategoryDetails.from(raceData())
 
         assertEquals(2, rows.size)
+        assertEquals("W21", rows[0].id)
         assertEquals("W21", rows[0].name)
         assertEquals("Sprint", rows[0].raceTypeLabel)
         assertEquals("2m", rows[0].raceBandLabel)
         assertEquals("60:00", rows[0].timeLimitText)
         assertEquals("31 32", rows[0].controlPointsText)
 
+        assertEquals("M21", rows[1].id)
         assertEquals("M21", rows[1].name)
         assertEquals("Classic", rows[1].raceTypeLabel)
         assertEquals("80m", rows[1].raceBandLabel)

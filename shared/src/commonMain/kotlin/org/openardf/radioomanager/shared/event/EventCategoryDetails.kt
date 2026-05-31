@@ -4,6 +4,7 @@ import org.openardf.radioomanager.shared.time.DurationFormatter
 
 /** Shared read-only category row prepared for desktop and other event-admin surfaces. */
 data class EventCategoryDetails(
+    val id: String,
     val name: String,
     val raceTypeLabel: String,
     val raceBandLabel: String,
@@ -18,6 +19,7 @@ data class EventCategoryDetails(
                 .map { categoryData ->
                     val category = categoryData.category
                     EventCategoryDetails(
+                        id = category.id,
                         name = category.name,
                         raceTypeLabel = category.effectiveRaceType(raceData.race).toDisplayLabel(),
                         raceBandLabel = category.effectiveRaceBand(raceData.race).toDisplayLabel(),
