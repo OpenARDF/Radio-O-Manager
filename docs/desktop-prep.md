@@ -109,6 +109,9 @@ The current desktop packaging smoke checks are:
 ./gradlew :desktopApp:prepareDesktopJdeployBundle :desktopApp:verifyDesktopJdeployBundle
 ```
 
+On macOS, `scripts/jdeploy-prepare.sh` selects the registered JDK 17 runtime
+when available and runs the two Gradle-side jDeploy bundle tasks.
+
 `checkRuntime` verifies that Compose Desktop can find a usable JDK runtime.
 `createDistributable` currently writes the macOS app image to
 `desktopApp/build/compose/binaries/main/app/Radio-O-Manager.app`. The Compose
