@@ -43,16 +43,19 @@ import org.openardf.radioomanager.shared.event.EventProjectFile
 import org.openardf.radioomanager.shared.event.EventProjectSummary
 import org.openardf.radioomanager.shared.event.EventReadoutDetails
 import org.openardf.radioomanager.shared.event.EventResultDetails
+import java.nio.file.Path
 
 /** Starts the first Compose Desktop shell for Radio-O-Manager. */
-fun main() = application {
+fun main(args: Array<String>) = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Radio-O-Manager Desktop"
     ) {
+        val startupPath = remember(args.toList()) { args.firstOrNull()?.let(Path::of) }
         val projectSession = remember { DesktopProjectSession(DesktopProjectFiles) }
+        val startupStatus = remember(startupPath) { openStartupProject(projectSession, startupPath) }
         var projectFile by remember { mutableStateOf(projectSession.currentProject) }
-        var projectStatusText by remember { mutableStateOf("No project open.") }
+        var projectStatusText by remember { mutableStateOf(startupStatus) }
         var hasUnsavedChanges by remember { mutableStateOf(projectSession.hasUnsavedChanges) }
 
         MenuBar {
