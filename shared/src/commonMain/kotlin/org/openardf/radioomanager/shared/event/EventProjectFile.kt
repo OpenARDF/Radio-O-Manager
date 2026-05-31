@@ -1,6 +1,12 @@
 package org.openardf.radioomanager.shared.event
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+
 /** File envelope for future shared event project import/export. */
+@Serializable
 data class EventProjectFile(
     val schemaVersion: Int = EventProjectFileFormat.CURRENT_SCHEMA_VERSION,
     val appName: String = EventProjectFileFormat.APP_NAME,
@@ -9,6 +15,33 @@ data class EventProjectFile(
     /** Returns true when this file schema can be read by the current shared code. */
     fun isSupportedSchema(): Boolean =
         EventProjectFileFormat.isSupportedSchema(schemaVersion)
+}
+
+/** JSON codec for portable `.rom.json` project files. */
+object EventProjectFileJson {
+    private val json = Json {
+        encodeDefaults = true
+        ignoreUnknownKeys = true
+        prettyPrint = true
+    }
+
+    /** Encodes a project file using the stable, shared desktop-beta JSON format. */
+    fun encode(projectFile: EventProjectFile): String =
+        json.encodeToString(projectFile)
+
+    /**
+     * Decodes a project file and rejects schema versions this build does not support.
+     *
+     * Unknown fields are tolerated for additive metadata inside a supported schema
+     * version, but schema upgrades must still increment `schemaVersion`.
+     */
+    fun decode(text: String): EventProjectFile {
+        val projectFile = json.decodeFromString<EventProjectFile>(text)
+        require(projectFile.isSupportedSchema()) {
+            "Unsupported Radio-O-Manager project file schema version: ${projectFile.schemaVersion}"
+        }
+        return projectFile
+    }
 }
 
 /** Schema metadata for portable Radio-O-Manager project files. */

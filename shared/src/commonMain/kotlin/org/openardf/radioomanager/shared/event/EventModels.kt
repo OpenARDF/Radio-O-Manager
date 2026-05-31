@@ -1,5 +1,6 @@
 package org.openardf.radioomanager.shared.event
 
+import kotlinx.serialization.Serializable
 import org.openardf.radioomanager.shared.domain.ControlPointType
 import org.openardf.radioomanager.shared.domain.PunchStatus
 import org.openardf.radioomanager.shared.domain.RaceBand
@@ -9,6 +10,7 @@ import org.openardf.radioomanager.shared.domain.ResultStatus
 import org.openardf.radioomanager.shared.domain.SIRecordType
 
 /** Portable race metadata used by shared services and non-Android clients. */
+@Serializable
 data class EventRace(
     val id: String,
     val name: String,
@@ -21,6 +23,7 @@ data class EventRace(
 )
 
 /** Portable category definition, including optional category-level race overrides. */
+@Serializable
 data class EventCategory(
     val id: String,
     val raceId: String,
@@ -50,6 +53,7 @@ data class EventCategory(
 }
 
 /** Portable control-point definition for a category course. */
+@Serializable
 data class EventControlPoint(
     val id: String,
     val categoryId: String,
@@ -59,6 +63,7 @@ data class EventControlPoint(
 )
 
 /** Portable display alias for a SportIdent control code. */
+@Serializable
 data class EventAlias(
     val id: String,
     val raceId: String,
@@ -67,6 +72,7 @@ data class EventAlias(
 )
 
 /** Portable competitor record independent of Android Room persistence. */
+@Serializable
 data class EventCompetitor(
     val id: String,
     val raceId: String,
@@ -90,6 +96,7 @@ data class EventCompetitor(
 }
 
 /** Portable raw punch record, with SportIdent times represented as absolute seconds. */
+@Serializable
 data class EventPunch(
     val id: String,
     val raceId: String,
@@ -105,6 +112,7 @@ data class EventPunch(
 )
 
 /** Portable result/readout summary for a competitor or unmatched SI card. */
+@Serializable
 data class EventResult(
     val id: String,
     val raceId: String,
@@ -125,18 +133,21 @@ data class EventResult(
 )
 
 /** Portable punch plus optional alias resolved for display. */
+@Serializable
 data class EventAliasPunch(
     val punch: EventPunch,
     val alias: EventAlias?
 )
 
 /** Portable readout data: result summary plus all recorded punches. */
+@Serializable
 data class EventReadoutData(
     val result: EventResult,
     val punches: List<EventAliasPunch>
 )
 
 /** Portable category aggregate containing course and category competitors. */
+@Serializable
 data class EventCategoryData(
     val category: EventCategory,
     val controlPoints: List<EventControlPoint>,
@@ -144,18 +155,21 @@ data class EventCategoryData(
 )
 
 /** Portable competitor plus optional category aggregate used by result lists. */
+@Serializable
 data class EventCompetitorCategory(
     val competitor: EventCompetitor,
     val category: EventCategory?
 )
 
 /** Portable competitor aggregate with optional readout data. */
+@Serializable
 data class EventCompetitorData(
     val competitorCategory: EventCompetitorCategory,
     val readoutData: EventReadoutData?
 )
 
 /** Portable complete event aggregate used for project import/export and desktop workflows. */
+@Serializable
 data class EventRaceData(
     val race: EventRace,
     val categories: List<EventCategoryData>,

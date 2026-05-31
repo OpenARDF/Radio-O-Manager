@@ -88,7 +88,9 @@ preferred release workflow.
 2. Done: add a desktop app module with a minimal launch window and no event editing.
    The shell uses Compose Desktop, Android-derived colors, Android navigation
    vocabulary, and a non-editing status strip.
-3. Add file-backed open/save for a shared project envelope.
+3. In progress: add file-backed open/save for a shared project envelope.
+   The shared `.rom.json` envelope now has a tested JSON codec; desktop file
+   picker and filesystem wiring should remain in the desktop app module.
 4. Add the first event-admin screen backed by shared models and services.
 5. Add jDeploy metadata only after the desktop app can complete a real smoke
    scenario.

@@ -15,6 +15,8 @@ import org.openardf.radioomanager.shared.event.EventCategoryData
 import org.openardf.radioomanager.shared.event.EventCompetitor
 import org.openardf.radioomanager.shared.event.EventCompetitorCategory
 import org.openardf.radioomanager.shared.event.EventCompetitorData
+import org.openardf.radioomanager.shared.event.EventProjectFile
+import org.openardf.radioomanager.shared.event.EventProjectFileJson
 import org.openardf.radioomanager.shared.event.EventRace
 import org.openardf.radioomanager.shared.event.EventRaceData
 import org.openardf.radioomanager.shared.event.EventReadoutData
@@ -51,6 +53,8 @@ fun main() {
 
     check(evaluation.points == 2)
     val raceData = sampleRaceData()
+    val projectFile = EventProjectFile(raceData = raceData)
+    check(EventProjectFileJson.decode(EventProjectFileJson.encode(projectFile)) == projectFile)
     check(EventValidationRules.validateRaceData(raceData).isEmpty())
     check(
         EventResultPlacement.sortByPlace(raceData.competitorData)
