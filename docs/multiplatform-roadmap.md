@@ -55,6 +55,9 @@ The desktop beta should explicitly exclude:
 - live result sending;
 - replacing Android for normal race-day readout operations.
 
+The concrete desktop boundary, storage approach, UI direction, and packaging
+default are tracked in [`desktop-prep.md`](desktop-prep.md).
+
 ## Stages
 
 ### 1. Foundation stabilization
@@ -124,6 +127,9 @@ results.
 Goal: produce installable desktop beta artifacts.
 
 - Add version/build metadata for desktop artifacts.
+- Use jDeploy as the default packaging path unless a focused packaging spike
+  finds a concrete blocker; keep Conveyor as a comparison option and `jpackage`
+  as a low-level fallback.
 - Add packaging environment checks and package tasks for macOS, Windows, and
   Linux.
 - Document beta limitations clearly.

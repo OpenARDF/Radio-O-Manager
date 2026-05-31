@@ -32,6 +32,8 @@ Please refer to the wiki section [Developement](https://github.com/kolskypavel/A
 
 The in-repo [multiplatform roadmap](docs/multiplatform-roadmap.md) describes the
 shared Kotlin module, desktop beta direction, and current verification gates.
+Desktop beta scope and packaging direction are tracked in
+[docs/desktop-prep.md](docs/desktop-prep.md).
 Deferred dependency-management follow-ups are tracked in
 [docs/dependency-update-todo.md](docs/dependency-update-todo.md).
 The 2026-05-31 Moto/download-box Android regression pass is recorded in
