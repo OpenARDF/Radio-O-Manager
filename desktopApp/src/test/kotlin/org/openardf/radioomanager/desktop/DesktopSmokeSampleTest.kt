@@ -197,5 +197,11 @@ class DesktopSmokeSampleTest {
         assertEquals(1_000, readout.result.runTimeSeconds)
         assertEquals(ResultStatus.NO_RANKING, readout.result.resultStatus)
         assertEquals(listOf(0, 41, 42, 0), readout.punches.map { it.punch.siCode })
+        assertEquals(
+            "41 42",
+            EventReadoutDetails.from(readBack.raceData)
+                .first { it.id == "manual-result" }
+                .punchCodesText
+        )
     }
 }

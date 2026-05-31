@@ -3,7 +3,9 @@ package org.openardf.radioomanager.shared.event
 import org.openardf.radioomanager.shared.domain.RaceBand
 import org.openardf.radioomanager.shared.domain.RaceLevel
 import org.openardf.radioomanager.shared.domain.RaceType
+import org.openardf.radioomanager.shared.domain.PunchStatus
 import org.openardf.radioomanager.shared.domain.ResultStatus
+import org.openardf.radioomanager.shared.domain.SIRecordType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -21,6 +23,7 @@ class EventReadoutDetailsTest {
         assertEquals("OK", rows[0].statusLabel)
         assertEquals("3", rows[0].pointsText)
         assertEquals("00:20:00", rows[0].runTimeText)
+        assertEquals("31 32", rows[0].punchCodesText)
 
         assertEquals("unmatched", rows[1].id)
         assertEquals("654321", rows[1].siNumberText)
@@ -28,6 +31,7 @@ class EventReadoutDetailsTest {
         assertEquals(ResultStatus.NO_RANKING, rows[1].resultStatus)
         assertEquals(true, rows[1].automaticStatus)
         assertEquals("No ranking", rows[1].statusLabel)
+        assertEquals("41", rows[1].punchCodesText)
     }
 
     private fun raceData(): EventRaceData {
@@ -62,10 +66,10 @@ class EventReadoutDetailsTest {
             competitorData = listOf(
                 EventCompetitorData(
                     competitorCategory = EventCompetitorCategory(competitor, category = null),
-                    readoutData = readout("matched", competitor.id, 123456, ResultStatus.OK)
+                    readoutData = readout("matched", competitor.id, 123456, ResultStatus.OK, listOf(31, 32))
                 )
             ),
-            unmatchedReadoutData = listOf(readout("unmatched", competitorId = null, siNumber = 654321, ResultStatus.NO_RANKING))
+            unmatchedReadoutData = listOf(readout("unmatched", competitorId = null, siNumber = 654321, ResultStatus.NO_RANKING, listOf(41)))
         )
     }
 
@@ -73,7 +77,8 @@ class EventReadoutDetailsTest {
         id: String,
         competitorId: String?,
         siNumber: Int,
-        resultStatus: ResultStatus
+        resultStatus: ResultStatus,
+        controlCodes: List<Int>
     ): EventReadoutData =
         EventReadoutData(
             result = EventResult(
@@ -93,6 +98,23 @@ class EventReadoutDetailsTest {
                 modified = false,
                 sent = false
             ),
-            punches = emptyList()
+            punches = controlCodes.mapIndexed { index, siCode ->
+                EventAliasPunch(
+                    punch = EventPunch(
+                        id = "punch-$index",
+                        raceId = "race",
+                        resultId = id,
+                        cardNumber = siNumber,
+                        siCode = siCode,
+                        siTimeSeconds = 600L + index,
+                        originalSiTimeSeconds = 600L + index,
+                        punchType = SIRecordType.CONTROL,
+                        order = index,
+                        punchStatus = PunchStatus.UNKNOWN,
+                        splitSeconds = 0
+                    ),
+                    alias = null
+                )
+            }
         )
 }

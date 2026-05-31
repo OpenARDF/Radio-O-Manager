@@ -1,6 +1,7 @@
 package org.openardf.radioomanager.shared.event
 
 import org.openardf.radioomanager.shared.domain.ResultStatus
+import org.openardf.radioomanager.shared.domain.SIRecordType
 import org.openardf.radioomanager.shared.time.DurationFormatter
 
 /** Shared read-only readout row for matched and unmatched SI-card data. */
@@ -12,7 +13,8 @@ data class EventReadoutDetails(
     val automaticStatus: Boolean,
     val statusLabel: String,
     val pointsText: String,
-    val runTimeText: String
+    val runTimeText: String,
+    val punchCodesText: String
 ) {
     companion object {
         /** Builds readout display rows for competitor-linked and unmatched readouts. */
@@ -40,7 +42,11 @@ data class EventReadoutDetails(
                 automaticStatus = result.automaticStatus,
                 statusLabel = result.resultStatus.toDisplayLabel(),
                 pointsText = result.points.toString(),
-                runTimeText = DurationFormatter.secondsToFormattedString(result.runTimeSeconds, useMinutes = false)
+                runTimeText = DurationFormatter.secondsToFormattedString(result.runTimeSeconds, useMinutes = false),
+                punchCodesText = readoutData.punches
+                    .map { it.punch }
+                    .filter { it.punchType == SIRecordType.CONTROL }
+                    .joinToString(" ") { it.siCode.toString() }
             )
         }
     }

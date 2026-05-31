@@ -779,7 +779,7 @@ private fun ReadoutDetailsPanel(
             competitors = competitors,
             onAddManualReadout = onAddManualReadout
         )
-        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", "", ""))
+        DetailHeaderRow(listOf("SI no.", "Competitor", "Status", "Points", "Runtime", "Punches", "", ""))
         readouts.forEach { readout ->
             ReadoutDetailRow(readout, onRemoveReadout, onUpdateReadoutStatus)
         }
@@ -886,6 +886,7 @@ private fun ReadoutDetailRow(
         )
         Text(readout.pointsText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Text(readout.runTimeText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
+        Text(readout.punchCodesText, modifier = Modifier.weight(1f), color = DesktopPalette.Black, fontSize = 13.sp)
         Button(
             onClick = { onUpdateReadoutStatus(readout.id, selectedStatus) },
             modifier = Modifier.weight(1f),
