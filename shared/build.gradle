@@ -33,11 +33,11 @@ tasks.register("desktopSmokeRun", JavaExec) {
 
     dependsOn(mainCompilation.compileTaskProvider)
     classpath(mainCompilation.runtimeDependencyFiles, mainCompilation.output.allOutputs)
-    mainClass.set("org.openardf.radioomanager.shared.cli.DesktopSmokeCliKt")
+    mainClass.set("org.openardf.radiooracle.shared.cli.DesktopSmokeCliKt")
 }
 
 android {
-    namespace = "org.openardf.radioomanager.shared"
+    namespace = "org.openardf.radiooracle.shared"
     compileSdk = 36
 
     defaultConfig {

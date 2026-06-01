@@ -13,6 +13,7 @@
 .cxx/
 local.properties
 /app/release
+/app/google-services.json
 keystore.properties
 *.apk
 *.aab

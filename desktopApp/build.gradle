@@ -19,7 +19,7 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "org.openardf.radioomanager.desktop.MainKt"
+        mainClass = "org.openardf.radiooracle.desktop.MainKt"
 
         nativeDistributions {
             packageName = "Radio-Oracle"
@@ -27,13 +27,13 @@ compose.desktop {
             vendor = "OpenARDF"
 
             macOS {
-                bundleID = "org.openardf.radioomanager.desktop"
+                bundleID = "org.openardf.radiooracle.desktop"
             }
         }
     }
 }
 
-def desktopMainClass = "org.openardf.radioomanager.desktop.MainKt"
+def desktopMainClass = "org.openardf.radiooracle.desktop.MainKt"
 def desktopAppName = "Radio-Oracle"
 def desktopJdeployBundleDir = layout.buildDirectory.dir("jdeploy")
 def desktopJdeployLibsDir = desktopJdeployBundleDir.map { it.dir("libs") }

@@ -1,0 +1,830 @@
+package org.openardf.radiooracle.shared.event
+
+import org.openardf.radiooracle.shared.domain.ControlPointType
+import org.openardf.radiooracle.shared.domain.RaceBand
+import org.openardf.radiooracle.shared.domain.RaceLevel
+import org.openardf.radiooracle.shared.domain.RaceType
+import org.openardf.radiooracle.shared.domain.ResultStatus
+import org.openardf.radiooracle.shared.domain.SIRecordType
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+
+class EventProjectEditorTest {
+    @Test
+    fun renamesRaceWithoutChangingOtherProjectData() {
+        val original = projectFile("Original Race")
+
+        val renamed = EventProjectEditor.renameRace(original, " Updated Race ")
+
+        assertEquals("Updated Race", renamed.raceData.race.name)
+        assertEquals(original.raceData.race.id, renamed.raceData.race.id)
+        assertEquals(original.raceData.categories, renamed.raceData.categories)
+        assertEquals(original.schemaVersion, renamed.schemaVersion)
+    }
+
+    @Test
+    fun rejectsBlankRaceName() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameRace(projectFile("Original Race"), "   ")
+        }
+    }
+
+    @Test
+    fun updatesRaceSettingsUsingAndroidMinuteLimitConvention() {
+        val original = projectFile("Original Race")
+
+        val updated = EventProjectEditor.updateRaceSettings(
+            original,
+            raceType = RaceType.FOXORING,
+            raceLevel = RaceLevel.REGIONAL,
+            raceBand = RaceBand.COMBINED,
+            timeLimitMinutes = " 90 "
+        )
+
+        val race = updated.raceData.race
+        assertEquals(RaceType.FOXORING, race.raceType)
+        assertEquals(RaceLevel.REGIONAL, race.raceLevel)
+        assertEquals(RaceBand.COMBINED, race.raceBand)
+        assertEquals(5_400, race.timeLimitSeconds)
+    }
+
+    @Test
+    fun rejectsInvalidRaceSettings() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "abc")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateRaceSettings(projectFile(), RaceType.CLASSIC, RaceLevel.PRACTICE, RaceBand.M80, "-1")
+        }
+    }
+
+    @Test
+    fun renamesCategoryWithoutChangingOtherCategories() {
+        val original = projectFile(
+            name = "Original Race",
+            categories = listOf(categoryData("cat-1", "M21"), categoryData("cat-2", "W21"))
+        )
+
+        val updated = EventProjectEditor.renameCategory(original, "cat-2", " W35 ")
+
+        assertEquals(listOf("M21", "W35"), updated.raceData.categories.map { it.category.name })
+        assertEquals(original.raceData.categories[0], updated.raceData.categories[0])
+    }
+
+    @Test
+    fun rejectsBlankCategoryName() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCategory(original, "cat-1", " ")
+        }
+    }
+
+    @Test
+    fun rejectsDuplicateCategoryName() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21"), categoryData("cat-2", "W21"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCategory(original, "cat-2", "M21")
+        }
+    }
+
+    @Test
+    fun rejectsUnknownCategoryId() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCategory(projectFile(), "missing", "W21")
+        }
+    }
+
+    @Test
+    fun addsCategoryUsingConservativeDefaults() {
+        val existingCategory = categoryData("cat-1", "M21")
+        val original = projectFile(
+            categories = listOf(existingCategory.copy(category = existingCategory.category.copy(order = 4)))
+        )
+
+        val updated = EventProjectEditor.addCategory(original, "cat-2", " W21 ")
+
+        val category = updated.raceData.categories.last().category
+        assertEquals("cat-2", category.id)
+        assertEquals("race", category.raceId)
+        assertEquals("W21", category.name)
+        assertEquals(5, category.order)
+        assertEquals(false, category.differentProperties)
+        assertEquals("", category.controlPointsString)
+    }
+
+    @Test
+    fun rejectsInvalidCategoryAdds() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "", "W21")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-2", " ")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-1", "W21")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCategory(original, "cat-2", "M21")
+        }
+    }
+
+    @Test
+    fun removesCategoryAndUnassignsKeptCompetitors() {
+        val original = projectFile(
+            categories = listOf(
+                categoryData("cat-1", "M21", order = 0, controlSiCodes = listOf(31, 32)),
+                categoryData("cat-2", "W21", order = 1, controlSiCodes = listOf(31)),
+                categoryData("cat-3", "M40", order = 2)
+            ),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")),
+                competitorData("comp-2", "Bob", "Racer", category = category("cat-2", "W21"))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCategory(original, "cat-1", deleteCompetitors = false)
+
+        assertEquals(listOf("cat-2", "cat-3"), updated.raceData.categories.map { it.category.id })
+        assertEquals(listOf(0, 1), updated.raceData.categories.map { it.category.order })
+        assertEquals(listOf(31), updated.raceData.categories.first().controlPoints.map { it.siCode })
+        assertEquals(null, updated.raceData.competitorData[0].competitorCategory.competitor.categoryId)
+        assertEquals(null, updated.raceData.competitorData[0].competitorCategory.category)
+        assertEquals("cat-2", updated.raceData.competitorData[1].competitorCategory.competitor.categoryId)
+    }
+
+    @Test
+    fun removesCategoryAndAssignedCompetitorsWhenRequested() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21"), categoryData("cat-2", "W21")),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")),
+                competitorData("comp-2", "Bob", "Racer", category = category("cat-2", "W21"))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCategory(original, "cat-1", deleteCompetitors = true)
+
+        assertEquals(listOf("cat-2"), updated.raceData.categories.map { it.category.id })
+        assertEquals(listOf("comp-2"), updated.raceData.competitorData.map { it.competitorCategory.competitor.id })
+    }
+
+    @Test
+    fun rejectsUnknownCategoryRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeCategory(projectFile(), "missing", deleteCompetitors = false)
+        }
+    }
+
+    @Test
+    fun updatesCategoryControlPointsUsingSharedValidationRules() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21")))
+
+        val updated = EventProjectEditor.updateCategoryControlPoints(original, "cat-1", " 31 32 36B ") { index ->
+            "control-$index"
+        }
+
+        val categoryData = updated.raceData.categories.single()
+        assertEquals("31 32 36B", categoryData.category.controlPointsString)
+        assertEquals(listOf("control-0", "control-1", "control-2"), categoryData.controlPoints.map { it.id })
+        assertEquals(listOf(31, 32, 36), categoryData.controlPoints.map { it.siCode })
+        assertEquals(listOf(1, 2, 3), categoryData.controlPoints.map { it.order })
+        assertEquals(listOf(ControlPointType.CONTROL, ControlPointType.CONTROL, ControlPointType.BEACON), categoryData.controlPoints.map { it.type })
+    }
+
+    @Test
+    fun clearsCategoryControlPoints() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21", controlSiCodes = listOf(31, 32))))
+
+        val updated = EventProjectEditor.updateCategoryControlPoints(original, "cat-1", " ") { index ->
+            "control-$index"
+        }
+
+        val categoryData = updated.raceData.categories.single()
+        assertEquals("", categoryData.category.controlPointsString)
+        assertEquals(emptyList(), categoryData.controlPoints)
+    }
+
+    @Test
+    fun rejectsInvalidCategoryControlPointUpdates() {
+        val original = projectFile(categories = listOf(categoryData("cat-1", "M21")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCategoryControlPoints(original, "missing", "31") { index -> "control-$index" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCategoryControlPoints(original, "cat-1", "31 31") { index -> "control-$index" }
+        }
+    }
+
+    @Test
+    fun renamesCompetitorWithoutChangingOtherCompetitors() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"), competitorData("comp-2", "Bob", "Racer"))
+        )
+
+        val updated = EventProjectEditor.renameCompetitor(original, "comp-2", " Robert ", " Runner ")
+
+        assertEquals("Alice", updated.raceData.competitorData[0].competitorCategory.competitor.firstName)
+        assertEquals("Robert", updated.raceData.competitorData[1].competitorCategory.competitor.firstName)
+        assertEquals("Runner", updated.raceData.competitorData[1].competitorCategory.competitor.lastName)
+    }
+
+    @Test
+    fun rejectsBlankCompetitorFirstName() {
+        val original = projectFile(competitors = listOf(competitorData("comp-1", "Alice", "Runner")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(original, "comp-1", " ", "Runner")
+        }
+    }
+
+    @Test
+    fun rejectsBlankCompetitorLastName() {
+        val original = projectFile(competitors = listOf(competitorData("comp-1", "Alice", "Runner")))
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(original, "comp-1", "Alice", " ")
+        }
+    }
+
+    @Test
+    fun rejectsUnknownCompetitorId() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.renameCompetitor(projectFile(), "missing", "Alice", "Runner")
+        }
+    }
+
+    @Test
+    fun assignsCompetitorToCategory() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"))
+        )
+
+        val updated = EventProjectEditor.assignCompetitorCategory(original, "comp-1", " cat-1 ")
+
+        val competitorCategory = updated.raceData.competitorData.single().competitorCategory
+        assertEquals("cat-1", competitorCategory.competitor.categoryId)
+        assertEquals("M21", competitorCategory.category?.name)
+    }
+
+    @Test
+    fun unassignsCompetitorFromCategory() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", category = category("cat-1", "M21")))
+        )
+
+        val updated = EventProjectEditor.assignCompetitorCategory(original, "comp-1", null)
+
+        val competitorCategory = updated.raceData.competitorData.single().competitorCategory
+        assertEquals(null, competitorCategory.competitor.categoryId)
+        assertEquals(null, competitorCategory.category)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorCategoryAssignment() {
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21")),
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.assignCompetitorCategory(original, "missing", "cat-1")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.assignCompetitorCategory(original, "comp-1", "missing")
+        }
+    }
+
+    @Test
+    fun updatesCompetitorNumbersUsingSharedValidationRules() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111),
+                competitorData("comp-2", "Bob", "Racer", startNumber = 2, siNumber = 2222)
+            )
+        )
+
+        val updated = EventProjectEditor.updateCompetitorNumbers(original, "comp-2", " 3 ", " ")
+
+        assertEquals(1, updated.raceData.competitorData[0].competitorCategory.competitor.startNumber)
+        assertEquals(3, updated.raceData.competitorData[1].competitorCategory.competitor.startNumber)
+        assertEquals(null, updated.raceData.competitorData[1].competitorCategory.competitor.siNumber)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorNumberUpdates() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111),
+                competitorData("comp-2", "Bob", "Racer", startNumber = 2, siNumber = 2222)
+            )
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "", "3333")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "1", "3333")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "3", "999")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "comp-2", "3", "1111")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateCompetitorNumbers(original, "missing", "3", "3333")
+        }
+    }
+
+    @Test
+    fun addsCompetitorUsingConservativeDefaults() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111))
+        )
+
+        val updated = EventProjectEditor.addCompetitor(original, "comp-2", " Bob ", " Racer ", " 2 ", " ")
+
+        val competitor = updated.raceData.competitorData.last().competitorCategory.competitor
+        assertEquals("comp-2", competitor.id)
+        assertEquals("race", competitor.raceId)
+        assertEquals(null, competitor.categoryId)
+        assertEquals("Bob", competitor.firstName)
+        assertEquals("Racer", competitor.lastName)
+        assertEquals(2, competitor.startNumber)
+        assertEquals(null, competitor.siNumber)
+    }
+
+    @Test
+    fun rejectsInvalidCompetitorAdds() {
+        val original = projectFile(
+            competitors = listOf(competitorData("comp-1", "Alice", "Runner", startNumber = 1, siNumber = 1111))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "", "Bob", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-1", "Bob", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "", "Racer", "2", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "Bob", "Racer", "1", "")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addCompetitor(original, "comp-2", "Bob", "Racer", "2", "1111")
+        }
+    }
+
+    @Test
+    fun removesCompetitorAndKeepsReadoutAsUnmatched() {
+        val readoutData = readout("result-1", "comp-1", siNumber = 1111)
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readoutData)
+            )
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = false)
+
+        assertEquals(emptyList(), updated.raceData.competitorData)
+        assertEquals(1, updated.raceData.unmatchedReadoutData.size)
+        assertEquals("result-1", updated.raceData.unmatchedReadoutData.single().result.id)
+        assertEquals(null, updated.raceData.unmatchedReadoutData.single().result.competitorId)
+        assertEquals(1111, updated.raceData.unmatchedReadoutData.single().result.siNumber)
+    }
+
+    @Test
+    fun removesCompetitorAndReadoutWhenRequested() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = true)
+
+        assertEquals(emptyList(), updated.raceData.competitorData)
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun removesCompetitorFromCategoryAggregates() {
+        val category = category("cat-1", "M21")
+        val competitor = competitorData("comp-1", "Alice", "Runner", category = category)
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21", competitors = listOf(competitor.competitorCategory.competitor))),
+            competitors = listOf(competitor)
+        )
+
+        val updated = EventProjectEditor.removeCompetitor(original, "comp-1", deleteReadout = false)
+
+        assertEquals(emptyList(), updated.raceData.categories.single().competitors)
+    }
+
+    @Test
+    fun rejectsUnknownCompetitorRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeCompetitor(projectFile(), "missing", deleteReadout = false)
+        }
+    }
+
+    @Test
+    fun removesMatchedReadoutFromCompetitor() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.removeReadout(original, "result-1")
+
+        assertEquals(null, updated.raceData.competitorData.single().readoutData)
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun removesUnmatchedReadout() {
+        val original = projectFile(
+            unmatchedReadouts = listOf(
+                readout("result-1", null, 1111),
+                readout("result-2", null, 2222)
+            )
+        )
+
+        val updated = EventProjectEditor.removeReadout(original, "result-1")
+
+        assertEquals(listOf("result-2"), updated.raceData.unmatchedReadoutData.map { it.result.id })
+    }
+
+    @Test
+    fun rejectsUnknownReadoutRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeReadout(projectFile(), "missing")
+        }
+    }
+
+    @Test
+    fun updatesMatchedReadoutManualStatus() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("result-1", "comp-1", 1111))
+            )
+        )
+
+        val updated = EventProjectEditor.updateReadoutManualStatus(
+            original,
+            "result-1",
+            ResultStatus.DISQUALIFIED
+        )
+
+        val result = updated.raceData.competitorData.single().readoutData!!.result
+        assertEquals(ResultStatus.DISQUALIFIED, result.resultStatus)
+        assertEquals(false, result.automaticStatus)
+        assertEquals(true, result.modified)
+        assertEquals(false, result.sent)
+    }
+
+    @Test
+    fun updatesUnmatchedReadoutManualStatus() {
+        val original = projectFile(
+            unmatchedReadouts = listOf(readout("result-1", null, 1111))
+        )
+
+        val updated = EventProjectEditor.updateReadoutManualStatus(
+            original,
+            "result-1",
+            ResultStatus.DID_NOT_FINISH
+        )
+
+        val result = updated.raceData.unmatchedReadoutData.single().result
+        assertEquals(ResultStatus.DID_NOT_FINISH, result.resultStatus)
+        assertEquals(false, result.automaticStatus)
+        assertEquals(true, result.modified)
+        assertEquals(false, result.sent)
+    }
+
+    @Test
+    fun rejectsUnknownReadoutStatusUpdate() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateReadoutManualStatus(projectFile(), "missing", ResultStatus.DISQUALIFIED)
+        }
+    }
+
+    @Test
+    fun addsManualReadoutForMatchedCompetitorAndEvaluatesCourse() {
+        val category = category("cat-1", "M21")
+        val original = projectFile(
+            categories = listOf(categoryData("cat-1", "M21", controlSiCodes = listOf(31, 32, 33))),
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", siNumber = 123456, category = category)
+            )
+        )
+
+        val updated = EventProjectEditor.addManualReadout(
+            projectFile = original,
+            resultId = "result-1",
+            competitorId = "comp-1",
+            siNumber = "",
+            startSeconds = "600",
+            finishSeconds = "1800",
+            controlCodes = "31 32 33",
+            resultStatus = ResultStatus.OK,
+            readoutDateTimeIso = "2026-05-31T12:00",
+            punchIdFactory = { index, type -> "punch-$index-${type.name}" }
+        )
+
+        val readout = updated.raceData.competitorData.single().readoutData!!
+        assertEquals("comp-1", readout.result.competitorId)
+        assertEquals(123456, readout.result.siNumber)
+        assertEquals(600, readout.result.startTimeSeconds)
+        assertEquals(1800, readout.result.finishTimeSeconds)
+        assertEquals(1200, readout.result.runTimeSeconds)
+        assertEquals(3, readout.result.points)
+        assertEquals(ResultStatus.OK, readout.result.resultStatus)
+        assertEquals(false, readout.result.automaticStatus)
+        assertEquals(true, readout.result.modified)
+        assertEquals(false, readout.result.sent)
+        assertEquals(listOf(SIRecordType.START, SIRecordType.CONTROL, SIRecordType.CONTROL, SIRecordType.CONTROL, SIRecordType.FINISH), readout.punches.map { it.punch.punchType })
+        assertEquals(listOf(0, 31, 32, 33, 0), readout.punches.map { it.punch.siCode })
+        assertEquals(emptyList(), updated.raceData.unmatchedReadoutData)
+    }
+
+    @Test
+    fun addsManualReadoutAsUnmatchedWhenNoCompetitorIsSelected() {
+        val original = projectFile()
+
+        val updated = EventProjectEditor.addManualReadout(
+            projectFile = original,
+            resultId = "result-1",
+            competitorId = null,
+            siNumber = "123456",
+            startSeconds = "",
+            finishSeconds = "",
+            controlCodes = "31, 32",
+            resultStatus = ResultStatus.NO_RANKING,
+            readoutDateTimeIso = "2026-05-31T12:00",
+            punchIdFactory = { index, type -> "punch-$index-${type.name}" }
+        )
+
+        val readout = updated.raceData.unmatchedReadoutData.single()
+        assertEquals(null, readout.result.competitorId)
+        assertEquals(123456, readout.result.siNumber)
+        assertEquals(null, readout.result.startTimeSeconds)
+        assertEquals(null, readout.result.finishTimeSeconds)
+        assertEquals(ResultStatus.NO_RANKING, readout.result.resultStatus)
+        assertEquals(2, readout.punches.size)
+    }
+
+    @Test
+    fun rejectsInvalidManualReadoutInputs() {
+        val original = projectFile(
+            competitors = listOf(
+                competitorData("comp-1", "Alice", "Runner", readoutData = readout("existing", "comp-1", 123456))
+            )
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "", null, "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "new", "missing", "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(original, "new", "comp-1", "123456", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "999", "", "", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "123456", "900", "600", "", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addManualReadout(projectFile(), "new", null, "123456", "", "", "999", ResultStatus.OK, "now") { index, type -> "$index-$type" }
+        }
+    }
+
+    @Test
+    fun updatesAliasUsingSharedValidationRules() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        val updated = EventProjectEditor.updateAlias(original, "alias-2", " 33 ", " F3 ")
+
+        assertEquals(31, updated.raceData.aliases[0].siCode)
+        assertEquals("F1", updated.raceData.aliases[0].name)
+        assertEquals(33, updated.raceData.aliases[1].siCode)
+        assertEquals("F3", updated.raceData.aliases[1].name)
+    }
+
+    @Test
+    fun rejectsInvalidAliasUpdates() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "alias-2", "31", "F3")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "alias-2", "33", "TOOLONG")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.updateAlias(original, "missing", "33", "F3")
+        }
+    }
+
+    @Test
+    fun addsAliasUsingSharedValidationRules() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"))
+        )
+
+        val updated = EventProjectEditor.addAlias(original, "alias-2", " 32 ", " F2 ")
+
+        assertEquals(2, updated.raceData.aliases.size)
+        assertEquals("race", updated.raceData.aliases[1].raceId)
+        assertEquals(32, updated.raceData.aliases[1].siCode)
+        assertEquals("F2", updated.raceData.aliases[1].name)
+    }
+
+    @Test
+    fun rejectsInvalidAliasAdds() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"))
+        )
+
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "", "32", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-1", "32", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-2", "31", "F2")
+        }
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.addAlias(original, "alias-2", "32", "F1")
+        }
+    }
+
+    @Test
+    fun removesAlias() {
+        val original = projectFile(
+            aliases = listOf(alias("alias-1", 31, "F1"), alias("alias-2", 32, "F2"))
+        )
+
+        val updated = EventProjectEditor.removeAlias(original, "alias-1")
+
+        assertEquals(listOf("alias-2"), updated.raceData.aliases.map { it.id })
+    }
+
+    @Test
+    fun rejectsUnknownAliasRemove() {
+        assertFailsWith<IllegalArgumentException> {
+            EventProjectEditor.removeAlias(projectFile(), "missing")
+        }
+    }
+
+    private fun projectFile(
+        name: String = "Original Race",
+        categories: List<EventCategoryData> = emptyList(),
+        competitors: List<EventCompetitorData> = emptyList(),
+        aliases: List<EventAlias> = emptyList(),
+        unmatchedReadouts: List<EventReadoutData> = emptyList()
+    ): EventProjectFile =
+        EventProjectFile(
+            raceData = EventRaceData(
+                race = EventRace(
+                    id = "race",
+                    name = name,
+                    apiKey = "",
+                    startDateTimeIso = "2026-05-31T10:00",
+                    raceType = RaceType.CLASSIC,
+                    raceLevel = RaceLevel.PRACTICE,
+                    raceBand = RaceBand.M80,
+                    timeLimitSeconds = 7_200
+                ),
+                categories = categories,
+                aliases = aliases,
+                competitorData = competitors,
+                unmatchedReadoutData = unmatchedReadouts
+            )
+        )
+
+    private fun categoryData(
+        id: String,
+        name: String,
+        order: Int = 0,
+        controlSiCodes: List<Int> = emptyList(),
+        competitors: List<EventCompetitor> = emptyList()
+    ): EventCategoryData =
+        EventCategoryData(
+            category = category(id, name, order),
+            controlPoints = controlSiCodes.mapIndexed { index, siCode ->
+                EventControlPoint(
+                    id = "$id-control-$index",
+                    categoryId = id,
+                    siCode = siCode,
+                    type = ControlPointType.CONTROL,
+                    order = index
+                )
+            },
+            competitors = competitors
+        )
+
+    private fun category(id: String, name: String, order: Int = 0): EventCategory =
+        EventCategory(
+            id = id,
+            raceId = "race",
+            name = name,
+            isMan = name.startsWith("M"),
+            maxAge = null,
+            lengthMeters = 0,
+            climbMeters = 0,
+            order = order,
+            differentProperties = false,
+            raceType = null,
+            raceBand = null,
+            timeLimitSeconds = null,
+            controlPointsString = ""
+        )
+
+    private fun competitorData(
+        id: String,
+        firstName: String,
+        lastName: String,
+        startNumber: Int = 1,
+        siNumber: Int? = null,
+        category: EventCategory? = null,
+        readoutData: EventReadoutData? = null
+    ): EventCompetitorData =
+        EventCompetitorData(
+            competitorCategory = EventCompetitorCategory(
+                competitor = EventCompetitor(
+                    id = id,
+                    raceId = "race",
+                    categoryId = category?.id,
+                    firstName = firstName,
+                    lastName = lastName,
+                    club = "",
+                    index = "",
+                    isMan = true,
+                    birthYear = null,
+                    siNumber = siNumber,
+                    siRent = false,
+                    startNumber = startNumber,
+                    drawnStartTimeSeconds = null
+                ),
+                category = category
+            ),
+            readoutData = readoutData
+        )
+
+    private fun readout(id: String, competitorId: String?, siNumber: Int): EventReadoutData =
+        EventReadoutData(
+            result = EventResult(
+                id = id,
+                raceId = "race",
+                competitorId = competitorId,
+                siNumber = siNumber,
+                cardType = 0,
+                checkTimeSeconds = null,
+                startTimeSeconds = null,
+                finishTimeSeconds = null,
+                readoutDateTimeIso = "2026-05-31T11:00",
+                automaticStatus = true,
+                resultStatus = ResultStatus.OK,
+                points = 0,
+                runTimeSeconds = 0,
+                modified = false,
+                sent = false
+            ),
+            punches = emptyList()
+        )
+
+    private fun alias(id: String, siCode: Int, name: String): EventAlias =
+        EventAlias(
+            id = id,
+            raceId = "race",
+            siCode = siCode,
+            name = name
+        )
+}

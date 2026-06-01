@@ -3,16 +3,22 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("androidx.navigation.safeargs")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+}
+
+def firebaseConfigFile = file("google-services.json")
+def firebaseEnabled = firebaseConfigFile.isFile()
+
+if (firebaseEnabled) {
+    apply plugin: "com.google.gms.google-services"
+    apply plugin: "com.google.firebase.crashlytics"
 }
 
 android {
-    namespace = "kolskypavel.ardfmanager"
+    namespace = "org.openardf.radiooracle"
     compileSdk 36
 
     defaultConfig {
-        applicationId = "kolskypavel.ardfmanager"
+        applicationId = "org.openardf.radiooracle"
         minSdk = 26
         targetSdk = 35
         versionCode = 8
@@ -80,10 +86,11 @@ dependencies {
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
 
-    //Firebase
-    implementation platform(libs.firebase.bom)
-    implementation(libs.firebase.crashlytics.ndk)
-    implementation(libs.firebase.analytics)
+    if (firebaseEnabled) {
+        implementation platform(libs.firebase.bom)
+        implementation(libs.firebase.crashlytics.ndk)
+        implementation(libs.firebase.analytics)
+    }
 
     //External libraries
     implementation(libs.sortable.table.view)

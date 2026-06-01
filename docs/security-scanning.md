@@ -6,11 +6,11 @@ Run Gitleaks before publishing security-sensitive changes:
 gitleaks detect --no-banner --redact --source .
 ```
 
-The repository intentionally tracks `app/google-services.json` because the
-Android Firebase and Crashlytics build plugins require that client configuration
-file during normal app builds. Firebase Android API keys identify the Firebase
-project to client SDKs, but they are not authentication secrets by themselves.
+The repository does not track `app/google-services.json`. Firebase and
+Crashlytics are enabled only when that local client configuration file exists.
+Use an OpenARDF-owned Firebase project for new configs; do not commit client
+configuration from legacy projects.
 
-The `.gitleaksignore` entry is limited to the existing `gcp-api-key` fingerprint
-for that file. New findings, different files, or changed Firebase configuration
-values should still be reviewed instead of broadly allowlisted.
+Firebase Android API keys identify the Firebase project to client SDKs, but they
+still create unwanted coupling to that project when checked in. New Gitleaks
+findings should be reviewed instead of broadly allowlisted.

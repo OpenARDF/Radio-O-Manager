@@ -1,2 +1,1 @@
-# Firebase Android client configuration is intentionally tracked for the app build.
-fd063ffe3b38be1268239e1f027be2ff5bb70e47:app/google-services.json:gcp-api-key:18
+# Firebase Android client configuration is local-only; no project API key is tracked.

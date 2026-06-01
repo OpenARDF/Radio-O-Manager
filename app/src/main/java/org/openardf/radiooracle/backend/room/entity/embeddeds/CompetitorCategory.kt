@@ -1,0 +1,17 @@
+package org.openardf.radiooracle.backend.room.entity.embeddeds
+
+import androidx.room.Embedded
+import androidx.room.Relation
+import org.openardf.radiooracle.backend.room.entity.Category
+import org.openardf.radiooracle.backend.room.entity.Competitor
+import java.io.Serializable
+
+/** Room relation aggregate for a competitor and its optional category. */
+data class CompetitorCategory(
+    @Embedded var competitor: Competitor,
+    @Relation(
+        parentColumn = "category_id",
+        entityColumn = "id",
+        entity = Category::class
+    ) var category: Category?
+) : Serializable

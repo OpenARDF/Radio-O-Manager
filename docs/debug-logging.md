@@ -8,7 +8,7 @@ is intended for developer troubleshooting and is not exposed in normal user UI.
 The Android app stores logs in:
 
 ```shell
-/data/data/kolskypavel.ardfmanager/files/debug-logs/
+/data/data/org.openardf.radiooracle/files/debug-logs/
 ```
 
 The active file is `debug.log`. Older files are retained as `debug.log.1`,
@@ -32,12 +32,12 @@ files, competitor names, or other broad personal event data.
 For debug builds, use `adb run-as`:
 
 ```shell
-adb shell run-as kolskypavel.ardfmanager ls -l files/debug-logs
-adb exec-out run-as kolskypavel.ardfmanager cat files/debug-logs/debug.log
+adb shell run-as org.openardf.radiooracle ls -l files/debug-logs
+adb exec-out run-as org.openardf.radiooracle cat files/debug-logs/debug.log
 ```
 
 To reset the hidden debug logs during a test:
 
 ```shell
-adb shell run-as kolskypavel.ardfmanager rm -rf files/debug-logs
+adb shell run-as org.openardf.radiooracle rm -rf files/debug-logs
 ```

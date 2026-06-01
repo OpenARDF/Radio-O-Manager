@@ -20,7 +20,7 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class kolskypavel.ardfmanager.backend.room.entity.** { *; }
--keep class kolskypavel.ardfmanager.backend.room.enums.** { *; }
--keep class kolskypavel.ardfmanager.backend.files.json.** { *; }
--keep class kolskypavel.ardfmanager.ui.races.** {*;}
+-keep class org.openardf.radiooracle.backend.room.entity.** { *; }
+-keep class org.openardf.radiooracle.backend.room.enums.** { *; }
+-keep class org.openardf.radiooracle.backend.files.json.** { *; }
+-keep class org.openardf.radiooracle.ui.races.** {*;}
