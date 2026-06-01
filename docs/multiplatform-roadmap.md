@@ -49,6 +49,16 @@ Known Room/KSP warnings about missing indexes and `@Transaction` annotations
 currently predate this roadmap work. Do not treat those warnings as Stage 1
 blockers unless a change in this branch introduces new failures.
 
+## Standards compatibility
+
+Radio-Oracle must not intentionally drift farther from
+[`radio-o-standards`](https://github.com/AROB-CR/radio-o-standards) without a
+prior pull request to the standards repository. Follow
+[`standards-compatibility-policy.md`](standards-compatibility-policy.md) before
+changing ARDF JSON, ARDF XML, IOF mapping, import/export semantics, or
+standards-facing event data shapes. The same policy is a required pre-deployment
+inspection gate for every Android and desktop release candidate.
+
 ## Desktop beta goal
 
 The first desktop release should be a beta event-admin app. It should support:

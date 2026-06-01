@@ -1,44 +1,35 @@
 # Radio-Oracle
-Android app for managing radio orienteering events, written in Kotlin.
 
-## Basic app information
-Currently availabe functions:
- - Creating and importing races with categories, aliases, and competitors
- - Readout of SportIdent cards (SI5 - SIAC)
- - Results export
- - Finish ticket printout
- - Live result sending
+Radio-Oracle is an Android app for managing radio orienteering events on race
+day.
 
-## Equipment needed
+## What It Does
+
+Radio-Oracle is intended to help organizers:
+
+1. create or import races with categories, aliases, and competitors
+2. read SportIdent cards
+3. calculate and review results
+4. export results
+5. print finish tickets
+6. send live results
+
+## Equipment Needed
+
 - SportIdent BSM 7 / BSM 8 reader
-- USB to OTG adaper
+- USB to OTG adapter
 - Bluetooth printer for ticket printout
 
-## Support
-### Competition formats
+## Supported Competition Formats
+
 - Classics
 - Foxoring
 - Orienteering
 - Sprint
 
-## Building from source and developement information
-The in-repo [multiplatform roadmap](docs/multiplatform-roadmap.md) describes the
-shared Kotlin module, desktop beta direction, and current verification gates.
-Desktop beta scope and packaging direction are tracked in
-[docs/desktop-prep.md](docs/desktop-prep.md).
-Deferred dependency-management follow-ups are tracked in
-[docs/dependency-update-todo.md](docs/dependency-update-todo.md).
-The 2026-05-31 Moto/download-box Android regression pass is recorded in
-[docs/android-regression-2026-05-31.md](docs/android-regression-2026-05-31.md).
-Hidden developer-only diagnostic logging is described in
-[docs/debug-logging.md](docs/debug-logging.md).
-Security scanning and local Firebase/Crashlytics configuration notes are
-documented in [docs/security-scanning.md](docs/security-scanning.md).
-OpenARDF-owned Firebase setup is documented in
-[docs/firebase-setup.md](docs/firebase-setup.md).
+## Third Party Libraries and Resources
 
-## Third party libraries and resources
- - **Logo** - using SportIdent by Gonzo from <a href="https://thenounproject.com/browse/icons/term/sportident/" target="_blank" title="SportIdent Icons">Noun Project</a> (CC BY 3.0)
+- **Logo** - using SportIdent by Gonzo from <a href="https://thenounproject.com/browse/icons/term/sportident/" target="_blank" title="SportIdent Icons">Noun Project</a> (CC BY 3.0)
 - [SortableTableView](https://github.com/ISchwarz23/SortableTableView)
 - [kotlin-csv](https://github.com/doyaaaaaken/kotlin-csv)
 - [UsbSerial](https://github.com/felHR85/UsbSerial)
@@ -47,7 +38,8 @@ OpenARDF-owned Firebase setup is documented in
 - [OkHttp](https://github.com/square/okhttp)
 - [Markwon](https://github.com/noties/Markwon)
 
-## Developement team
+## Development Team
+
 - Pavel Kolský (head developer)
 - Vojtěch Kopal
 - Jakub Šrom
