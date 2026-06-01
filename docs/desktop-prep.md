@@ -114,7 +114,7 @@ when available and runs the two Gradle-side jDeploy bundle tasks.
 
 `checkRuntime` verifies that Compose Desktop can find a usable JDK runtime.
 `createDistributable` currently writes the macOS app image to
-`desktopApp/build/compose/binaries/main/app/Radio-O-Manager.app`. The Compose
+`desktopApp/build/compose/binaries/main/app/Radio-Oracle.app`. The Compose
 Desktop metadata now sets the app image name, description, vendor, and macOS
 bundle ID. A later packaging slice should define the release-version mapping
 before jDeploy packaging, because macOS `jpackage` app versions must begin with
@@ -173,6 +173,6 @@ repeatable package validation.
    `samples/desktop-smoke.rom.json`.
 5. In progress: add jDeploy metadata after the desktop app can complete a real
    smoke scenario. The Gradle-side jDeploy bundle tasks now build and verify
-   `desktopApp/build/jdeploy/Radio-O-Manager-jdeploy.jar`. The npm/jDeploy
+   `desktopApp/build/jdeploy/Radio-Oracle-jdeploy.jar`. The npm/jDeploy
    package metadata, local install smoke, release workflow, and public package
    name remain pending.

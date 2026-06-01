@@ -79,7 +79,7 @@ object XmlHelper {
         var parserEvent = parser.eventType
         while (parserEvent != XmlPullParser.END_DOCUMENT) {
             if (parserEvent == XmlPullParser.START_TAG && parser.name == "RaceCourseData") {
-                // IOF Course elements are treated as Radio-O-Manager categories.
+                // IOF Course elements are treated as Radio-Oracle categories.
                 var innerEvent = parser.next()
                 while (!(innerEvent == XmlPullParser.END_TAG && parser.name == "RaceCourseData")) {
                     if (innerEvent == XmlPullParser.START_TAG && parser.name == "Course") {
@@ -209,7 +209,7 @@ object XmlHelper {
         serializer.startTag(null, rootTag)
         serializer.attribute(null, "xmlns", "http://www.orienteering.org/datastandard/3.0")
         serializer.attribute(null, "iofVersion", "3.0")
-        serializer.attribute(null, "creator", "Radio-O Manager ${dataProcessor.getAppVersion()}")
+        serializer.attribute(null, "creator", "Radio-Oracle ${dataProcessor.getAppVersion()}")
 
         // IOF result lists include a status attribute; start lists do not.
         if (rootTag == "ResultList") {

@@ -9,7 +9,7 @@ import java.nio.file.Path
 object DesktopProjectFilePaths {
     const val PROJECT_EXTENSION = ".rom.json"
 
-    /** Returns a path with the standard Radio-O-Manager desktop project extension. */
+    /** Returns a path with the standard Radio-Oracle desktop project extension. */
     fun withProjectExtension(path: Path): Path =
         if (path.fileName.toString().endsWith(PROJECT_EXTENSION)) {
             path
@@ -26,16 +26,16 @@ object DesktopFileDialogs {
 
     /** Lets the user choose an existing project file, returning null when cancelled. */
     fun chooseOpenProject(): Path? =
-        chooseProjectFile("Open Radio-O-Manager Project", FileDialog.LOAD)
+        chooseProjectFile("Open Radio-Oracle Project", FileDialog.LOAD)
 
     /** Lets the user choose a save location, returning null when cancelled. */
     fun chooseSaveProject(): Path? =
-        chooseProjectFile("Save Radio-O-Manager Project", FileDialog.SAVE)
+        chooseProjectFile("Save Radio-Oracle Project", FileDialog.SAVE)
             ?.let(DesktopProjectFilePaths::withProjectExtension)
 
     /** Lets the user choose an export-copy location, returning null when cancelled. */
     fun chooseExportProject(): Path? =
-        chooseProjectFile("Export Radio-O-Manager Project Copy", FileDialog.SAVE)
+        chooseProjectFile("Export Radio-Oracle Project Copy", FileDialog.SAVE)
             ?.let(DesktopProjectFilePaths::withProjectExtension)
 
     private fun chooseProjectFile(title: String, mode: Int): Path? {

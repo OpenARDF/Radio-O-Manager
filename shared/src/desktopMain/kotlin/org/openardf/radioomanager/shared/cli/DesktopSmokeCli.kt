@@ -98,7 +98,7 @@ fun main() {
     check(StandardCategoryRules.definitionsFor(StandardCategoryType.INTERNATIONAL).size == 12)
     check(NetworkEndpoints.ORESULTS_RESULTS_API_URL == "https://api.oresults.eu")
     check(EventResultSending.unsentCompetitorIds(raceData.competitorData) == setOf("competitor"))
-    println("Radio-O-Manager desktop shared smoke OK")
+    println("Radio-Oracle desktop shared smoke OK")
 }
 
 /** Builds a minimal event used by the desktop smoke check. */

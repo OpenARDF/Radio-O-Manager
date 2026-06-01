@@ -56,10 +56,10 @@ import java.nio.file.Path
 import java.time.LocalDateTime
 import java.util.UUID
 
-/** Starts the first Compose Desktop shell for Radio-O-Manager. */
+/** Starts the first Compose Desktop shell for Radio-Oracle. */
 fun main(args: Array<String>) = application {
     lateinit var requestWindowClose: () -> Unit
-    Window(onCloseRequest = { requestWindowClose() }, title = "Radio-O-Manager Desktop") {
+    Window(onCloseRequest = { requestWindowClose() }, title = "Radio-Oracle Desktop") {
         val startupPath = remember(args.toList()) { args.firstOrNull()?.let(Path::of) }
         val projectSession = remember { DesktopProjectSession(DesktopProjectFiles) }
         val startupStatus = remember(startupPath) { openStartupProject(projectSession, startupPath) }
@@ -566,7 +566,7 @@ private fun AppTopBar() {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Radio-O-Manager",
+            text = "Radio-Ōracle",
             color = DesktopPalette.White,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold

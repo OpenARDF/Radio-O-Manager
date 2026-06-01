@@ -39,7 +39,7 @@ test focused on the existing Android behavior, not new desktop functionality.
   - final result rows: `16`
   - final punch rows: `128`
   - duplicate card event did not create an extra result row.
-- Focused log checks found no Radio-O-Manager crash, ANR, force-finish, or
+- Focused log checks found no Radio-Oracle crash, ANR, force-finish, or
   process-death signatures.
 
 ## Notes

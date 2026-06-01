@@ -1,6 +1,6 @@
 # Hidden Debug Logging
 
-Radio-O-Manager writes a small diagnostic log under app-private storage. The log
+Radio-Oracle writes a small diagnostic log under app-private storage. The log
 is intended for developer troubleshooting and is not exposed in normal user UI.
 
 ## Location

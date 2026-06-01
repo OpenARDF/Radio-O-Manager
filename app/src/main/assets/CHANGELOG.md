@@ -19,7 +19,7 @@
 
 ## [0.1.0] - 2025-23-11
 ### Added
-- Changed name to Radio-O Manager
+- Changed name to Radio-Oracle
 - Added SHORT and OTHER to race options 
 - Added edit dialog to race data import
 - Added duplicate SI card read options (ignore/overwrite/create new)

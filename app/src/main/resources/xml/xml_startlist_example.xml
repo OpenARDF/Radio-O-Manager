@@ -2,7 +2,7 @@
 <StartList
     iofVersion="3.0"
     xmlns="http://www.orienteering.org/datastandard/3.0"
-    creator="Radio-O Manager 0.0.1">
+    creator="Radio-Oracle 0.0.1">
     <Event>
         <Name>Test Race</Name>
         <StartTime>

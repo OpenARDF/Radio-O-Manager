@@ -1,4 +1,4 @@
-# Radio-O-Manager Multiplatform Roadmap
+# Radio-Oracle Multiplatform Roadmap
 
 This roadmap tracks the move from an Android-only app toward a shared Kotlin
 foundation with a desktop beta. The first desktop target is an event-admin MVP,
@@ -107,7 +107,7 @@ and tested in shared code.
 Goal: make file formats portable while leaving file pickers and permissions on
 each platform.
 
-- Move CSV parsing/writing policy, Radio-O-Manager JSON shaping, final/live
+- Move CSV parsing/writing policy, Radio-Oracle JSON shaping, final/live
   result JSON shaping, and IOF XML policy into shared code where platform-neutral.
 - Define shared import/export APIs that accept text/bytes plus shared event data
   and return data or structured validation errors.

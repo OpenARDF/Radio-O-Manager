@@ -38,15 +38,15 @@ object EventProjectFileJson {
     fun decode(text: String): EventProjectFile {
         val projectFile = json.decodeFromString<EventProjectFile>(text)
         require(projectFile.isSupportedSchema()) {
-            "Unsupported Radio-O-Manager project file schema version: ${projectFile.schemaVersion}"
+            "Unsupported Radio-Oracle project file schema version: ${projectFile.schemaVersion}"
         }
         return projectFile
     }
 }
 
-/** Schema metadata for portable Radio-O-Manager project files. */
+/** Schema metadata for portable Radio-Oracle project files. */
 object EventProjectFileFormat {
-    const val APP_NAME = "Radio-O-Manager"
+    const val APP_NAME = "Radio-Oracle"
     const val CURRENT_SCHEMA_VERSION = 1
 
     /** Returns true when the supplied schema version is within the supported range. */

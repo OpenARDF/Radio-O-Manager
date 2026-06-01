@@ -19,7 +19,7 @@ class EventProjectFileTest {
         val projectFile = EventProjectFile(raceData = raceData())
 
         assertEquals(1, projectFile.schemaVersion)
-        assertEquals("Radio-O-Manager", projectFile.appName)
+        assertEquals("Radio-Oracle", projectFile.appName)
         assertTrue(projectFile.isSupportedSchema())
     }
 
@@ -37,7 +37,7 @@ class EventProjectFileTest {
         val decoded = EventProjectFileJson.decode(encoded)
 
         assertTrue(encoded.contains("\"schemaVersion\": 1"))
-        assertTrue(encoded.contains("\"appName\": \"Radio-O-Manager\""))
+        assertTrue(encoded.contains("\"appName\": \"Radio-Oracle\""))
         assertEquals(original, decoded)
     }
 
@@ -54,7 +54,7 @@ class EventProjectFileTest {
     @Test
     fun acceptsUnknownFieldsWithinSupportedSchemaVersions() {
         val encoded = EventProjectFileJson.encode(EventProjectFile(raceData = raceData()))
-            .replace("\"appName\": \"Radio-O-Manager\"", "\"appName\": \"Radio-O-Manager\", \"futureField\": true")
+            .replace("\"appName\": \"Radio-Oracle\"", "\"appName\": \"Radio-Oracle\", \"futureField\": true")
 
         assertEquals(EventProjectFileFormat.APP_NAME, EventProjectFileJson.decode(encoded).appName)
     }

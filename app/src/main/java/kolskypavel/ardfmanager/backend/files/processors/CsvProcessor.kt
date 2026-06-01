@@ -35,7 +35,7 @@ import java.io.OutputStream
 import java.time.Duration
 import java.util.UUID
 
-/** Import/export processor for Radio-O-Manager's semicolon-delimited CSV formats. */
+/** Import/export processor for Radio-Oracle's semicolon-delimited CSV formats. */
 object CsvProcessor : FormatProcessor {
 
     /** Imports the requested CSV data type into transient aggregates for validation and persistence. */

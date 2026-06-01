@@ -26,7 +26,7 @@ kotlin {
 
 tasks.register("desktopSmokeRun", JavaExec) {
     group = "application"
-    description = "Runs the Radio-O-Manager desktop smoke-test CLI."
+    description = "Runs the Radio-Oracle desktop smoke-test CLI."
 
     def desktopTarget = kotlin.targets.getByName("desktop") as KotlinJvmTarget
     def mainCompilation = desktopTarget.compilations.getByName("main")
